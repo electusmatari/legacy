@@ -1,0 +1,52 @@
+{% extends "gmi/base.html" %}
+
+{% block content %}
+<h2>Upload History</h2>
+
+<h3>Top 10 Uploader (Last 28 Days)</h3>
+
+<table class="data">
+  <thead>
+    <tr><th></th><th>Uploads</th><th>Name</th></tr>
+  </thead>
+  <tbody>
+{% for uploader in top10 %}
+<tr class="{% cycle 'odd' 'even' %}">
+  <td class="numeric">{{uploader.rank}}</td>
+  <td class="numeric">{{uploader.uploadcount}}</td>
+  <td>{{uploader.name}}</td>
+</tr>
+{% endfor %}
+  </tbody>
+</table>
+
+<h3>Upload Log</h3>
+
+<p>Your own registered uploads. Viewing the same item twice does not
+  create two uploads.</p>
+
+{% include "paginate.html" %}
+
+<table class="data">
+<thead>
+<tr>
+  <th>Timestamp</th>
+  <th>Region</th>
+  <th>Type</th>
+  <th>Cache Timestamp</th>
+</tr>
+</thead>
+<tbody>
+{% for upload in upload_list %}
+<tr class="{% cycle 'even' 'odd' %}">
+  <td class="nobreak">{{upload.timestamp|date:"Y-m-d H:i:s"}}</td>
+  <td>{{upload.region}}</td>
+  <td>{{upload.typename}}</td>
+  <td class="nobreak">{{upload.calltimestamp|date:"Y-m-d H:i:s"}}</td>
+</tr>
+{% endfor %}
+</tbody>
+</table>
+
+{% include "paginate.html" %}
+{% endblock %}

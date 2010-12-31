@@ -1,0 +1,69 @@
+{% extends "channels/base.html" %}
+
+{% block content %}
+{% ifequal tab 'mandatory' %}
+<h2>Mandatory Channels</h2>
+<p>These channels are mandatory for all members of Electus Matari.</p>
+{% endifequal %}
+{% ifequal tab 'alliance' %}
+<h2>Alliance Channels</h2>
+<p>Channels the alliance provides for various purposes. Joining them
+  is not mandatory.</p>
+{% endifequal %}
+{% ifequal tab 'intel' %}
+<h2>Intel Channels</h2>
+<p>Channels designated to share intel with different groups. Joining
+  them is highly recommended when you are active in the area they
+  cover, but it is not mandatory.</p>
+{% endifequal %}
+{% ifequal tab 'other' %}
+<h2>Other Channels</h2>
+<p>Various channels suggested by members of Electus Matari. You can
+  add new channels yourself, and edit existing ones. Changes are
+  recorded in the changelog.</p>
+{% endifequal %}
+
+{% if igb %}
+{% if not igb.trusted %}
+<ul class="messages">
+<li class="error">This site is currently not trusted by your browser.
+  This means that the buttons to join these channels will not
+  work. Reload this page once you trusted this site to get rid of this
+  warning.<br />
+  {{trust}}
+</li>
+</ul>
+{% endif %}
+{% else %}
+<ul class="messages">
+<li class="debug">If you view this page in the neocom browser, you
+  will get buttons to automatically join these channels.</li>
+</ul>
+{% endif %}
+
+<ul class="channels">
+{% for channel in channel_list %}
+<li><div class="title">{{channel.name}}</div>
+<div class="description">{{channel.description|linebreaks}}</div>
+<div class="buttons">
+{% if igb %}{{channel.join_button}}{% endif %}
+{% if form %}
+<form method="get" action="/tools/channels/edit/{{channel.id}}/">
+  <input type="submit" value="Edit" />
+</form>
+{% endif %}
+</div>
+{% endfor %}
+</ul>
+
+{% if form %}
+<h2>Add a Channel</h2>
+<form method="post" action="">
+<table>
+{{form}}
+<tr><td></td><td><input type="submit" value="Add Channel" /></td></tr>
+</table>
+</form>
+{% endif %}
+
+{% endblock %}

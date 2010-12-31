@@ -1,0 +1,21 @@
+{% extends "emauth/base.html" %}
+
+{% block content %}
+<h1>Forum Avatar</h1>
+{% if user.profile.active %}
+<img src="https://image.eveonline.com/Character/{{user.profile.characterid}}_64.jpg"
+     style="float: left; padding: 0.5em 0.5em 0.5em 0" />
+
+<p>As you are an identified user, you can set your forum avatar to the
+  same image used in your pilot license. You can see the image to be
+  used on the left.</p>
+
+<form action="" method="post" style="clear: both">
+<input type="hidden" name="action" value="setavatar" />
+<input type="submit" value="Update Avatar" />
+</form>
+{% else %}
+<p>You have not successfully been identified, so your avatar can not
+  be set yet.</p>
+{% endif %}
+{% endblock %}

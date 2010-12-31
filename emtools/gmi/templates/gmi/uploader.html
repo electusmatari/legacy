@@ -1,0 +1,33 @@
+{% extends "gmi/base.html" %}
+
+{% block content %}
+<h2>Uploader Application</h2>
+
+<p>The following is an OOC description.</p>
+
+<p>The Gradient Material Index works by uploading data directly from
+  your game client's cache director to electusmatari.com. To do so,
+  you need to run a client locally, and then just start browsing the
+  market - with the "market history" tab open. The application will
+  see the cache files in the background and upload them automatically.
+  You have to do nothing else.</p>
+
+<h3>Installation</h3>
+
+<p>To install the Gradient Market Uploader, you need to download the
+  following two files and put them into a directory of your choice
+  (e.g. <tt>C:\Program Files\EVE GMU\</tt>).</p>
+
+<ul>
+  <li><a href="files/CacheUploader.exe">CacheUploader.exe</a></li>
+  <li><a href="files/CacheUploaderCore.dll">CacheUploaderCore.dll</a></li>
+</ul>
+
+<p>In addition to this, you might need .NET 4.0 from Microsoft:</p>
+
+<ul>
+  <li><a href="http://www.microsoft.com/downloads/en/details.aspx?FamilyID=9cfb2d51-5ff4-4491-b0e5-b386f32c0992&amp;displaylang=en&amp;pf=true">.NET 4.0</a></li>
+</ul>
+
+<p>The program will update automatically in the future.</p>
+{% endblock %}

@@ -1,0 +1,29 @@
+{% extends "corpadmin/base.html" %}
+
+{% block content %}
+<h2>Corporation API Configuration</h2>
+
+{% if apikey %}
+  {% if apikey.active %}
+  <p>Your corporation already has a director-level API key stored.
+    You can overwrite it in the form below.</p>
+  {% else %}
+  <p>Your corporation had a director-level API key stored, but there
+    was an error when accessing it. Please update it with the form
+    below.</p>
+  <p>The error was: {{apikey.message}}</p>
+  {% endif %}
+{% else %}
+<p>Your corporation has not stored a director-level API key yet. Not
+  all functionality of the corp admin interface will be available. If
+  you are a director, you can submit your own API key in the form
+  below.</p>
+{% endif %}
+
+<form action="" method="post">
+<table>
+{{form}}
+</table>
+<input type="submit" value="Save" />
+</form>
+{% endblock %}

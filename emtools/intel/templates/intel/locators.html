@@ -1,0 +1,68 @@
+{% extends "intel/base.html" %}
+{% load eve %}
+
+{% block scriptheader2 %}
+<script type="text/javascript">
+$(function() {
+  $("#systemsearch").autocomplete({
+    minLength: 1,
+    source: "http://www.electusmatari.com/intel/search/ajax/systems/",
+    focus: function( event, ui) {
+       $("#systemsearch").val(ui.item.value);
+       return false;
+    },
+    select: function( event, ui) {
+       $("#systemsearch").parent().submit();
+       return false;
+    }});
+});
+</script>
+{% endblock %}
+
+{% block content %}
+{% if igb %}
+{% if not igb.trusted %}
+<ul class="messages">
+<li class="error">This site is currently not trusted by your browser.
+  This means that the buttons to set the destination to these systems
+  will not work. Reload this page once you trusted this site to get
+  rid of this warning.<br />
+  {{trust}}
+</li>
+</ul>
+{% endif %}
+{% else %}
+<ul class="messages">
+<li class="debug">If you view this page in the neocom browser, you
+  will get buttons to automatically set the autopilot destination to
+  these systems.</li>
+</ul>
+{% endif %}
+
+<h2>Locator Agent Search</h2>
+
+<form method="get" action="">
+  <input id="systemsearch" type="text" name="system" value="{{system}}" />
+  <input type="submit" value="Search" />
+</form>
+
+<div style="margin-bottom: 1em"></div>
+
+<table class="data">
+<thead>
+  <tr><th>Jumps</th><th>Level</th><th>Faction</th><th>Station</th>{% if igb %}<th></th>{% endif %}</tr>
+</thead>
+{% for agent in agent_list %}
+<tr class="{% cycle 'odd' 'even' %}">
+  <td>{{agent.jumps}}</td>
+  <td>{{agent.level}}</td>
+  <td>{{agent.factionname}}</td>
+  <td>{{agent.stationname}}{% if igb %}{{agent.stationinfo}}{% endif %}</td>
+{% if igb %}
+  <td><button type="button" onclick="CCPEVE.addWaypoint({{agent.systemid}})">Set Destination</button>
+{% endif %}
+</tr>
+{% endfor %}
+</ul>
+
+{% endblock %}

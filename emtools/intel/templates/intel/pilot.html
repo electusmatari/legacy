@@ -1,0 +1,45 @@
+{% extends "intel/base.html" %}
+{% load eve %}
+
+{% block content %}
+<h2>Pilot {{pilot.name}}</h2>
+
+<table>
+  <tr><th>Name:</th><td>{{pilot}}</td></tr>
+  <tr><th>Corp:</th><td>{{pilot.corporation}}</td></tr>
+  <tr><th>Alliance:</th><td>{{pilot.corporation.alliance}}</td></tr>
+  <tr><th>Last&nbsp;check:</th><td>{{pilot.lastseen|eve_time}}</td></tr>
+</table>
+
+<h3>Locator Traces</h3>
+
+{% include "paginate.html" %}
+<table class="data">
+<thead>
+<tr><th>Timestamp</th><th>Corp</th><th>Location</th><th>On&nbsp;Comms?</th><th>Submitter</th></tr>
+</thead>
+<tbody>
+{% for trace in trace_list %}
+<tr class="{% cycle even,odd %}">
+  <td class="nobreak">{{trace.timestamp|eve_time}}</td>
+  <td>{{trace.corporation}} {% if trace.corporation != trace.pilot.corporation %}(left){% endif %}<br />
+      {% if trace.alliance %}{{trace.alliance}} {% if trace.alliance != trace.pilot.alliance %}(left){% endif %}{% endif %}
+  </td>
+  <td>
+    {{trace.get_system_display}}{% if trace.station %}<br />
+    {{trace.get_station_display}}{% endif %}
+  </td>
+  <td>
+    {{trace.get_online_display}}
+  </td>
+  <td>
+    {{trace.submitter.profile.mybb_username}}
+  </td>
+</tr>
+{% endfor %}
+</tbody>
+</table>
+
+
+{% include "paginate.html" %}
+{% endblock %}

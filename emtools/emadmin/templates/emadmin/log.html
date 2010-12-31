@@ -1,0 +1,14 @@
+{% extends "emadmin/base.html" %}
+
+{% block content %}
+
+{% include "paginate.html" %}
+
+<pre>
+{% for log in log_list %}{{log.message}}
+{% endfor %}
+</pre>
+
+{% include "paginate.html" %}
+
+{% endblock %}

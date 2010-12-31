@@ -1,0 +1,37 @@
+{% extends "gmi/base.html" %}
+
+{% block scriptheader %}
+<script type="text/javascript" src="/media/js/jquery.js"></script>
+<script type="text/javascript" src="/media/js/calc.js"></script>
+<script type="text/javascript">
+$(function () {
+    calculator($("#result"), $("#search"), $("#data"),
+               {{jsondata|safe}});
+});
+</script>
+<style type="text/css">
+#searchdiv span {
+    border: 2px solid black;
+    padding: 0.5em 1em;
+}
+#searchdiv {
+    margin: 1em 0;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<h2>Gradient Material Index - Calculator</h2>
+
+<div style="float: right; margin: 2.7em 0 0 1em;">
+<div id="result"></div>
+</div>
+
+<div id="searchdiv"><span style="white-space: nowrap">Search:
+<input type="text" id="search"></input>
+</span></div>
+
+<div id="data"></div>
+
+<div style="clear: both">
+{% endblock %}

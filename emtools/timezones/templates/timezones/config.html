@@ -1,0 +1,24 @@
+{% extends "timezones/base.html" %}
+
+{% block content %}
+<h2>Timezone Configuration</h2>
+
+<p>Configure your local time zone to show in the overview. If you
+  check public, your name will show in that time zone for others,
+  too.</p>
+
+<form method="post" action="">
+<table>
+{{form}}
+</table>
+<input type="submit" value="Save"
+       style="width: 10em; margin-top: 1em" />
+</form>
+
+<form method="post" action="">
+<input type="hidden" name="action" value="delete" />
+<input type="submit" value="Delete entry"
+       style="width: 10em; margin-top: 1em" />
+</form>
+
+{% endblock %}

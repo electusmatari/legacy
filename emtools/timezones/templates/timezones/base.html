@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+
+{% block title %}Timezones{% endblock %}
+
+{% block tabs %}
+<ul class="tabs">
+<li {% ifequal tab 'time' %}class="active"{% endifequal %}><a href="/tools/timezones/">Times</a></li>
+<li {% ifequal tab 'config' %}class="active"{% endifequal %}><a href="/tools/timezones/config/">Configuration</a></li>
+</ul>
+{% endblock %}
+
+{% block body %}
+{% block content %}
+{% endblock %}
+{% endblock %}

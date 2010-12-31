@@ -1,0 +1,30 @@
+{% extends "intel/base.html" %}
+{% load eve %}
+
+{% block content %}
+<h2>Search Results</h2>
+
+<h3>Alliances</h3>
+
+<ul>
+  {% for alliance in alliance_list %}
+  <li>{{alliance}}</li>
+  {% endfor %}
+</ul>
+
+<h3>Corporations</h3>
+
+<ul>
+  {% for corp in corp_list %}
+  <li>{{corp}}</li>
+  {% endfor %}
+</ul>
+
+<h3>Pilots</h3>
+
+<ul>
+  {% for pilot in pilot_list %}
+  <li>{{pilot}}</li>
+  {% endfor %}
+</ul>
+{% endblock %}

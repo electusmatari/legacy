@@ -1,0 +1,55 @@
+{% extends "intel/base.html" %}
+{% load eve %}
+
+{% block content %}
+<h2>Corporation {{corp.name}}</h2>
+
+<table>
+  <tr><th>Corp:</th><td>{{corp}}</td></tr>
+  <tr><th>Alliance:</th><td>{{corp.alliance}}</td></tr>
+  <tr><th>Members:</th><td>{{corp.members}}</td></tr>
+  <tr><th>Standing:</th><td>{{corp.standing}}</td></tr>
+  <tr><th>Last&nbsp;check:</th><td>{{corp.lastseen|eve_time}}</td></tr>
+</table>
+
+<h3>Member Pilots ({{corp.pilot_set.count}}{% if corp.members %}/{{corp.members}}{% endif %})</h3>
+
+{% if not tracked %}
+<p>Members of this corporation are not tracked. This means the
+  following list might be outdated.</p>
+{% endif %}
+
+<ul>
+{% for pilot in corp.pilot_set.all %}
+  <li>{{pilot}}</li>
+{% endfor %}
+</ul>
+
+<h3>Recent Changes</h3>
+
+{% include "paginate.html" %}
+<table class="data">
+<thead>
+<tr><th>Timestamp</th><th colspan="2">Pilot</th><th>Old&nbsp;Corp</th><th>New&nbsp;Corp</th></tr>
+</thead>
+<tbody>
+{% for log in changelog_list %}
+<tr class="{% cycle even,odd %}">
+  <td>{{log.timestamp|eve_time}}</td>
+  <td>{{log.pilot}}</td>
+  <td>
+    {% if log.oldcorp == corp %}
+    <span style="color: #FF0000; font-weight: bold">Left</span>
+    {% else %}
+    <span style="color: #00AF00; font-weight: bold">Joined</span>
+    {% endif %}
+  </td>
+  <td>{{log.oldcorp}}</td>
+  <td>{{log.newcorp}}</td>
+</tr>
+{% endfor %}
+</tbody>
+</table>
+{% include "paginate.html" %}
+
+{% endblock %}

@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+
+{% block title %}Electus Matari Intelligence Department{% endblock %}
+
+{% block scriptheader %}
+<link type="text/css" rel="stylesheet" href="/media/css/jquery-ui.css" />
+<script type="text/javascript" src="/media/js/jquery.js"></script>
+<script type="text/javascript" src="/media/js/jquery.ui.js"></script>
+<script type="text/javascript">
+$(function() {
+$("#searchinput").autocomplete({
+    minLength: 3,
+    source: "http://www.electusmatari.com/intel/search/ajax/entities/",
+    focus: function( event, ui) {
+       $("#searchinput").val(ui.item.value);
+       return false;
+    },
+    select: function( event, ui) {
+       $("#searchinput").parent().submit();
+       return false;
+    }
+});
+{% block morescript %}{% endblock %}
+});
+</script>
+{% block scriptheader2 %}
+{% endblock %}
+{% endblock %}
+
+{% block tabs %}
+<div id="searchbox" style="float: right; margin: 0.5em 0">
+  <strong>Search:</strong>
+  <form method="get" action="/intel/search/" style="display: inline">
+    <input id="searchinput" type="text" name="q" />
+  </form>
+</div>
+
+<ul class="tabs">
+<li {% ifequal tab 'overview' %}class="active"{% endifequal %}><a href="{% url emtools.intel.views.view_overview %}">Overview</a></li>
+<li {% ifequal tab 'submit' %}class="active"{% endifequal %}><a href="{% url emtools.intel.views.view_submit %}">Submit&nbsp;Trace</a></li>
+<li {% ifequal tab 'submitpilots' %}class="active"{% endifequal %}><a href="{% url emtools.intel.views.view_submitpilots %}">Submit&nbsp;Pilots</a></li>
+<li {% ifequal tab 'tracking' %}class="active"{% endifequal %}><a href="{% url emtools.intel.views.view_tracking %}">Tracking</a></li>
+<li {% ifequal tab 'locators' %}class="active"{% endifequal %}><a href="{% url emtools.intel.views.view_locators %}">Locator Agents</a></li>
+</ul>
+{% endblock %}
+
+{% block body %}
+{% block content %}
+{% endblock %}
+{% endblock %}

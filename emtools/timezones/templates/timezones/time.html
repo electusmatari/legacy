@@ -1,0 +1,30 @@
+{% extends "timezones/base.html" %}
+
+{% block content %}
+<h2>Timezones</h2>
+
+<p>Compare local times of other members of Electus Matari. Enter a
+  time in any of the input fields, and hit <em>Set</em> to use this as
+  the current time for all time zones. You can use either the format
+  seen below, or strings like <em>Thu 20:00</em> - and a few
+  others.</p>
+
+<table class="tztable">
+{% for group in group_list %}
+<tr class="{% cycle odd,even %} {{group.cssclass}}">
+<th class="nobreak">EVT{{group.niceoffset}}{% if group.name %} ({{group.name}}){% endif %}</th>
+<td class="nobreak">
+  <form method="get" action="">
+  <input type="text" name="time" value="{{group.now|date:"Y-m-d H:i"}}" />
+  <input type="hidden" name="offset" value="{{group.offset}}" />
+  <input type="submit" value="Set" />
+  </form>
+</td>
+<td>
+{% for user in group.users %}<span class="nobreak">{{user.profile.mybb_username}}{% if not forloop.last %},</span> {% endif %}
+{% endfor %}
+</td>
+</tr>
+{% endfor %}
+</table>
+{% endblock %}
