@@ -94,7 +94,7 @@ def update_user(user, userid, apikey):
         characters = api.account.Characters()
     except Exception as e:
         raise userauth.AuthenticationError("Error during API call: %s" % 
-                                           str(e))
+                                           (str(e),))
 
     username = user.profile.mybb_username
     for char in characters.characters:

@@ -84,6 +84,7 @@ class Pilot(models.Model):
     characterid = models.IntegerField()
     corporation = models.ForeignKey(Corporation)
     alliance = models.ForeignKey(Alliance, null=True)
+    security = models.FloatField(default=0.0)
     lastseen = models.DateTimeField(auto_now=True)
 
     class Meta:

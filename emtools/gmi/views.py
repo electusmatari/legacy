@@ -110,9 +110,14 @@ def view_calculator(request):
     index = dict((index.latest.typename, index.latest.republic)
                  for index in Index.objects.all())
     prices = []
+    lastheader = 'Unknown'
     for typename, rowtype in TYPE_DATA:
         if rowtype != 'header':
-            prices.append((typename, index[typename]))
+            prices.append({'name': typename,
+                           'value': index[typename],
+                           'type': lastheader})
+        else:
+            lastheader = typename
     return direct_to_template(request, 'gmi/calculator.html',
                               extra_context={'tab': 'calculator',
                                              'internal': is_internal,
@@ -156,11 +161,34 @@ def view_autoupload(request):
     else:
         is_internal = False
     region = request.GET.get('region', None)
-    typeids = set()
-    for typename, rowtype in TYPE_DATA:
-        if rowtype != 'header':
-            typeids.add(get_typeid(typename))
-    typeids = sorted(typeids)
+    if region is None:
+        typeids = set()
+        for typename, rowtype in TYPE_DATA:
+            if rowtype != 'header':
+                typeids.add(get_typeid(typename))
+        typeids = sorted(typeids)
+    else:
+        c = connection.cursor()
+        c.execute("""
+SELECT t.typeid
+FROM ccp.invtypes t
+     LEFT JOIN (SELECT u.typeid AS typeid,
+                       MAX(u.timestamp) AS timestamp
+                FROM gmi_upload u
+                     INNER JOIN ccp.mapregions r
+                       ON u.regionid = r.regionid
+                WHERE r.regionname = %s
+                GROUP BY u.typeid) AS upload
+       ON t.typeid = upload.typeid
+WHERE t.marketgroupid IS NOT NULL
+  AND (upload.timestamp IS NULL
+       OR DATE_TRUNC('day', upload.timestamp) <
+          DATE_TRUNC('day', CURRENT_TIMESTAMP AT TIME ZONE 'GMT'))
+ORDER BY upload.timestamp IS NULL DESC,
+         upload.timestamp ASC,
+         t.typeid ASC;
+""", (region,))
+        typeids = [typeid for (typeid,) in c]
     return direct_to_template(request, 'gmi/autoupload.html',
                               extra_context={'tab': 'autoupload',
                                              'jsondata': json.dumps(typeids),

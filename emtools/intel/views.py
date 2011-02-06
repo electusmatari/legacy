@@ -8,6 +8,7 @@ from django.http import HttpResponse, HttpResponseRedirect, Http404
 from django.views.generic.list_detail import object_list
 from django.views.generic.simple import direct_to_template
 
+from emtools.ccpeve import eveapi
 from emtools.ccpeve.models import apiroot, APIKey
 from emtools.ccpeve import ccpdb
 from emtools.emauth.decorators import require_mybbgroup, require_account
@@ -46,6 +47,12 @@ def view_locators(request):
 def view_submitpilots(request):
     if request.method == 'POST':
         names = request.POST.get("names", "")
+        if "I found" in names and "for you" in names:
+            messages.add_message(request, messages.ERROR,
+                                 'You are trying to submit a locator trace. '
+                                 'Please do that under "Submit Trace", use '
+                                 'this form to submit pilot names.')
+            return HttpResponseRedirect('/intel/submit/pilots/')
         names = [name.strip() for name in names.split("\n") if name != '']
         api = apiroot()
         charids = api.eve.CharacterID(names=",".join(names))
@@ -314,7 +321,8 @@ def get_pilot(name, charid=None):
         name=charinfo.characterName,
         characterid=charinfo.characterID,
         defaults={'corporation': corp,
-                  'alliance': alliance})
+                  'alliance': alliance,
+                  'security': charinfo.securityStatus})
     if created:
         ChangeLog.objects.create(pilot=pilot,
                                  oldcorp=None,
@@ -330,6 +338,7 @@ def get_pilot(name, charid=None):
                                      newalliance=alliance)
         pilot.corporation = corp
         pilot.alliance = alliance
+        pilot.security = charinfo.securityStatus
         pilot.save()
     return pilot
 

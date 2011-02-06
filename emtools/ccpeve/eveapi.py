@@ -369,6 +369,7 @@ class _Parser(object):
 			# for rowsets, use the given name
 			try:
 				columns = attributes[attributes.index('columns')+1].split(",")
+                                columns = [s.strip() for s in columns]
 			except ValueError:
 				# rowset did not have columns tag set (this is a bug in API)
 				# columns will be extracted from first row instead.

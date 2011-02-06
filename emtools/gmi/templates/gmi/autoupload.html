@@ -1,5 +1,6 @@
 {% extends "gmi/base.html" %}
 {% block scriptheader %}
+<script type="text/javascript" src="/media/js/jquery.js"></script>
 <script type="text/javascript">
 var typeids = {{jsondata|safe}};
 typeids.reverse();
@@ -9,8 +10,7 @@ var timeout = false;
 
 function checktypes () {
     if (!pause && typeids.length > 0) {
-        status("Running " + (origlen - typeids.length)
-               + " / " + (origlen - 1));
+        status("Running");
         CCPEVE.showMarketDetails(typeids.pop());
         timeout = setTimeout(checktypes, 3000);
     }
@@ -30,9 +30,16 @@ function toggle_pause () {
     }
 }
 function status (text) {
-    var st = document.getElementById("status");
-    st.innerHTML = text;
+    $("#status").html(text + " (" +
+                      (origlen - typeids.length) + " / " + (origlen - 1) +
+                      ")");
 }
+
+$(function () {
+    $('#totaltime').html(Math.round(((typeids.length * 3)/60)+0.5));
+    status("Not running");
+});
+
 </script>
 {% endblock %}
 
@@ -51,7 +58,8 @@ function status (text) {
   installed and running, that you <b>see the Price History tab in
   your market window</b>, and just hit the button below</p>
 
-<p>The whole process will take about 18 minutes.</p>
+<p>The whole process will take about <span id="totaltime">18</span>
+minutes.</p>
 
 <p><b>Status:</b> <span id="status">Not running</span></p>
 

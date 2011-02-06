@@ -93,7 +93,8 @@ INSTALLED_APPS = (
     'emtools.intel',
     'emtools.tools',
     'emtools.channels',
-    'emtools.timezones'
+    'emtools.timezones',
+    'emtools.fw',
 )
 
 AUTH_PROFILE_MODULE = 'emauth.Profile'

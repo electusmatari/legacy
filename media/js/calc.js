@@ -44,8 +44,9 @@ function calculator (result, search, data, table) {
         html += '</thead>'
         rowi = 1;
         for (row in table) {
-            typename = table[row][0];
-            if (typename.search(needle) == -1) {
+            typename = table[row].name;
+            group = table[row].type
+            if (typename.search(needle) == -1 && group.search(needle) == -1) {
                 continue;
             }
             if (rowi % 2) {
@@ -66,8 +67,8 @@ function calculator (result, search, data, table) {
                      'value="' + qty + '" autocomplete="off" />' +
                      '</td>' +
                      '<td class="name"><label for="dataqty' + row + '">' +
-                     table[row][0] + "</label></td>" +
-                     '<td class="numeric">' + humane(table[row][1]) + "</td>" +
+                     table[row].name + "</label></td>" +
+                     '<td class="numeric">' + humane(table[row].value) + "</td>" +
                      '</tr>');
         }
         html += '</table>';
@@ -101,8 +102,8 @@ function calculator (result, search, data, table) {
                 }
                 clsi += 1;
                 i = $(this).attr("name").substr(3);
-                typename = table[rowi][0];
-                price = table[rowi][1];
+                typename = table[rowi].name;
+                price = table[rowi].value;
                 html += ('<tr class="' + cls + '">' +
                          '<td>' +
                          '<input type="text" size="7" ' +

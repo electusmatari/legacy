@@ -56,6 +56,8 @@ def authenticate_users(user=None):
     activecount = 0
 
     for mybbuser in users:
+        if mybbuser.has_group('Banned'):
+            continue
         totalcount += 1
         oldcorp = None
         if mybbuser.profile:
@@ -205,7 +207,7 @@ def get_gradient_details():
         membertracking = grd.MemberTracking()
     except Exception as e:
         raise AuthenticationError("Error during API call: %s" % str(e))
-    for member in membersecurity.member:
+    for member in membersecurity.members:
         result.setdefault(member.name, (set(), ''))
         for role in member.roles:
             if role.roleName == 'roleDirector':

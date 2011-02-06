@@ -55,13 +55,20 @@ class DBCache(object):
                 ).get(host=host, path=path, params=repr(params))
         except Cache.DoesNotExist:
             return None
+        except Exception as e:
+            raise Exception("Error %s during cache call" %
+                            (e.__class__.__name__,))
         return cached.doc.encode("utf-8")
 
     def store(self, host, path, params, doc, obj):
         Cache.objects.filter(
             host=host, path=path, params=repr(params)
             ).delete()
-        cacheduntil = datetime.datetime.utcfromtimestamp(obj.cachedUntil)
+        # Ugly hack for bug #106748
+        if hasattr(obj, 'cachedUntil'):
+            cacheduntil = datetime.datetime.utcfromtimestamp(obj.cachedUntil)
+        else:
+            cacheduntil = datetime.datetime.utcfromtimestamp(obj.result.cachedUntil)
         cached = Cache(host=host, path=path, params=repr(params),
                        doc=doc, cacheduntil=cacheduntil)
         cached.save()

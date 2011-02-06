@@ -45,7 +45,7 @@
   <td>{{log.timestamp|eve_time}}</td>
   <td>{{log.pilot}}</td>
   <td>
-    {% if log.alliance == alliance %}
+    {% if log.oldalliance == alliance and log.alliance != alliance %}
     <span style="color: #FF0000; font-weight: bold">Left</span>
     {% else %}
     <span style="color: #00AF00; font-weight: bold">Joined</span>

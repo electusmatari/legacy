@@ -14,6 +14,7 @@ urlpatterns = patterns('',
 
     ('^tools/channels/', include('emtools.channels.urls')),
     ('^tools/timezones/', include('emtools.timezones.urls')),
+    ('^tools/fw/', include('emtools.fw.urls')),
     ('^tools/', include('emtools.tools.urls')),
     ('^banner/', 'emtools.tools.views.view_banner'),
 
