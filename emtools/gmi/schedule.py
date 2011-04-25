@@ -3,7 +3,7 @@ import logging
 
 from django.db import connection
 from emtools.gmi.models import Index, IndexHistory
-from emtools.gmi.index import TYPE_DATA
+from emtools.gmi.index import TYPE_DATA, REFINEABLES_DATA
 from emtools.ccpeve.ccpdb import get_typeid
 
 log = logging.getLogger('gmi')
@@ -13,8 +13,8 @@ REPUBLIC = ['Heimatar', 'Metropolis', 'Molden Heath']
 def update_index():
     now = datetime.datetime.utcnow().date()
     typeids = set(get_typeid(typename)
-                    for (typename, rowtype) in TYPE_DATA
-                    if rowtype == 'typename')
+                  for (typename, rowtype) in TYPE_DATA
+                  if rowtype == 'typename')
     republic = get_index(now, typeids, REPUBLIC)
     heimatar = get_index(now, typeids, ['Heimatar'])
     metropolis = get_index(now, typeids, ['Metropolis'])
@@ -33,7 +33,6 @@ def update_index():
         else:
             (republiclast, heimatarlast, metropolislast,
              moldenheathlast, jitalast) = (0.0, 0.0, 0.0, 0.0, 0.0)
-        
 
         obj = IndexHistory.objects.create(
             timestamp=now,
@@ -66,6 +65,67 @@ def update_index():
             obj.republic = get_last_trade(typeid)
             obj.save()
         Index.objects.create(latest=obj)
+    add_refineables(now, last)
+
+def add_refineables(now, last):
+    now = datetime.datetime.utcnow().date()
+    typeids = set(get_typeid(typename)
+                  for (typename, rowtype) in REFINEABLES_DATA
+                  if rowtype == 'typename')
+    index = dict((index.latest.typeid, index.latest)
+                 for index in Index.objects.all())
+    for typeid in typeids:
+        republic = 0
+        heimatar = 0
+        metropolis = 0
+        moldenheath = 0
+        jita = 0
+        skip = False
+        for qty, reqtypeid in refine(typeid):
+            if reqtypeid not in index:
+                skip = True
+                break
+            republic += qty * index[reqtypeid].republic
+            heimatar += qty * index[reqtypeid].heimatar
+            metropolis += qty * index[reqtypeid].metropolis
+            moldenheath += qty * index[reqtypeid].moldenheath
+            jita += qty * index[reqtypeid].jita
+        if skip:
+            continue
+        obj = IndexHistory.objects.create(
+            timestamp=now,
+            typeid=typeid,
+            republic=republic,
+            republicvolume=0,
+            republicchange=republic / last[typeid].republic if typeid in last and last[typeid].republic > 0 else None,
+            heimatar=heimatar,
+            heimatarvolume=0,
+            heimatarchange=heimatar / last[typeid].heimatar if typeid in last and last[typeid].heimatar > 0 else None,
+            heimatarage=0,
+            metropolis=metropolis,
+            metropolisvolume=0,
+            metropolischange=metropolis / last[typeid].metropolis if typeid in last and last[typeid].metropolis > 0 else None,
+            metropolisage=0,
+            moldenheath=moldenheath,
+            moldenheathvolume=0,
+            moldenheathchange=moldenheath / last[typeid].moldenheath if typeid in last and last[typeid].moldenheath > 0 else None,
+            moldenheathage=0,
+            jita=jita,
+            jitavolume=0,
+            jitachange=jita / last[typeid].jita if typeid in last and last[typeid].jita > 0 else None,
+            jitaage=0)
+        Index.objects.create(latest=obj)
+    
+def refine(typeid):
+    c = connection.cursor()
+    c.execute("SELECT mat.quantity::float / t.portionsize, "
+              "       mat.materialtypeid "
+              "FROM ccp.invtypematerials mat "
+              "     INNER JOIN ccp.invtypes t "
+              "       ON mat.typeid = t.typeid "
+              "WHERE t.typeid = %s",
+              (typeid,))
+    return c.fetchall()
 
 def upload_age(timestamp, typeid, region):
     c = connection.cursor()

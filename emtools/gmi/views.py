@@ -15,7 +15,7 @@ from emtools.ccpeve.models import MarketHistory
 from emtools.ccpeve.ccpdb import get_typeid
 from emtools.emauth.models import AuthToken
 from emtools.gmi.models import Upload, Index
-from emtools.gmi.index import TYPE_DATA
+from emtools.gmi.index import TYPE_DATA, REFINEABLES_DATA
 
 def view_index(request):
     if hasattr(request.user, 'profile') and 'Electus Matari' in request.user.profile.mybb_groups:
@@ -25,7 +25,7 @@ def view_index(request):
     index = dict((index.latest.typename, index.latest)
                  for index in Index.objects.all())
     index_table = []
-    for typename, rowtype in TYPE_DATA:
+    for typename, rowtype in TYPE_DATA + REFINEABLES_DATA:
         if rowtype == 'header':
             index_table.append({'row': 'header',
                                 'header': typename})
@@ -111,7 +111,7 @@ def view_calculator(request):
                  for index in Index.objects.all())
     prices = []
     lastheader = 'Unknown'
-    for typename, rowtype in TYPE_DATA:
+    for typename, rowtype in TYPE_DATA + REFINEABLES_DATA:
         if rowtype != 'header':
             prices.append({'name': typename,
                            'value': index[typename],
@@ -154,20 +154,39 @@ def view_uploader(request):
                               extra_context={'tab': 'uploader',
                                              'internal': is_internal})
 
-@require_mybbgroup('Electus Matari')
+#@require_mybbgroup('Electus Matari')
 def view_autoupload(request):
     if hasattr(request.user, 'profile') and 'Electus Matari' in request.user.profile.mybb_groups:
         is_internal = True
     else:
         is_internal = False
     region = request.GET.get('region', None)
-    if region is None:
-        typeids = set()
-        for typename, rowtype in TYPE_DATA:
-            if rowtype != 'header':
-                typeids.add(get_typeid(typename))
-        typeids = sorted(typeids)
-    else:
+
+    typeids = set()
+    for typename, rowtype in TYPE_DATA:
+        if rowtype != 'header':
+            typeids.add(get_typeid(typename))
+    typeids = sorted(typeids)
+
+    c = connection.cursor()
+    c.execute("SELECT r.regionname, "
+              "       AGE(DATE_TRUNC('day', MIN(sq.timestamp))) AS timestamp "
+              "FROM (SELECT u.typeid, "
+              "             u.regionid, "
+              "             MAX(u.timestamp) as timestamp "
+              "      FROM gmi_upload u "
+              "      WHERE u.typeid IN (%s) "
+              "      GROUP by u.typeid, u.regionid) AS sq "
+              "     INNER JOIN ccp.mapregions r "
+              "       ON sq.regionid = r.regionid "
+              "WHERE r.regionname IN ('Heimatar', 'Metropolis', "
+              "                       'Molden Heath', 'The Forge') "
+              "GROUP BY r.regionname "
+              "ORDER BY r.regionname ASC" % ", ".join(["%s"] * len(typeids)),
+              typeids)
+    region_updates = c.fetchall()
+
+    if region is not None:
         c = connection.cursor()
         c.execute("""
 SELECT t.typeid
@@ -189,10 +208,12 @@ ORDER BY upload.timestamp IS NULL DESC,
          t.typeid ASC;
 """, (region,))
         typeids = [typeid for (typeid,) in c]
+
     return direct_to_template(request, 'gmi/autoupload.html',
                               extra_context={'tab': 'autoupload',
                                              'jsondata': json.dumps(typeids),
-                                             'internal': is_internal})
+                                             'internal': is_internal,
+                                             'regionupdates': region_updates})
 
 ##################################################################
 # Cache file parsing

@@ -403,3 +403,104 @@ TYPE_DATA = [
     ("Sterile Conduits", "typename"),
     ("Wetware Mainframe", "typename"),
     ]
+
+REFINEABLES_DATA = [
+    # Asteroids
+    ("Ore (Refined)", "header"),
+
+    ("Veldspar", "typename"),
+    ("Concentrated Veldspar", "typename"),
+    ("Dense Veldspar", "typename"),
+
+    ("Scordite", "typename"),
+    ("Condensed Scordite", "typename"),
+    ("Massive Scordite", "typename"),
+
+    ("Pyroxeres", "typename"),
+    ("Solid Pyroxeres", "typename"),
+    ("Viscous Pyroxeres", "typename"),
+
+    ("Plagioclase", "typename"),
+    ("Azure Plagioclase", "typename"),
+    ("Rich Plagioclase", "typename"),
+
+    ("Omber", "typename"),
+    ("Silvery Omber", "typename"),
+    ("Golden Omber", "typename"),
+
+    ("Kernite", "typename"),
+    ("Luminous Kernite", "typename"),
+    ("Fiery Kernite", "typename"),
+
+    ("Jaspet", "typename"),
+    ("Pure Jaspet", "typename"),
+    ("Pristine Jaspet", "typename"),
+
+    ("Hemorphite", "typename"),
+    ("Vivid Hemorphite", "typename"),
+    ("Radiant Hemorphite", "typename"),
+
+    ("Hedbergite", "typename"),
+    ("Vitric Hedbergite", "typename"),
+    ("Glazed Hedbergite", "typename"),
+
+    ("Gneiss", "typename"),
+    ("Iridescent Gneiss", "typename"),
+    ("Prismatic Gneiss", "typename"),
+
+    ("Dark Ochre", "typename"),
+    ("Onyx Ochre", "typename"),
+    ("Obsidian Ochre", "typename"),
+
+    ("Crokite", "typename"),
+    ("Sharp Crokite", "typename"),
+    ("Crystalline Crokite", "typename"),
+
+    ("Spodumain", "typename"),
+    ("Bright Spodumain", "typename"),
+    ("Gleaming Spodumain", "typename"),
+
+    ("Bistot", "typename"),
+    ("Triclinic Bistot", "typename"),
+    ("Monoclinic Bistot", "typename"),
+
+    ("Arkonor", "typename"),
+    ("Crimson Arkonor", "typename"),
+    ("Prime Arkonor", "typename"),
+
+    ("Mercoxit", "typename"),
+    ("Magma Mercoxit", "typename"),
+    ("Vitreous Mercoxit", "typename"),
+
+    # Ice
+    ("Ice (Refined)", "header"),
+
+    ("Glacial Mass", "typename"),
+    ("Smooth Glacial Mass", "typename"),
+    ("Blue Ice", "typename"),
+    ("Thick Blue Ice", "typename"),
+    ("White Glaze", "typename"),
+    ("Pristine White Glaze", "typename"),
+    ("Clear Icicle", "typename"),
+    ("Enriched Clear Icicle", "typename"),
+
+    ("Krystallos", "typename"),
+    ("Glare crust", "typename"),
+    ("Gelidus", "typename"),
+    ("Dark Glitter", "typename"),
+
+    # Drone alloys
+    ("Alloys & Compounds (Refined)", "header"),
+    ("Condensed Alloy", "typename"),
+    ("Crystal Compound", "typename"),
+    ("Precious Alloy", "typename"),
+    ("Gleaming Alloy", "typename"),
+    ("Sheen Compound", "typename"),
+    ("Lucent Compound", "typename"),
+    ("Dark Compound", "typename"),
+    ("Motley Compound", "typename"),
+    ("Lustering Alloy", "typename"),
+    ("Plush Compound", "typename"),
+    ("Glossy Compound", "typename"),
+    ("Opulent Compound", "typename"),
+]

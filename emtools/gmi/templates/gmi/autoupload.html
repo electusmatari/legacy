@@ -71,4 +71,12 @@ minutes.</p>
 <img src="/media/img/gmi/markethistory.png" />
 
 {% endif %}
+
+<h3>Last Updates</h3>
+<ul>
+{% for region, age in regionupdates %}
+<li>{{region}}: {{age.days}} day{{age.days|pluralize}}</li>
+{% endfor %}
+</ul>
+
 {% endblock %}

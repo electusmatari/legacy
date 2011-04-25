@@ -165,7 +165,7 @@ def update_single_user2(api, mybbuser, grddetails, allies):
     profile.save()
 
     # EM members
-    if profile.alliance == 'Electus Matari' or profile.corp == 'Re-Awakened Technologies Inc':
+    if profile.alliance == 'Electus Matari':
         mybbuser.add_group('Electus Matari')
 
     # Allies

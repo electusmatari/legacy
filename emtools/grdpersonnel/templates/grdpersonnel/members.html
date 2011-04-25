@@ -1,0 +1,174 @@
+{% extends "grdpersonnel/base.html" %}
+{% load eve %}
+{% load em %}
+
+{% block scriptheader %}
+<script type="text/javascript" src="/media/js/jquery.js"></script>
+<script type="text/javascript" src="/media/js/jquery.tablesorter.js"></script>
+<script type="text/javascript">
+// $(function() {
+//     $('.data').tablesorter({
+//         widgets: ['zebra'],
+//     });
+// });
+</script>
+{% endblock %}
+
+{% block content %}
+<p>Data cached until {{cacheduntil|eve_time}}</p>
+
+<h2>Prospects ({{prospect_count}})</h2>
+
+<p><em>Prospects above 30 days, but hired before 113.02.01, are
+    automatically treated as being hired on that day.</em></p>
+
+<table class="data">
+<thead>
+<tr>
+  <th>Name</th>
+  <th>Age</th>
+  <th>Inactive</th>
+  <th>Notes</th>
+</tr>
+</thead>
+<tbody>
+{% for name, details in pilots %}
+{% if details.prospect %}
+<tr class="{% cycle odd,even %}">
+  <td>
+    {% if details.tid %}
+    <a href="/forums/showthread.php?tid={{details.tid}}">{{name}}</a>
+    {% else %}
+    {{name}}
+    {% endif %}
+    {{details.showinfo}}
+  </td>
+  <td class="numeric">{{details.age}}</td>
+  <td class="numeric">{{details.lastactive}}</td>
+  <td>
+    {% if details.canbepromoted %}
+    Can be promoted.
+    {% else %}
+    {% if details.d120 %}
+    Older than 120 days, promote or remove.
+    {% else %}
+    {% if details.d60 %}
+    Older than 60 days, must only lack recommendations.
+    {% else %}
+    {% if details.d30 %}
+    Older than 30 days, check for promotion.
+    {% else %}
+    Less than 30 days.
+    {% endif %}
+    {% endif %}
+    {% endif %}
+    {% endif %}
+  </td>
+</tr>
+{% endif %}
+{% endfor %}
+</tbody>
+</table>
+
+{% if norole_count %}
+<h2>Employees with no Roles ({{norole_count}})</h2>
+
+<table class="data">
+<thead>
+<tr>
+  <th>Name</th>
+  <th>Age</th>
+  <th>Inactive</th>
+</tr>
+</thead>
+<tbody>
+{% for name, details in pilots %}
+{% if details.noroles %}
+<tr class="{% cycle odd,even %}">
+  <td>
+    {% if details.tid %}
+    <a href="/forums/showthread.php?tid={{details.tid}}">{{name}}</a>
+    {% else %}
+    {{name}}
+    {% endif %}
+    {{details.showinfo}}
+  </td>
+  <td class="numeric">{{details.age}}</td>
+  <td class="numeric">{{details.lastactive}}</td>
+</tr>
+{% endif %}
+{% endfor %}
+</tbody>
+</table>
+{% endif %}
+
+<h2>Inactive Employees ({{inactive_count}})</h2>
+
+<table class="data">
+<thead>
+<tr>
+  <th>Name</th>
+  <th>Age</th>
+  <th>Inactive</th>
+  <th>Notes</th>
+</tr>
+</thead>
+<tbody>
+{% for name, details in pilots %}
+{% if details.inactive %}
+<tr class="{% cycle odd,even %}">
+  <td>
+    {% if details.tid %}
+    <a href="/forums/showthread.php?tid={{details.tid}}">{{name}}</a>
+    {% else %}
+    {{name}}
+    {% endif %}
+    {{details.showinfo}}
+  </td>
+  <td class="numeric">{{details.age}}</td>
+  <td class="numeric">{{details.lastactive}}</td>
+  <td>
+    {{details.titles|join:", "}}
+  </td>
+</tr>
+{% endif %}
+{% endfor %}
+</tbody>
+</table>
+
+<h2>All Members</h2>
+
+<table class="data">
+<thead>
+<tr>
+  <th>Name</th>
+  <th>Free Title</th>
+  <th>Titles</th>
+  <th>Joined</th>
+  <th>Logon</th>
+  <th>Logoff</th>
+</tr>
+</thead>
+<tbody>
+{% for name, details in pilots %}
+<tr class="{% cycle odd,even %}">
+  <td>
+    {% if details.tid %}
+    <a href="/forums/showthread.php?tid={{details.tid}}">{{name}}</a>
+    {% else %}
+    {{name}}
+    {% endif %}
+    {{details.showinfo}}
+  </td>
+  <td>{{details.freeformtitle}}</td>
+  <td>{{details.titles|join:", "}}</td>
+  <td class="nobreak">{{details.start|eve_time}}</td>
+  <td class="nobreak">{{details.logon|eve_time}}</td>
+  <td class="nobreak">{{details.logoff|eve_time}}</td>
+</tr>
+{% endfor %}
+</tbody>
+</table>
+
+{% endblock %}
+

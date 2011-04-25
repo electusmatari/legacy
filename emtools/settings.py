@@ -90,11 +90,13 @@ INSTALLED_APPS = (
     'emtools.emadmin',
     'emtools.corpadmin',
     'emtools.gmi',
+    'emtools.profits',
     'emtools.intel',
     'emtools.tools',
     'emtools.channels',
     'emtools.timezones',
     'emtools.fw',
+    'emtools.grdpersonnel',
 )
 
 AUTH_PROFILE_MODULE = 'emauth.Profile'

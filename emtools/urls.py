@@ -15,8 +15,11 @@ urlpatterns = patterns('',
     ('^tools/channels/', include('emtools.channels.urls')),
     ('^tools/timezones/', include('emtools.timezones.urls')),
     ('^tools/fw/', include('emtools.fw.urls')),
+    ('^tools/profits/', include('emtools.profits.urls')),
     ('^tools/', include('emtools.tools.urls')),
     ('^banner/', 'emtools.tools.views.view_banner'),
+
+    ('^grd/personnel/', include('emtools.grdpersonnel.urls')),
 
     # Uncomment the admin/doc line below and add 'django.contrib.admindocs' 
     # to INSTALLED_APPS to enable admin documentation:

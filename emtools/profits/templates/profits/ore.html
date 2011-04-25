@@ -1,0 +1,35 @@
+{% extends "profits/base.html" %}
+{% load em %}
+
+{% block content %}
+<h2>{% if ice %}Ice{% else %}Ore{% endif %} Mining Profit</h2>
+
+<form method="get" action="">
+<select name="location">
+<option value="Republic" {% if location == 'Republic' %}selected="true"{% endif %}>Republic</option>
+<option value="Rens" {% if location == 'Rens' %}selected="true"{% endif %}>Rens</option>
+<option value="Jita" {% if location == 'Jita' %}selected="true"{% endif %}>Jita</option>
+</select><br />
+{% if not ice %}
+<input id="fullcheckbox" type="checkbox" name="full" value="true" {% if full == 'true' %}checked="true"{% endif %} />
+<label for="fullcheckbox">Show variants</label><br />
+{% endif %}
+<input type="submit" value="Update" />
+</form>
+<br />
+
+<table class="data">
+<thead>
+<tr><th>Ore</th><th>ISK/m3</th><th>Notes</th></tr>
+</thead>
+<tbody>
+{% for ore in ore_list %}
+<tr class="{% cycle odd,even %}">
+  <td>{{ore.name}}</td>
+  <td class="numeric">{{ore.price|floatcomma}}</td>
+  <td>{{ore.notes}}</td>
+</tr>
+{% endfor %}
+</tbody>
+</table>
+{% endblock %}

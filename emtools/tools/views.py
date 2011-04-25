@@ -18,6 +18,7 @@ TOOLS = [
 EMTOOLS = [
     ('Alliance',
      [('/tools/channels/', 'Channels', '/media/img/tools/channels.png'),
+      ('/tools/profits/', 'Profits', '/media/img/tools/profits.png'),
       ('/vote/', 'Vote', '/media/img/tools/vote.png'),
       ('/gallery/', 'Gallery', '/media/img/tools/gallery.png'),
       ('/intel/', 'Intel', '/media/img/tools/intel.png'),
