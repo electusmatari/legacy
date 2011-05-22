@@ -65,7 +65,8 @@ def view_members(request):
     if request.user.is_staff:
         queryset = Profile.objects.filter(active=True)
     else:
-        queryset = Profile.objects.filter(corp=request.user.profile.corp)
+        queryset = Profile.objects.filter(corp=request.user.profile.corp,
+                                          active=True)
 
     do_all = request.GET.get('do_all', False)
     oldforum = intval(request.GET.get('oldforum', 7))
@@ -137,8 +138,9 @@ def view_activity(request):
     killboarddata.sort()
     # forumdata
     wanted_uids = [x.mybb_uid for x in
-                   Profile.objects.filter(Q(corp=corp) |
-                                          Q(alliance=corp))]
+                   Profile.objects.filter(Q(active=True) &
+                                          (Q(corp=corp) |
+                                           Q(alliance=corp)))]
     if len(wanted_uids) == 0:
         forumdata = []
     else:
@@ -168,7 +170,7 @@ def view_activity(request):
 def view_ajax(request):
     term = request.GET.get("term", "").lower()
     result = set()
-    for profile in Profile.objects.all():
+    for profile in Profile.objects.filter(active=True):
         if profile.corp is not None and term in profile.corp.lower():
             result.add(profile.corp)
         if profile.alliance is not None and term in profile.alliance.lower():

@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+
+{% block title %}Recruitment{% endblock %}
+
+{% block tabs %}
+<ul class="tabs">
+<li {% ifequal tab 'submit' %}class="active"{% endifequal %}><a href="/recruitment/">Recruitment</a></li>
+{% if user.profile.active %}
+<li {% ifequal tab 'audits' %}class="active"{% endifequal %}><a href="/recruitment/audits/">Audits</a></li>
+{% endif %}
+</ul>
+{% endblock %}
+
+{% block body %}
+{% block content %}
+{% endblock %}
+{% endblock %}

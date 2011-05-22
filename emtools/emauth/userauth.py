@@ -134,6 +134,7 @@ def update_single_user2(api, mybbuser, grddetails, allies):
     except eveapi.Error as e:
         if e.code == 522: # Failed getting character information.
             return "%s (character deleted?)" % str(e)
+        raise AuthenticationError("Error during API call: %s" % str(e))
     except Exception as e:
         raise AuthenticationError("Error during API call: %s" % str(e))
 

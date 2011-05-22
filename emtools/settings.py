@@ -53,6 +53,7 @@ MIDDLEWARE_CLASSES = (
     'django.middleware.common.CommonMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
+    'django.middleware.transaction.TransactionMiddleware',
     'emtools.emauth.middleware.MyBBAuthenticationMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.csrf.middleware.CsrfMiddleware',
@@ -96,6 +97,7 @@ INSTALLED_APPS = (
     'emtools.channels',
     'emtools.timezones',
     'emtools.fw',
+    'emtools.recruitment',
     'emtools.grdpersonnel',
 )
 

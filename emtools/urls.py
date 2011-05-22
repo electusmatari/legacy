@@ -9,6 +9,7 @@ urlpatterns = patterns('',
     ('^admin/', include('emtools.emadmin.urls')),
     ('^corpadmin/', include('emtools.corpadmin.urls')),
     ('^intel/', include('emtools.intel.urls')),
+    ('^recruitment/', include('emtools.recruitment.urls')),
     ('^gmi/', include('emtools.gmi.urls')),
     ('^gmi2/', include('emtools.gmi.urls')),
 
