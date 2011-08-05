@@ -1,6 +1,7 @@
 import datetime
 
 from django.contrib.auth.models import User
+from django.db import connection
 from django.views.generic.list_detail import object_list
 from django.views.generic.simple import direct_to_template
 
@@ -68,3 +69,48 @@ def view_groups(request):
     return direct_to_template(request, 'emadmin/groups.html',
                               extra_context={'tab': 'groups',
                                              'group_list': groups})
+
+@require_admin
+def view_stats(request):
+    conn = utils.connect('emmisc')
+    c = conn.cursor()
+    c.execute("SELECT table_schema, "
+              "       SUM(table_rows) AS rows, "
+              "       SUM(data_length + index_length) AS size "
+              "FROM information_schema.TABLES "
+              "GROUP BY table_schema "
+              "ORDER BY size DESC")
+    mysql_databases = c.fetchall()
+    c.execute("SELECT table_name, "
+              "       table_rows AS rows, "
+              "       data_length + index_length AS size "
+              "FROM information_schema.TABLES "
+              "ORDER BY size DESC")
+    mysql_tables = c.fetchall()
+    c = connection.cursor()
+    c.execute("SELECT 'eve', "
+              "       (SELECT SUM(n_live_tup) FROM pg_stat_all_tables), "
+              "       pg_database_size('eve')")
+    postgresql_databases = c.fetchall()
+    c.execute("SELECT CASE WHEN nspname = 'public' "
+              "            THEN C.relname "
+              "            ELSE nspname || '.' || C.relname "
+              "       END, "
+              "       st.n_live_tup, "
+              "       pg_relation_size(C.oid) AS size "
+              "FROM pg_class C "
+              "     LEFT JOIN pg_namespace N "
+              "       ON (N.oid = C.relnamespace) "
+              "     INNER JOIN pg_stat_all_tables st "
+              "       ON st.relid = C.oid "
+              "WHERE reltype != 0 "
+              #"  AND nspname NOT IN ('pg_catalog', 'information_schema', "
+              #"                      'pg_toast') "
+              "ORDER BY size DESC")
+    postgresql_tables = c.fetchall()
+    return direct_to_template(request, 'emadmin/stats.html',
+                              extra_context={'tab': 'stats',
+                                             'mysql_databases': mysql_databases,
+                                             'mysql_tables': mysql_tables,
+                                             'postgresql_databases': postgresql_databases,
+                                             'postgresql_tables': postgresql_tables})

@@ -7,6 +7,7 @@
 <li {% ifequal tab 'log' %}class="active"{% endifequal %}><a href="{% url emtools.emadmin.views.view_log %}">Log</a></li>
 <li {% ifequal tab 'groups' %}class="active"{% endifequal %}><a href="{% url emtools.emadmin.views.view_groups %}">Groups</a></li>
 <li {% ifequal tab 'status' %}class="active"{% endifequal %}><a href="{% url emtools.emadmin.views.view_status %}">Status</a></li>
+<li {% ifequal tab 'stats' %}class="active"{% endifequal %}><a href="{% url emtools.emadmin.views.view_stats %}">Statistics</a></li>
 </ul>
 {% endblock %}
 

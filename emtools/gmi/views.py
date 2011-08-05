@@ -17,6 +17,8 @@ from emtools.emauth.models import AuthToken
 from emtools.gmi.models import Upload, Index
 from emtools.gmi.index import TYPE_DATA, REFINEABLES_DATA
 
+import emtools.ccpeve.igb as igb
+
 def view_index(request):
     if hasattr(request.user, 'profile') and 'Electus Matari' in request.user.profile.mybb_groups:
         is_internal = True
@@ -161,12 +163,37 @@ def view_autoupload(request):
     else:
         is_internal = False
     region = request.GET.get('region', None)
+    if region is None:
+        region = request.META.get('HTTP_EVE_REGIONNAME', None)
 
-    typeids = set()
+    index_typeids = set()
     for typename, rowtype in TYPE_DATA:
         if rowtype != 'header':
-            typeids.add(get_typeid(typename))
-    typeids = sorted(typeids)
+            index_typeids.add(get_typeid(typename))
+
+    c = connection.cursor()
+    if 'all' in request.GET:
+        c.execute("SELECT typeid FROM ccp.invtypes "
+                  "WHERE marketgroupid IS NOT NULL")
+        want = set(typeid for (typeid,) in c)
+    else:
+        want = index_typeids
+
+    if region is None:
+        have = set()
+    else:
+        c.execute("SELECT typeid "
+                  "FROM gmi_upload u "
+                  "     INNER JOIN ccp.mapregions r "
+                  "       ON u.regionid = r.regionid "
+                  "WHERE r.regionname = %s "
+                  "  AND DATE_TRUNC('day', u.calltimestamp) = "
+                  "      DATE_TRUNC('day', "
+                  "                 CURRENT_TIMESTAMP AT TIME ZONE 'GMT')",
+                  (region,))
+        have = set(typeid for (typeid,) in c)
+
+    typeids = sorted(want - have)
 
     c = connection.cursor()
     c.execute("SELECT r.regionname, "
@@ -182,38 +209,19 @@ def view_autoupload(request):
               "WHERE r.regionname IN ('Heimatar', 'Metropolis', "
               "                       'Molden Heath', 'The Forge') "
               "GROUP BY r.regionname "
-              "ORDER BY r.regionname ASC" % ", ".join(["%s"] * len(typeids)),
-              typeids)
+              "ORDER BY r.regionname ASC" %
+              ", ".join(["%s"] * len(index_typeids)),
+              tuple(index_typeids)
+              )
     region_updates = c.fetchall()
-
-    if region is not None:
-        c = connection.cursor()
-        c.execute("""
-SELECT t.typeid
-FROM ccp.invtypes t
-     LEFT JOIN (SELECT u.typeid AS typeid,
-                       MAX(u.timestamp) AS timestamp
-                FROM gmi_upload u
-                     INNER JOIN ccp.mapregions r
-                       ON u.regionid = r.regionid
-                WHERE r.regionname = %s
-                GROUP BY u.typeid) AS upload
-       ON t.typeid = upload.typeid
-WHERE t.marketgroupid IS NOT NULL
-  AND (upload.timestamp IS NULL
-       OR DATE_TRUNC('day', upload.timestamp) <
-          DATE_TRUNC('day', CURRENT_TIMESTAMP AT TIME ZONE 'GMT'))
-ORDER BY upload.timestamp IS NULL DESC,
-         upload.timestamp ASC,
-         t.typeid ASC;
-""", (region,))
-        typeids = [typeid for (typeid,) in c]
 
     return direct_to_template(request, 'gmi/autoupload.html',
                               extra_context={'tab': 'autoupload',
                                              'jsondata': json.dumps(typeids),
                                              'internal': is_internal,
-                                             'regionupdates': region_updates})
+                                             'region': region,
+                                             'regionupdates': region_updates,
+                                             'trust': igb.RequestTrust('http://www.electusmatari.com/')})
 
 ##################################################################
 # Cache file parsing

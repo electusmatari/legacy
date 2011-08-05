@@ -14,6 +14,8 @@ log = logging.getLogger('schedule')
 class Command(BaseCommand):
     def handle(self, *args, **options):
         # Taken from admin
+        transaction.enter_transaction_management()
+        transaction.managed(True)
         threads = []
         for app in settings.INSTALLED_APPS:
             try:
@@ -25,7 +27,7 @@ class Command(BaseCommand):
                 imp.find_module('schedule', app_path)
             except ImportError:
                 continue
-            sid = transaction.savepoint()
+            transaction.commit()
             try:
                 m = __import__("%s.schedule" % app, fromlist=["SCHEDULE"])
                 for name, function, delay_in_minutes in m.SCHEDULE:
@@ -45,12 +47,13 @@ class Command(BaseCommand):
                         obj.last_run = last_run
                         obj.next_run = last_run + delay
                         obj.save()
-                        transaction.savepoint_commit(sid)
+                        transaction.commit()
                         function()
                     else:
-                        transaction.savepoint_commit(sid)
+                        transaction.commit()
             except Exception as e:
-                transaction.savepoint_rollback(sid)
+                transaction.rollback()
                 log.error("Error in scheduling %s: %s" % (
                         app,
                         traceback.format_exc()))
+        transaction.leave_transaction_management()

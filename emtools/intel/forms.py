@@ -13,7 +13,10 @@ class TraceForm(forms.Form):
         message = self.cleaned_data['message'].replace("\r", "")
         match = TRACE_RX.match(message)
         if match is None:
-            raise forms.ValidationError("Malformed trace mail, please submit the full message from your agent")
+            if "in your solar system" in message:
+                raise forms.ValidationError("Sadly, we do not accept traces for targets in the current solar system")
+            else:
+                raise forms.ValidationError("Malformed trace mail, please submit the full message from your agent")
         self.cleaned_data['target'] = match.group('target')
         self.cleaned_data['agent'] = match.group('agent')
         try:

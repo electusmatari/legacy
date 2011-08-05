@@ -174,7 +174,7 @@ TYPE_DATA = [
     ("Crystalline Carbonide Armor Plate", "typename"),
     ("Deflection Shield Emitter", "typename"),
     ("Electrolytic Capacitor Unit", "typename"),
-    ("Emp Pulse Generator", "typename"),
+    ("EMP Generator", "typename"),
     ("Fernite Carbide Composite Armor Plate", "typename"),
     ("Fusion Reactor Unit", "typename"),
     ("Fusion Thruster", "typename"),
@@ -390,7 +390,7 @@ TYPE_DATA = [
     ("Supercomputers", "typename"),
     ("Synthetic Synapses", "typename"),
     ("Transcranial Microcontrollers", "typename"),
-    ("Ukomi Super Conductors", "typename"),
+    ("Ukomi Superconductors", "typename"),
     ("Vaccines", "typename"),
     ## P4
     ("Planetary Advanced Commodities (P4)", "header"),

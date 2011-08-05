@@ -1,0 +1,14 @@
+{% extends "industry/base.html" %}
+{% load em %}
+
+{% block content %}
+<h2>Build Requirements for {{typename}}</h2>
+
+{% if totalcost.note == 'Unknown' %}
+<p>We do not know how to build {{typename}}.</p>
+{% else %}
+<p>{{typename}} is acquired for {{totalcost|floatcomma}} ISK p.u. via
+{{totalcost.note}}.</p>
+{% endif %}
+
+{% endblock %}

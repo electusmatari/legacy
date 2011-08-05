@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+
+{% block title %}EM Corporate Reports{% endblock %}
+
+{% block tabs %}
+<ul class="tabs">
+<li {% ifequal tab 'balances' %}class="active"{% endifequal %}><a href="{% url corpreport-balances %}">Balances</a></li>
+<li {% ifequal tab 'locations' %}class="active"{% endifequal %}><a href="{% url corpreport-locations %}">Locations</a></li>
+<li {% ifequal tab 'categories' %}class="active"{% endifequal %}><a href="{% url corpreport-category-choose %}">Categories</a></li>
+<li {% ifequal tab 'config' %}class="active"{% endifequal %}><a href="{% url corpreport-config %}">Config</a></li>
+</ul>
+{% endblock %}
+
+{% block body %}
+{% block content %}
+{% endblock %}
+{% endblock %}

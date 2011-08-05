@@ -85,6 +85,7 @@ INSTALLED_APPS = (
     'django.contrib.sessions',
     'django.contrib.sites',
     'django.contrib.messages',
+    'django.contrib.humanize',
 
     'emtools.ccpeve',
     'emtools.emauth',
@@ -99,6 +100,8 @@ INSTALLED_APPS = (
     'emtools.fw',
     'emtools.recruitment',
     'emtools.grdpersonnel',
+    'emtools.corpreport',
+    'emtools.industry',
 )
 
 AUTH_PROFILE_MODULE = 'emauth.Profile'

@@ -1,0 +1,40 @@
+{% extends "industry/base.html" %}
+
+{% block scriptheader %}
+<link type="text/css" rel="stylesheet" href="/media/css/jquery-ui.css" />
+<script type="text/javascript" src="/media/js/jquery.js"></script>
+<script type="text/javascript" src="/media/js/jquery.ui.js"></script>
+<script type="text/javascript">
+$(function() {
+$("#searchinput").autocomplete({
+    minLength: 3,
+    source: "{% url industry-ajax-search %}",
+    focus: function( event, ui) {
+       $("#searchinput").val(ui.item.value);
+       return false;
+    },
+    select: function( event, ui) {
+       $("#searchinput").parent().submit();
+       return false;
+    }
+});
+});
+</script>
+{% endblock %}
+
+{% block content %}
+<h2>Find Build Requirements</h2>
+
+<form method="get" action="{% url industry-search %}">
+  <input id="searchinput" type="text" name="q" />
+  <input type="submit" value="Search" />
+</form>
+
+{% if type_list %}
+<ul>
+  {% for type_ in type_list %}
+  <li><a href="/industry/build/{{type_.typeName}}/">{{type_.typeName}}</a></li>
+  {% endfor %}
+</ul>
+{% endif %}
+{% endblock %}

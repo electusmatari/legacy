@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+
+{% block title %}EM Corporate Industry{% endblock %}
+
+{% block tabs %}
+<ul class="tabs">
+<li {% ifequal tab 'bpos' %}class="active"{% endifequal %}><a href="{% url industry-bpos %}">BPOs</a></li>
+<li {% ifequal tab 'build' %}class="active"{% endifequal %}><a href="{% url industry-build %}">Build</a></li>
+</ul>
+{% endblock %}
+
+{% block body %}
+{% block content %}
+{% endblock %}
+{% endblock %}

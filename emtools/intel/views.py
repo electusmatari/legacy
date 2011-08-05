@@ -41,7 +41,7 @@ def view_locators(request):
                               extra_context={'tab': 'locators',
                                              'system': system,
                                              'agent_list': agents,
-                                             'trust': igb.RequestTrust('http://www.electusmatari.com/intel/')})
+                                             'trust': igb.RequestTrust('http://www.electusmatari.com/')})
 
 @require_mybbgroup('Electus Matari')
 def view_submitpilots(request):

@@ -99,7 +99,6 @@ def systemrange(system, maxjumps):
         neighbors[fromsys].append(tosys)
     if system not in neighbors:
         return
-    results = []
     agenda = [(system, 0)]
     visited = set()
     while len(agenda) > 0:

@@ -30,6 +30,7 @@ function toggle_pause () {
     }
 }
 function status (text) {
+    $('#totaltime').html(Math.round(((typeids.length * 3)/60)+0.5));
     $("#status").html(text + " (" +
                       (origlen - typeids.length) + " / " + (origlen - 1) +
                       ")");
@@ -44,7 +45,7 @@ $(function () {
 {% endblock %}
 
 {% block content %}
-<h2>Automatic Upload</h2>
+<h2>Automatic Upload{% if region %} ({{region}}){% endif %}</h2>
 {% if not igb %}
 
 <p>This page would automatically upload index-relevant data if you
@@ -60,6 +61,17 @@ $(function () {
 
 <p>The whole process will take about <span id="totaltime">18</span>
 minutes.</p>
+
+{% if not igb.trusted %}
+<ul class="messages">
+<li class="error">This site is currently not trusted by your browser.
+  This means that you will upload all types, even if someone else has
+  uploaded them for today already.Reload this page once you trusted
+  this site to get rid of this warning.<br />
+  {{trust}}
+</li>
+</ul>
+{% endif %}
 
 <p><b>Status:</b> <span id="status">Not running</span></p>
 

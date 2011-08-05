@@ -1,0 +1,34 @@
+{% extends "corpreport/base.html" %}
+
+{% block content %}
+<h2>Report Category {{category}}</h2>
+
+{% include "paginate.html" %}
+
+<table class="data">
+  <thead>
+    <tr>
+      <th>Type Name</th>
+      <th>Group Name</th>
+      <th>Category Name</th>
+      <th>Report Category</th>
+    </tr>
+  </thead>
+  <tbody>
+  {% for cat, form in form_list %}
+  <tr class="{% cycle 'odd' 'even' %}">
+    <td>{{cat.type.typeName}}</td>
+    <td>{{cat.type.group.groupName}}</td>
+    <td>{{cat.type.group.category.categoryName}}</td>
+    <td>
+      <form method="post" action="">
+        {{form.category}}
+        <input type="hidden" name="typeID" value="{{cat.type.typeID}}" />
+        <input type="submit" value="Update" />
+      </form>
+    </td>
+  </tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% endblock %}
