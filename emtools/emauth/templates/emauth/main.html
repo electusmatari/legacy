@@ -8,17 +8,34 @@
   forums, you need to authenticate yourself as a capsuleer pilot. To
   do so, you need to supply a minimum-access <i>API key.</i></p>
 
+<p><strong><a href="https://support.eveonline.com/api/Key/Create"
+    target="_blank">Create an API key</a></strong> (new window)</p>
+
+<ul style="width: 66ex">
+  <li>Pick a <b>Name</b> of your own choosing. It's only for
+    yourself.</li>
+  <li>Change the <b>Verification Code</b> to start with the string
+    "emforum". This ensures that no other key of yours can be used to
+    authenticate here.</li>
+  <li>Select your name as the <b>Character</b>.</li>
+  <li>The <b>Type</b> should be "Character".</li>
+  <li>Leave the <b>Access Mask</b> at 0 (no accesses).</li>
+  <li>Set <b>Expires</b> to tomorrow if you like, or delete the key
+    once your are authenticated. We will not store the key and will
+    not use it anymore after you have authenticated.</li>
+</ul>
+
 <form method="post" action="">
   <fieldset style="width: 66ex">
     <legend>API key</legend>
     <table>
       <tr>
-        <td><label for="#keyID">Key ID:</label></td>
+        <td><label for="keyID">ID:</label></td>
         <td><input id="keyID" name="keyID" type="text" size="5" /></td>
       </tr>
       <tr>
-        <td><label for="#vCode" style="width: 5em; white-space: nowrap">Verification Code:</label></td>
-        <td><input id="vCode" name="vCode" type="text" size="83" /></td>
+        <td><label for="vCode" style="width: 5em; white-space: nowrap">Verification Code:</label></td>
+        <td><input id="vCode" name="vCode" type="text" size="83" autocomplete="off" /></td>
       </tr>
     </table>
   </fieldset>

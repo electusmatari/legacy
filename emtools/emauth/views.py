@@ -100,6 +100,11 @@ def main_handle_apikey(request):
     selected_charid = request.POST.get('characterID', None)
     dorename = request.POST.get('dorename', False)
     api = apiroot()
+    if vcode is not None and not vcode.startswith("emforum"):
+        messages.add_message(request, messages.ERROR,
+                             "Please change your Verification Code to "
+                             "start with the string 'emforum'")
+        return HttpResponseRedirect('/auth/')
     try:
         chars = api.account.Characters(keyID=keyid, vCode=vcode)
         chars = [(row.name, row.characterID) for row in chars.characters]
