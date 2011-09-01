@@ -4,8 +4,11 @@
 #
 # Each basket has a special "blueprint" in it, actually, a
 # blueprint/decryptor combination. Decryptor can be None for no
-# decryptor, or False for BPO.
-
+# decryptor, or False for BPO. (Or should it return tuples of
+# blueprint, item?)
+#
+# T3 also is wrong. Component reverse engineering yields a random
+# blueprint!
 
 from django.db import connection
 

@@ -1,6 +1,7 @@
 import datetime
 import imp
 import logging
+import socket
 import traceback
 
 from django.conf import settings
@@ -51,9 +52,12 @@ class Command(BaseCommand):
                         function()
                     else:
                         transaction.commit()
-            except Exception as e:
+            except socket.error as e:
                 transaction.rollback()
                 log.error("Error in scheduling %s: %s" % (
                         app,
-                        traceback.format_exc()))
+                        str(e)))
+            except Exception:
+                transaction.rollback()
+                log.exception("Error in scheduling %s" % (app,))
         transaction.leave_transaction_management()

@@ -145,15 +145,13 @@ def update_single_user2(api, mybbuser, grddetails, allies):
         info_alliance = None
         info_allianceID = None
 
-    if profile.corp != info.corporation:
-        success_reason = ("Changed corporation from %s to %s" %
-                          (profile.corp, info.corporation))
-    elif profile.alliance != info_alliance:
-        success_reason = ("Changed alliance from %s to %s" %
-                          (profile.alliance, info_alliance))
+    if profile.corp != info.corporation or profile.alliance != info_alliance:
+        success_reason = ("Changed from %s, %s to %s, %s" %
+                          (profile.corp, profile.alliance,
+                           info.corporation, info_alliance))
     else:
-        success_reason = "Corp %s, alliance %s" % (info.corporation,
-                                                   info_alliance)
+        success_reason = ("Corp %s, alliance %s" %
+                          (info.corporation, info_alliance))
 
     profile.mybb_username = mybbuser.username
     profile.name = info.characterName
@@ -192,8 +190,6 @@ def grdauth(mybbuser, grddetails):
         mybbuser.add_group('Gradient Employee')
     if 'Director' in titles or 'Shift manager' in titles:
         mybbuser.add_group('Gradient Executive')
-    # if 'Recruiter' in freeform:
-    #     mybbuser.add_group('Gradient Recruiter')
     if 'Recruiter' in titles or 'Director' in titles or 'Shift manager' in titles:
         mybbuser.add_group('Gradient Personnel Manager')
 
@@ -269,6 +265,17 @@ def mybb_setavatar(c, uid, url, x, y):
               "    avatartype = 'remote' "
               "WHERE uid = %s",
               (url, "%s|%s" % (x, y), uid))
+
+def mybb_setusername(c, uid, name):
+    c.execute("SELECT uid FROM mybb_users WHERE username = %s",
+              (name,))
+    if c.rowcount != 0:
+        return False
+    c.execute("UPDATE mybb_users "
+              "SET username = %s "
+              "WHERE uid = %s",
+              (name, uid))
+    return True
 
 class MyBBUser(object):
     DEFAULTGROUP = 2

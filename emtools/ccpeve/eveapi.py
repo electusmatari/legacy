@@ -25,6 +25,26 @@
 # OTHER DEALINGS IN THE SOFTWARE
 #
 #-----------------------------------------------------------------------------
+# Version: 1.1.7 - 1 September 2011
+# - auth() method updated to work with the new authentication scheme
+#
+# Version: 1.1.6 - 27 May 2011
+# - Now supports composite keys for IndexRowsets.
+# - Fixed calls not working if a path was specified in the root url.
+#
+# Version: 1.1.5 - 27 Januari 2011
+# - Now supports (and defaults to) HTTPS. Non-SSL proxies will still work by
+#   explicitly specifying http:// in the url.
+#
+# Version: 1.1.4 - 1 December 2010
+# - Empty explicit CDATA tags are now properly handled.
+# - _autocast now receives the name of the variable it's trying to typecast,
+#   enabling custom/future casting functions to make smarter decisions.
+#
+# Version: 1.1.3 - 6 November 2010
+# - Added support for anonymous CDATA inside row tags. This makes the body of
+#   mails in the rows of char/MailBodies available through the .data attribute.
+#
 # Version: 1.1.2 - 2 July 2010
 # - Fixed __str__ on row objects to work properly with unicode strings.
 #
@@ -80,6 +100,7 @@
 #-----------------------------------------------------------------------------
 
 import httplib
+import urlparse
 import urllib
 import copy
 
@@ -97,7 +118,7 @@ class Error(StandardError):
 		self.args = (message.rstrip("."),)
 
 
-def EVEAPIConnection(url="api.eve-online.com", cacheHandler=None, proxy=None):
+def EVEAPIConnection(url="api.eveonline.com", cacheHandler=None, proxy=None):
 	# Creates an API object through which you can call remote functions.
 	#
 	# The following optional arguments may be provided:
@@ -114,7 +135,7 @@ def EVEAPIConnection(url="api.eve-online.com", cacheHandler=None, proxy=None):
 	#          Called when eveapi wants to fetch a document.
 	#          host is the address of the server, path is the full path to
 	#          the requested document, and params is a dict containing the
-	#          parameters passed to this api call (userID, apiKey etc).
+	#          parameters passed to this api call (keyID, vCode, etc).
 	#          The method MUST return one of the following types:
 	#
 	#           None - if your cache did not contain this entry
@@ -133,17 +154,15 @@ def EVEAPIConnection(url="api.eve-online.com", cacheHandler=None, proxy=None):
 	#          this object.
 	#
 
-	if url.lower().startswith("http://"):
-		url = url[7:]
-
-	if "/" in url:
-		url, path = url.split("/", 1)
-	else:
-		path = ""
-
-	ctx = _RootContext(None, path, {}, {})
+	if not url.startswith("http"):
+		url = "https://" + url
+	p = urlparse.urlparse(url, "https")
+	if p.path and p.path[-1] == "/":
+		p.path = p.path[:-1]
+	ctx = _RootContext(None, p.path, {}, {})
 	ctx._handler = cacheHandler
-	ctx._host = url
+	ctx._scheme = p.scheme
+	ctx._host = p.netloc
 	ctx._proxy = proxy or globals()["proxy"]
 	return ctx
 
@@ -251,12 +270,10 @@ class _AuthContext(_Context):
 
 class _RootContext(_Context):
 
-	def auth(self, userID=None, apiKey=None):
-		# returns a copy of this object but for every call made through it, the
-		# userID and apiKey will be added to the API request.
-		if userID and apiKey:
-			return _AuthContext(self._root, self._path, self.parameters, {"userID":userID, "apiKey":apiKey})
-		raise ValueError("Must specify userID and apiKey")
+	def auth(self, **kw):
+		if len(kw) == 2 and (("keyID" in kw and "vCode" in kw) or ("userID" in kw and "apiKey" in kw)):
+			return _AuthContext(self._root, self._path, self.parameters, kw)
+		raise ValueError("Must specify keyID and vCode")
 
 	def setcachehandler(self, handler):
 		self._root._handler = handler
@@ -278,18 +295,23 @@ class _RootContext(_Context):
 			response = None
 
 		if response is None:
+			if self._scheme == "https":
+				connectionclass = httplib.HTTPSConnection
+			else:
+				connectionclass = httplib.HTTPConnection
+
 			if self._proxy is None:
-				http = httplib.HTTPConnection(self._host)
+				http = connectionclass(self._host)
 				if kw:
 					http.request("POST", path, urllib.urlencode(kw), {"Content-type": "application/x-www-form-urlencoded"})
 				else:
 					http.request("GET", path)
 			else:
-				http = httplib.HTTPConnection(*self._proxy)
+				http = connectionclass(*self._proxy)
 				if kw:
-					http.request("POST", 'http://'+self._host+path, urllib.urlencode(kw), {"Content-type": "application/x-www-form-urlencoded"})
+					http.request("POST", 'https://'+self._host+path, urllib.urlencode(kw), {"Content-type": "application/x-www-form-urlencoded"})
 				else:
-					http.request("GET", 'http://'+self._host+path)
+					http.request("GET", 'https://'+self._host+path)
 
 			response = http.getresponse()
 			if response.status != 200:
@@ -306,45 +328,61 @@ class _RootContext(_Context):
 		else:
 			store = False
 
-		return _ParseXML(response, True, store and (lambda obj: cache.store(self._host, path, kw, response, obj)))
+		retrieve_fallback = cache and getattr(cache, "retrieve_fallback", False)
+		if retrieve_fallback:
+			# implementor is handling fallbacks...
+			try:
+				return _ParseXML(response, True, store and (lambda obj: cache.store(self._host, path, kw, response, obj)))
+			except Error, reason:
+				response = retrieve_fallback(self._host, path, kw, reason=e)
+				if response is not None:
+					return response
+				raise
+		else:
+			# implementor is not handling fallbacks...
+			return _ParseXML(response, True, store and (lambda obj: cache.store(self._host, path, kw, response, obj)))
 
 #-----------------------------------------------------------------------------
 # XML Parser
 #-----------------------------------------------------------------------------
 
-def _autocast(s):
+def _autocast(key, value):
 	# attempts to cast an XML string to the most probable type.
 	try:
-		if s.strip("-").isdigit():
-			return int(s)
+		if value.strip("-").isdigit():
+			return int(value)
 	except ValueError:
 		pass
 
 	try:
-		return float(s)
+		return float(value)
 	except ValueError:
 		pass
 
-	if len(s) == 19 and s[10] == ' ':
+	if len(value) == 19 and value[10] == ' ':
 		# it could be a date string
 		try:
-			return max(0, int(timegm(strptime(s, "%Y-%m-%d %H:%M:%S"))))
+			return max(0, int(timegm(strptime(value, "%Y-%m-%d %H:%M:%S"))))
 		except OverflowError:
 			pass
 		except ValueError:
 			pass
 
 	# couldn't cast. return string unchanged.
-	return s
+	return value
+
 
 
 class _Parser(object):
 
 	def Parse(self, data, isStream=False):
 		self.container = self.root = None
+		self._cdata = False
 		p = expat.ParserCreate()
 		p.StartElementHandler = self.tag_start
 		p.CharacterDataHandler = self.tag_cdata
+		p.StartCdataSectionHandler = self.tag_cdatasection_enter
+		p.EndCdataSectionHandler = self.tag_cdatasection_exit
 		p.EndElementHandler = self.tag_end
 		p.ordered_attributes = True
 		p.buffer_text = True
@@ -354,7 +392,20 @@ class _Parser(object):
 		else:
 			p.Parse(data, True)
 		return self.root
-		
+
+
+	def tag_cdatasection_enter(self):
+		# encountered an explicit CDATA tag.
+		self._cdata = True
+
+	def tag_cdatasection_exit(self):
+		if self._cdata:
+			# explicit CDATA without actual data. expat doesn't seem
+			# to trigger an event for this case, so do it manually.
+			# (_cdata is set False by this call)
+			self.tag_cdata("")
+		else:
+			self._cdata = False
 
 	def tag_start(self, name, attributes):
 		# <hack>
@@ -369,7 +420,7 @@ class _Parser(object):
 			# for rowsets, use the given name
 			try:
 				columns = attributes[attributes.index('columns')+1].split(",")
-                                columns = [s.strip() for s in columns]
+                                columns = [col.strip() for col in columns]
 			except ValueError:
 				# rowset did not have columns tag set (this is a bug in API)
 				# columns will be extracted from first row instead.
@@ -402,7 +453,7 @@ class _Parser(object):
 			if not self.container._cols:
 				self.container._cols = attributes[0::2]
 
-			self.container.append([_autocast(attributes[i]) for i in range(1, len(attributes), 2)])
+			self.container.append([_autocast(attributes[i], attributes[i+1]) for i in xrange(0, len(attributes), 2)])
 			this._isrow = True
 			this._attributes = this._attributes2 = None
 		else:
@@ -414,13 +465,26 @@ class _Parser(object):
 
 
 	def tag_cdata(self, data):
-		if data == "\r\n" or data.strip() != data:
-			return
+		if self._cdata:
+			# unset cdata flag to indicate it's been handled.
+			self._cdata = False
+		else:
+			if data in ("\r\n", "\n") or data.strip() != data:
+				return
 
 		this = self.container
-		data = _autocast(data)
+		data = _autocast(this._name, data)
 
-		if this._attributes:
+		if this._isrow:
+			# sigh. anonymous data inside rows makes Entity cry.
+			# for the love of Jove, CCP, learn how to use rowsets.
+			parent = this.__parent
+			_row = parent._rows[-1]
+			_row.append(data)
+			if len(parent._cols) < len(_row):
+				parent._cols.append("data")
+
+		elif this._attributes:
 			# this tag has attributes, so we can't simply assign the cdata
 			# as an attribute to the parent tag, as we'll lose the current
 			# tag's attributes then. instead, we'll assign the data as
@@ -431,7 +495,6 @@ class _Parser(object):
 			# we won't be doing anything with this actual tag so we can just
 			# bind it to its parent (done by __tag_end)
 			setattr(this.__parent, this._name, data)
-
 
 	def tag_end(self, name):
 		this = self.container
@@ -476,7 +539,7 @@ class _Parser(object):
 			# multiples of some tag or attribute. Code below handles this case.
 			elif isinstance(sibling, Rowset):
 				# its doppelganger is a rowset, append this as a row to that.
-				row = [_autocast(attributes[i]) for i in range(1, len(attributes), 2)]
+				row = [_autocast(attributes[i], attributes[i+1]) for i in xrange(0, len(attributes), 2)]
 				row.extend([getattr(this, col) for col in attributes2])
 				sibling.append(row)
 			elif isinstance(sibling, Element):
@@ -485,11 +548,11 @@ class _Parser(object):
 				# into a Rowset, adding the sibling element and this one.
 				rs = Rowset()
 				rs.__catch = rs._name = this._name
-				row = [_autocast(attributes[i]) for i in range(1, len(attributes), 2)]+[getattr(this, col) for col in attributes2]
+				row = [_autocast(attributes[i], attributes[i+1]) for i in xrange(0, len(attributes), 2)]+[getattr(this, col) for col in attributes2]
 				rs.append(row)
-				row = [getattr(sibling, attributes[i]) for i in range(0, len(attributes), 2)]+[getattr(sibling, col) for col in attributes2]
+				row = [getattr(sibling, attributes[i]) for i in xrange(0, len(attributes), 2)]+[getattr(sibling, col) for col in attributes2]
 				rs.append(row)
-				rs._cols = [attributes[i] for i in range(0, len(attributes), 2)]+[col for col in attributes2]
+				rs._cols = [attributes[i] for i in xrange(0, len(attributes), 2)]+[col for col in attributes2]
 				setattr(self.container, this._name, rs)
 			else:
 				# something else must have set this attribute already.
@@ -497,8 +560,8 @@ class _Parser(object):
 				pass
 
 		# Now fix up the attributes and be done with it.
-		for i in range(1, len(attributes), 2):
-			this.__dict__[attributes[i-1]] = _autocast(attributes[i])
+		for i in xrange(0, len(attributes), 2):
+			this.__dict__[attributes[i]] = _autocast(attributes[i], attributes[i+1])
 
 		return
 
@@ -696,13 +759,22 @@ class IndexRowset(Rowset):
 
 	def __init__(self, cols=None, rows=None, key=None):
 		try:
-			self._ki = ki = cols.index(key)
+			if "," in key:
+				self._ki = ki = [cols.index(k) for k in key.split(",")]
+				self.composite = True
+			else:
+				self._ki = ki = cols.index(key)
+				self.composite = False
 		except IndexError:
 			raise ValueError("Rowset has no column %s" % key)
 
 		Rowset.__init__(self, cols, rows)
 		self._key = key
-		self._items = dict((row[ki], row) for row in self._rows)
+
+		if self.composite:
+			self._items = dict((tuple([row[k] for k in ki]), row) for row in self._rows)
+		else:
+			self._items = dict((row[ki], row) for row in self._rows)
 
 	def __getitem__(self, ix):
 		if type(ix) is slice:
@@ -711,7 +783,10 @@ class IndexRowset(Rowset):
 
 	def append(self, row):
 		Rowset.append(self, row)
-		self._items[row[self._ki]] = row
+		if self.composite:
+			self._items[tuple([row[k] for k in self._ki])] = row
+		else:
+			self._items[row[self._ki]] = row
 
 	def __getstate__(self):
 		return (Rowset.__getstate__(self), self._items, self._ki)
