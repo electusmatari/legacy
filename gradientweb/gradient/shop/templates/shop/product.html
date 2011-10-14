@@ -1,0 +1,63 @@
+{% load formatting %}
+<div class="product">
+  <img class="icon"
+       src="http://image.eveonline.com/Type/{{product.typeid}}_64.png" />
+  <span class="productname">
+    {{product.typename}}
+    <a href="http://wiki.eveonline.com/en/wiki/{{product.typename|itemdb}}">
+      <img src="/media/img/info.png" />
+    </a>
+  </span><br />
+  <span class="description">{{product.description|safe|truncatewords_html:32}}</span><br />
+{% with product.grdprice as price %}
+{% with product.marketprice as marketprice %}
+<table class="priceinfo">
+  <tr>
+    <th>Gradient price:</th>
+    <td class="numeric">{{price|floatcomma}} ISK</td>
+    <td>
+{% if shopuser.discount == 'gradient' %}
+  <em>(Gradient Employee Price)</em>
+{% endif %}
+{% if shopuser.discount == 'ally' %}
+  <em>(Ally Price)</em>
+{% endif %}
+{% if shopuser.discount == 'enemy' %}
+  <em>(Favorite Hostile Price)</em>
+{% endif %}
+    </td>
+  </tr>
+  {% if marketprice %}
+  <tr>
+    <th>Market price:</th>
+    <td class="numeric">{{marketprice|floatcomma}} ISK</td>
+    <td></td>
+  </tr>
+  {% if marketprice > price %}
+  <tr>
+    <th>You save:</th>
+    <td class="numeric">{{product.saving|floatcomma}} ISK</td>
+    <td>({{product.saving_percentage}}%)</td>
+  </tr>
+</table>
+  {% else %}
+</table>
+<strong>Gradient can not supply this product cheaper than the open
+  market&mdash;we recommend you acquire it from there for best
+  satisfaction.</strong>
+  {% endif %}
+  {% else %}
+</table>
+  {% endif %}
+
+<div class="orderlink">
+<form method="post" action="">
+  <input type="hidden" name="next" value="{{request.get_full_path}}" />
+  <input type="hidden" name="typeid" value="{{product.typeid}}" />
+  Qty:<input type="input" size="2" name="quantity" value="1" />
+  <input type="submit" value="Add to Cart" />
+</form>
+</div>
+{% endwith %}
+{% endwith %}
+</div>

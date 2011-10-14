@@ -1,0 +1,58 @@
+{% extends "shop/base-handle.html" %}
+
+{% block appheader %}
+{% endblock %}
+
+{% block appcontent %}
+<h1>Messages with {{charactername}}</h1>
+
+{% if message_list %}
+
+{% include "paginator.html" %}
+
+<table class="messages">
+{% for message in message_list %}
+<tr>
+  <td class="poster">
+    <img src="http://image.eveonline.com/Character/{{message.authorid}}_64.jpg"
+         /><br />
+    {{message.authorname}}<br />
+    <span style="font-size: small">{{message.created|date:"Y-m-d H:i"}}</span>
+  </td>
+{% if not characterid %}
+  <td class="poster">
+{% if message.recipientid %}
+    <img src="http://image.eveonline.com/Character/{{message.recipientid}}_64.jpg"
+         /><br />
+    {{message.recipientname}}<br />
+{% endif %}
+  </td>
+{% endif %}
+  <td>
+    {{message.text|linebreaksbr}}
+{% if not characterid %}
+<div style="text-align: right; margin-top: 1em;">
+    <a href="/shop/handle/messages/{{message.characterid}}/">Reply</a>
+</div>
+{% endif %}
+  </td>
+</tr>
+{% endfor %}
+</table>
+
+{% else %}
+
+<p>No messages.</p>
+
+{% endif %}
+
+{% if characterid %}
+<h2>Reply</h2>
+
+<form method="post" action="">
+  <textarea name="text" rows="5" cols="40"></textarea><br />
+  <input type="submit" value="Post" />
+</form>
+
+{% endif %}
+{% endblock %}

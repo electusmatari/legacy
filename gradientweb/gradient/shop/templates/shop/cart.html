@@ -1,0 +1,98 @@
+{% extends "shop/base-rhs.html" %}
+{% load formatting %}
+
+{% block appheader %}
+<style type="text/css">
+#content h1 {
+  margin-bottom: 1em;
+}
+#content h2 {
+  margin: 1em 0;
+}
+
+table.salescenter td {
+  vertical-align: top;
+}
+table.salescenter .salescentername {
+  font-weight: bold;
+}
+</style>
+{% endblock %}
+
+{% block appcontent %}
+<h1>Shopping Cart</h1>
+
+{% if cart_products %}
+
+<form method="post" action="">
+<input type="hidden" name="action" value="change_quantities" />
+<table class="data">
+  <thead>
+    <tr>
+      <th>Product</th>
+      <th>Quantity</th>
+      <th>Price p.u.</th>
+      <th>Price</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for product, price, qty, rowprice in cart_products %}
+    <tr class="{% cycle odd,even %}">
+      <td>{{product.typename}}</td>
+      <td class="numeric">
+        <input type="text" name="qty{{product.typeid}}"
+               size="3" value="{{qty}}" />
+      </td>
+      <td class="numeric">{{price|floatcomma}}</td>
+      <td class="numeric">{{rowprice|floatcomma}}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+  <tfoot>
+    <tr>
+      <th colspan="3">Total:</th>
+      <td class="numeric">{{total|floatcomma}}</td>
+    </tr>
+  </tfoot>
+</table>
+<input type="submit" value="Change Quantities" />
+</form>
+
+<h2>Sales Center</h2>
+
+<p>Please choose where you would like to receive your products. If in
+  doubt, use Pator&mdash;other production centers will usually have
+  longer delays due to lower stocks.</p>
+
+<form method="post" action="">
+<input type="hidden" name="action" value="confirm_order" />
+
+<table class="salescenter">
+{% for sp in shopinfo.salespoint_list %}
+<tr>
+  <td>
+    <input id="sp{{sp.id}}" type="radio" name="salespoint"
+           {% if sp.name == 'Pator' %}checked="true"{% endif %}
+           value="{{sp.id}}">
+  </td>
+  <td>
+    <label for="sp{{sp.id}}">
+      <span class="salescentername">{{sp.name}}</span><br />
+      {{sp.description}}
+    </label>
+  </td>
+</tr>
+{% endfor %}
+</table>
+<input type="submit" value="Confirm Order" />
+</form>
+
+{% else %}
+
+<p>You have not added any products to your cart yet.
+  Please <a href="/shop/">find some items</a> first and then check
+  out.</p>
+
+{% endif %}
+
+{% endblock %}

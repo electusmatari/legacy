@@ -1,0 +1,42 @@
+{% extends "gts/base.html" %}
+
+{% block gtscontent %}
+<h1>Documentation</h1>
+
+<p>A <em>ticket system</em> is a collaborative task list. It supports
+  a group of people to keep track of tasks that need to be done, and
+  to assign those tasks to different people to handle them. The
+  Gradient Ticket System (GTS) is a very basic ticket system written
+  specifically for Gradient.</p>
+
+<h2>Anatomy of a Ticket</h2>
+
+<p>A <em>ticket</em> is a single task. Think of it as a mail or
+  something you got that says "please do this". By default, a ticket
+  is in the state <em>open</em> - this means that no one said they
+  want to handle it yet. When someone <em>accepts</em> the ticket, the
+  ticket is <em>assigned</em> to them, and is now in the state <em>in
+  progress</em> - someone is handling it. When the owner (another name
+  for the person who got the ticket assigned to themselves) is done
+  handling the ticket, he can <em>close</em> the ticket. That's the
+  basic life cycle of the ticket.</p>
+
+<p>To make large number of tickets a bit more manageable, a ticket has
+  a <em>type.</em> For example, if you want to do research, you look
+  for tickets of the "research" type, and won't see other tickets.</p>
+
+<h2>Typical Workflow</h2>
+
+<p>A typical day working with the ticket system begins in the list
+  view. You look for "open" tickets that you might want to handle.
+  Having found some, you accept those.</p>
+
+<p>Next, you look at tickets "in progress" and assigned to yourself.
+  These are the tasks you need to do. Some of those tickets you handle
+  and close. Some you feel you are not up for, so you either ignore
+  them for now, or you can re-open them so that others can take care
+  of them.</p>
+
+<p>Finally, you can create new tickets for other tasks that need
+  handling.</p>
+{% endblock %}

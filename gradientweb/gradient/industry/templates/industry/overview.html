@@ -1,0 +1,73 @@
+{% extends "industry/base.html" %}
+{% load formatting %}
+
+{% block scriptheader %}
+{% include "tablesorter.html" %}
+<style type="text/css">
+.open {
+  background: #FF9F9F;
+}
+.mine {
+  background: #9FFF9F;
+}
+</style>
+{% endblock %}
+
+{% block appcontent %}
+<h2>Gradient Industry Page</h2>
+
+<p>The following are orders the corporation would like to have active
+  at any given time. If an order is not taken by another pilot yet,
+  maybe it would be something for you to take up?</p>
+
+{% for stationname, order_list in station_list %}
+<h3>{{stationname}}</h3>
+
+<table class="data sortable">
+  <thead>
+    <tr>
+      <th>Typename</th>
+      <th>Type</th>
+      <th>Comment</th>
+      <th class="{sorter: 'number'}">Quantity</th>
+      <th>Pilot</th>
+      <th class="{sorter: false}"></th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for order in order_list %}
+    <tr class="{% cycle odd,even %}">
+      <td>{{order.typename}}</td>
+      <td>{{order.ordertype}}</td>
+      <td>{{order.comment}}</td>
+      <td class="numeric">{{order.quantity|intcomma}}</td>
+      <td{% if not order.charactername %} class="open"{% endif %}
+         {% if order.characterid == user.profile.characterid %} class="mine"{% endif %}
+         >{{order.charactername}}</td>
+      <td>
+        {% if order.characterid == user.profile.characterid %}
+        <form method="post" action="">
+          <input type="hidden" name="wmoid" value="{{order.id}}" />
+          <input type="hidden" name="action" value="drop" />
+          <input type="submit" value="Relinquish" />
+        </form>
+        <form method="get" action="/industry/marketorders/{{order.id}}/edit/">
+          <input type="submit" value="Edit" />
+        </form>
+        {% else %}
+        {% if not order.characterid %}
+        <form method="post" action="">
+          <input type="hidden" name="wmoid" value="{{order.id}}" />
+          <input type="hidden" name="action" value="accept" />
+          <input type="submit" value="Accept" />
+        </form>
+        {% endif %}
+        {% endif %}
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+{% endfor %}
+{% endblock %}

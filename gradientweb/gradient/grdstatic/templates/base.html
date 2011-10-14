@@ -1,0 +1,47 @@
+<?xml version="1.0"e encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+                      "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>{% block pagetitle %}{% endblock %}</title>
+<link rel="icon" type="image/png" href="http://gradient.electusmatari.com/favicon.ico" />
+<link rel="stylesheet" href="/media/css/gradient.css" type="text/css" />
+{% block header %}{% endblock %}
+
+<body>
+<div id="header">
+<h1>{% block title %}{% endblock %}</h1>
+{% block subtitle %}{% endblock %}
+</div>
+
+<div id="menu">
+<ul>
+  <li{% block aboutclass %}{% endblock %}><a href="/">About</a></li>
+  <li{% block shopclass %}{% endblock %}><a href="/staticshop/">Shop</a></li>
+  <li{% block indexclass %}{% endblock %}><a href="/gmi/">Index</a></li>
+  <li{% block recruitmentclass %}{% endblock %}><a href="/recruitment/">Recruitment</a></li>
+  <li{% block employeesclass %}{% endblock %}><a href="/employees/">Employees</a></li>
+</ul>
+</div>
+
+{% if messages %}
+<div id="messages">
+  <ul class="messages">
+    {% for message in messages %}
+    <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+    {% endfor %}
+  </ul>
+</div>
+{% endif %}
+
+<div id="content">
+{% block content %}{% endblock %}
+<div style="clear: both"></div>
+</div>
+
+<div id="footer">
+  <a href="http://www.electusmatari.com/">Electus Matari</li>
+</div>
+
+</body> </html>

@@ -1,0 +1,475 @@
+import datetime
+import json
+
+from django.contrib import messages
+from django.db import connection
+from django.http import HttpResponse, HttpResponseRedirect
+from django.shortcuts import get_object_or_404
+from django.views.generic.simple import direct_to_template
+
+from gradient.decorators import require_gradient
+from gradient.rc.models import Change
+from gradient.industry.models import PriceList, BlueprintOriginal
+from gradient.industry.models import Stock, StockLevel
+from gradient.industry.models import MarketOrder, WantedMarketOrder
+from gradient.industry.models import LastUpdate, PublicMarketOrder
+from gradient.industry.dbutils import get_typeid, get_typename, get_itemname
+from gradient.industry.dbutils import get_membername, get_itemid
+from gradient.industry.utils import last_price, get_component_list
+from gradient.industry.forms import WantedMarketOrderForm, StockLevelForm
+from gradient.industry.forms import BlueprintOriginalForm
+
+@require_gradient
+def overview(request):
+    if request.method == 'POST':
+        return overview_post(request)
+    station_dict = {}
+    for wmo in WantedMarketOrder.objects.filter(forcorp=True):
+        station_dict.setdefault(wmo.stationname, [])
+        station_dict[wmo.stationname].append(wmo)
+    return direct_to_template(
+        request, 'industry/overview.html',
+        extra_context={'station_list': sorted(station_dict.items())})
+
+def overview_post(request):
+    action = request.POST.get('action')
+    wmo = get_object(WantedMarketOrder, pk=request.POST.get('wmoid'))
+    if wmo is None:
+        messages.add_message(request, messages.ERROR,
+                             'Bad wmoid, stop tampering')
+    elif action == 'drop':
+        if wmo.characterid == request.user.profile.characterid:
+            wmo.characterid = None
+            wmo.charactername = None
+            wmo.save()
+            messages.add_message(request, messages.SUCCESS,
+                                 'You relinquished the order for %s' %
+                                 wmo.typename)
+            if wmo.forcorp:
+                Change.objects.create(app='industry',
+                                      category='order',
+                                      text=('%s stopped handling the orders '
+                                            'for %s at %s' %
+                                            (request.user.profile.name,
+                                             wmo.typename,
+                                             wmo.stationname)))
+        else:
+            messages.add_message(request, messages.ERROR,
+                                 "That is not your order")
+    elif action == 'accept':
+        if wmo.characterid is None:
+            wmo.characterid = request.user.profile.characterid
+            wmo.charactername = request.user.profile.name
+            wmo.save()
+            messages.add_message(request, messages.SUCCESS,
+                                 'You are now handling the the order for %s' %
+                                 wmo.typename)
+            if wmo.forcorp:
+                Change.objects.create(app='industry',
+                                      category='order',
+                                      text=('%s is now handling the orders '
+                                            'for %s at %s' %
+                                            (request.user.profile.name,
+                                             wmo.typename,
+                                             wmo.stationname)))
+        else:
+            messages.add_message(request, messages.ERROR,
+                                 "That order is already taken")
+    return HttpResponseRedirect('/industry/')
+
+@require_gradient
+def prices_view(request):
+    lu = LastUpdate.objects.get(name='pricelist').timestamp
+    prices = []
+    for price in PriceList.objects.all():
+        prices.append({'name': price.typename,
+                       'type': price.typename,
+                       'value': price.productioncost * price.safetymargin})
+    return direct_to_template(request, 'industry/prices.html',
+                              extra_context={'jsondata': json.dumps(prices),
+                                             'lastupdate': lu})
+
+@require_gradient
+def build_view(request, typename):
+    component_list = get_component_list(typename)
+    return direct_to_template(request, 'industry/component_list.html',
+                              extra_context={'typename': typename,
+                                             'component_list': component_list})
+
+@require_gradient
+def marketorders_view(request):
+    lu = LastUpdate.objects.get(name='marketorders').timestamp
+    order_set = MarketOrder.objects.all()
+    wanted_set = WantedMarketOrder.objects.all()
+    pilot_name = None
+    if request.GET.get('all') is None:
+        pilot_name = request.user.profile.name
+        order_set = order_set.filter(
+            characterid=request.user.profile.characterid)
+        wanted_set = wanted_set.filter(
+            characterid=request.user.profile.characterid)
+    order_dict = {}
+    for order in order_set:
+        order.station = get_itemname(order.stationid)
+        order.typename = get_typename(order.typeid)
+        ordertype = order.ordertype
+        order_dict.setdefault(order.station, {})
+        order_dict[order.station].setdefault(ordertype, [])
+        order_dict[order.station][ordertype].append(order)
+        if pilot_name is None:
+            order.pilotname = get_membername(order.characterid)
+    for wanted in wanted_set:
+        station = get_itemname(wanted.stationid)
+        typename = get_typename(wanted.typeid)
+        ordertype = wanted.ordertype
+        order_dict.setdefault(station, {})
+        order_dict[station].setdefault(ordertype, [])
+        if wanted.typeid not in [order.typeid
+                                 for order in order_dict[station][ordertype]]:
+            try:
+                pl = PriceList.objects.get(typeid=wanted.typeid)
+            except PriceList.DoesNotExist:
+                productioncost = 0.0
+            else:
+                productioncost = pl.productioncost * pl.safetymargin
+
+            price = last_price(ordertype,
+                               wanted.stationid,
+                               wanted.typeid)
+            if ordertype == 'sell':
+                if price == 0:
+                    profitmargin = 0
+                else:
+                    profitmargin = 1 - (productioncost / price)
+                profitperitem = price - productioncost
+            else:
+                if price == 0:
+                    profitmargin = 0
+                else:
+                    profitmargin = (productioncost - price) / price
+                profitperitem = productioncost - price
+            order_dict[station][ordertype].append(
+                KeyValue(stationid=wanted.stationid,
+                         stationname=station,
+                         typeid=wanted.typeid,
+                         typename=typename,
+                         ordertype=ordertype,
+                         expires=datetime.datetime(2000, 1, 1),
+                         volremaining=0,
+                         price=price,
+                         productioncost=productioncost,
+                         salesperday=0.0,
+                         trend=0.0,
+                         expiredays=0,
+                         profitmargin=profitmargin,
+                         profitperitem=profitperitem,
+                         daysremaining=0,
+                         profitperday=0,
+                         ))
+
+    order_list = []
+    for station, otypes in order_dict.items():
+        newotypes = {}
+        for ordertype, orders in otypes.items():
+            newotypes[ordertype] = sorted(orders, key=lambda o: o.typename)
+        order_list.append((station, newotypes))
+    return direct_to_template(
+        request, 'industry/marketorders.html',
+        extra_context={'pilot_name': pilot_name,
+                       'order_list': order_list,
+                       'lastupdate': lu})
+
+@require_gradient
+def marketorders_edit(request, orderid=None):
+    if orderid is None:
+        instance = None
+        forcorp = False
+    else:
+        instance = get_object_or_404(WantedMarketOrder, pk=orderid)
+        forcorp = instance.forcorp
+    if request.method == 'POST':
+        form = WantedMarketOrderForm(request.POST, instance=instance)
+        if form.is_valid():
+            wmo = form.save(commit=False)
+            wmo.characterid = request.user.profile.characterid
+            wmo.charactername = request.user.profile.name
+            wmo.stationid = get_itemid(wmo.stationname)
+            wmo.typeid = get_typeid(wmo.typename)
+            wmo.save()
+            messages.add_message(request, messages.SUCCESS,
+                                 'Order requests updated')
+            if wmo.forcorp or forcorp:
+                Change.objects.create(app='industry',
+                                      category='order',
+                                      text=('%s edited the order for '
+                                            '%s at %s' %
+                                            (request.user.profile.name,
+                                             wmo.typename,
+                                             wmo.stationname)))
+            return HttpResponseRedirect('/industry/marketorders/config/')
+    else:
+        form = WantedMarketOrderForm(instance=instance)
+    return direct_to_template(request, 'industry/marketconfig_edit.html',
+                              extra_context={'form': form,
+                                             'instance': instance})
+
+@require_gradient
+def marketorders_delete(request, orderid):
+    instance = get_object_or_404(WantedMarketOrder, pk=orderid)
+    if request.method == 'POST':
+        if instance.forcorp:
+            Change.objects.create(app='industry',
+                                  category='order',
+                                  text=('%s deleted the order for '
+                                        '%s at %s' %
+                                        (request.user.profile.name,
+                                         instance.typename,
+                                         instance.stationname)))
+        instance.delete()
+        messages.add_message(request, messages.SUCCESS,
+                             'Order request deleted')
+        return HttpResponseRedirect('/industry/marketorders/config/')
+    else:
+        return direct_to_template(request, 'industry/marketconfig_delete.html',
+                                  extra_context={'instance': instance})
+
+@require_gradient
+def config_view(request):
+    wmo_list = WantedMarketOrder.objects.filter(
+        characterid=request.user.profile.characterid,
+        forcorp=False)
+    return direct_to_template(request, 'industry/config.html',
+                              extra_context={'wanted_list': wmo_list})
+
+@require_gradient
+def stocks_view(request, watched=False):
+    lu = LastUpdate.objects.get(name='stocks').timestamp
+    stock_dict = {}
+    if watched:
+        qs = request.user.stocklevel_set.all()
+    else:
+        qs = StockLevel.objects.all()
+    for stock in qs:
+        station = get_itemname(stock.stationid)
+        stock_dict.setdefault(station, [])
+        stock_dict[station].append(stock)
+    return direct_to_template(request, 'industry/stocks.html',
+                              extra_context={'lastupdate': lu,
+                                             'watched': watched,
+                                             'station_list': sorted(stock_dict.items())})
+
+@require_gradient
+def stocks_edit(request, stockid=None):
+    if stockid is None:
+        instance = None
+        oldhigh = None
+    else:
+        instance = get_object_or_404(StockLevel, pk=stockid)
+        oldhigh = instance.high
+    if request.method == 'POST':
+        form = StockLevelForm(request.POST, instance=instance)
+        if form.is_valid():
+            sl = form.save(commit=False)
+            sl.stationid = get_itemid(sl.stationname)
+            sl.typeid = get_typeid(sl.typename)
+            sl.save()
+            try:
+                st = Stock.objects.get(typeid=sl.typeid,
+                                       stationid=sl.stationid)
+            except Stock.DoesNotExist:
+                pass
+            else:
+                st.level = sl
+                st.save()
+            Change.objects.create(app='industry',
+                                  category='stocks',
+                                  text=('%s updated the stock level for %s '
+                                        'at %s from %s to %s' %
+                                        (request.user.profile.name,
+                                         sl.typename,
+                                         sl.stationname,
+                                         oldhigh,
+                                         sl.high)))
+            messages.add_message(request, messages.SUCCESS,
+                                 'Stock level updated')
+            return HttpResponseRedirect('/industry/stocks/')
+    else:
+        form = StockLevelForm(instance=instance)
+    return direct_to_template(request, 'industry/stocks_edit.html',
+                              extra_context={'form': form,
+                                             'instance': instance})
+
+@require_gradient
+def stocks_delete(request, stockid):
+    instance = get_object_or_404(StockLevel, pk=stockid)
+    if request.method == 'POST':
+        Change.objects.create(app='industry',
+                              category='stocks',
+                              text=('%s deleted the stock level for %s '
+                                    'at %s' %
+                                    (request.user.profile.name,
+                                     instance.typename,
+                                     instance.stationname)))
+        instance.level = None
+        instance.price = None
+        instance.delete()
+        messages.add_message(request, messages.SUCCESS,
+                             'Stock level request deleted')
+        return HttpResponseRedirect('/industry/stocks/')
+    else:
+        return direct_to_template(request, 'industry/stocks_delete.html',
+                                  extra_context={'instance': instance})
+
+@require_gradient
+def stocks_watch(request, stockid):
+    instance = get_object_or_404(StockLevel, pk=stockid)
+    instance.watcher.add(request.user)
+    return HttpResponseRedirect('/industry/stocks/')
+
+@require_gradient
+def stocks_unwatch(request, stockid):
+    instance = get_object_or_404(StockLevel, pk=stockid)
+    instance.watcher.remove(request.user)
+    return HttpResponseRedirect('/industry/stocks/watched/')
+
+@require_gradient
+def bpos_view(request):
+    bpos = BlueprintOriginal.objects.all()
+    return direct_to_template(request, 'industry/bpos.html',
+                              extra_context={'bpo_list': bpos})
+
+@require_gradient
+def bpos_edit(request, bpoid=None):
+    if bpoid is None:
+        instance = None
+    else:
+        instance = get_object_or_404(BlueprintOriginal, pk=bpoid)
+    if request.method == 'POST':
+        form = BlueprintOriginalForm(request.POST, instance=instance)
+        if form.is_valid():
+            bpo = form.save(commit=False)
+            bpo.typeid = get_typeid(bpo.typename)
+            bpo.save()
+            Change.objects.create(app='industry',
+                                  category='bpos',
+                                  text=('%s edited the %s' %
+                                        (request.user.profile.name,
+                                         bpo.typename)))
+            messages.add_message(request, messages.SUCCESS,
+                                 'BPO saved')
+            return HttpResponseRedirect('/industry/bpos/')
+    else:
+        form = BlueprintOriginalForm(instance=instance)
+    return direct_to_template(request, 'industry/bpos_edit.html',
+                              extra_context={'form': form,
+                                             'instance': instance})
+
+@require_gradient
+def bpos_delete(request, bpoid):
+    instance = get_object_or_404(BlueprintOriginal, pk=bpoid)
+    if request.method == 'POST':
+        Change.objects.create(app='industry',
+                              category='bpos',
+                              text=('%s deleted the %s' %
+                                    (request.user.profile.name,
+                                     instance.typename)))
+        instance.delete()
+        messages.add_message(request, messages.SUCCESS,
+                             'Blueprint original deleted')
+        return HttpResponseRedirect('/industry/bpos/')
+    else:
+        return direct_to_template(request, 'industry/bpos_delete.html',
+                                  extra_context={'instance': instance})
+
+@require_gradient
+def json_invtype(request):
+    term = request.GET.get('term', '')
+    if len(term) < 3:
+        lis = []
+    else:
+        c = connection.cursor()
+        c.execute("SELECT typename FROM ccp.invtypes "
+                  "WHERE typename ILIKE %s AND published = 1 "
+                  "ORDER BY typename ASC",
+                  ("%%%s%%" % term,))
+        lis = [name for (name,) in c.fetchall()]
+    return HttpResponse(json.dumps(lis), mimetype="text/plain")
+
+@require_gradient
+def json_blueprint(request):
+    term = request.GET.get('term', '')
+    if len(term) < 3:
+        lis = []
+    else:
+        c = connection.cursor()
+        c.execute("SELECT t.typename "
+                  "FROM ccp.invblueprinttypes b "
+                  "     INNER JOIN ccp.invtypes t "
+                  "       ON b.blueprinttypeid = t.typeid "
+                  "WHERE t.published = 1 "
+                  "  AND t.marketgroupid IS NOT NULL "
+                  "  AND t.typename ILIKE %s "
+                  "ORDER BY t.typename ASC",
+                  ("%%%s%%" % term,))
+        lis = [name for (name,) in c.fetchall()]
+    return HttpResponse(json.dumps(lis), mimetype="text/plain")
+
+@require_gradient
+def json_station(request):
+    term = request.GET.get('term', '')
+    if len(term) < 3:
+        lis = []
+    else:
+        c = connection.cursor()
+        c.execute("SELECT stationname FROM ccp.stastations "
+                  "WHERE stationname ILIKE %s "
+                  "ORDER BY stationname ASC",
+                  ("%%%s%%" % term,))
+        lis = [name for (name,) in c.fetchall()]
+    return HttpResponse(json.dumps(lis), mimetype="text/plain")
+
+def autoupload_view(request):
+    return direct_to_template(request, 'industry/autoupload.html')
+
+from gradient.gmi.utils import TYPE_DATA, upload_age
+
+def autoupload_json(request):
+    viewtype = request.GET.get('uploadtype', 'history')
+    region = request.META.get('HTTP_EVE_REGIONNAME', None)
+    regionid = get_itemid(region)
+    type_list = []
+    if viewtype == 'history':
+        for typename, rowtype in TYPE_DATA:
+            if rowtype == 'header':
+                continue
+            typeid = get_typeid(typename)
+            if regionid and upload_age(regionid, typeid) <= 1:
+                continue
+            type_list.append((typename, typeid))
+    elif viewtype == 'orders':
+        if regionid is None:
+            for pl in PriceList.objects.all():
+                type_list.append((pl.typename, pl.typeid))
+        else:
+            aged_orders = []
+            for pl in PriceList.objects.all():
+                pmo = PublicMarketOrder.objects.filter(regionid=regionid,
+                                                       typeid=pl.typeid)
+                if len(pmo) > 0:
+                    last_seen = max(entry.last_seen for entry in pmo)
+                else:
+                    last_seen = datetime.datetime(2000, 1, 1)
+                aged_orders.append((last_seen, (pl.typename, pl.typeid)))
+            aged_orders.sort()
+            type_list = [b for (a, b) in aged_orders]
+    return HttpResponse(json.dumps(type_list), mimetype="text/json")
+
+def get_object(cls, **kwargs):
+    try:
+        return cls.objects.get(**kwargs)
+    except cls.DoesNotExist:
+        return None
+
+class KeyValue(object):
+    def __init__(self, **kwargs):
+        self.__dict__.update(kwargs)

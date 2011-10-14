@@ -1,0 +1,41 @@
+<script type="text/javascript" src="/media/js/jquery.js"></script>
+<script type="text/javascript" src="/media/js/jquery.metadata.js"></script>
+<script type="text/javascript" src="/media/js/jquery.tablesorter.js"></script>
+<script type="text/javascript">
+$.tablesorter.addParser({
+  id: 'number',
+  is: function (s) {
+    return false;
+  },
+  format: function (s) {
+    return s.replace(/,/g, "") * 100;
+  },
+  type: 'numeric'
+});
+
+$(function () {
+  $(".sortable").tablesorter({
+    widgets: ['zebra'],
+  });
+});
+</script>
+
+<style type="text/css">
+table.sortable thead tr th.header {
+  background-image: url(/media/img/icons/bg.png);
+  background-repeat: no-repeat;
+  background-position: center right;
+  padding-right: 21px;
+  cursor: pointer;
+}
+
+table.sortable thead tr th.headerSortUp {
+  background-image: url(/media/img/icons/asc.png);
+  background-color: #808080;
+}
+
+table.sortable thead tr th.headerSortDown {
+  background-image: url(/media/img/icons/desc.png);
+  background-color: #808080;
+}
+</style>

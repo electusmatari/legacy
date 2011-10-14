@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+{% block pagetitle %}Gradient Material Index{% endblock %}
+{% block title %}Gradient{% endblock %}
+{% block subtitle %}<h2>Freedom Through Strength. Strength Through Industry.</h2>{% endblock %}
+{% block indexclass %} class="selected"{% endblock %}
+{% block header %}
+<style type="text/css">
+table.gmi {
+  border-collapse: collapse;
+}
+
+table.gmi tr.groupheader th {
+  padding-top: 1em;
+}
+
+table.gmi tr.groupheader .header {
+  background: #532D2A;
+  color: #C0C0C0;
+}
+
+table.gmi tr.columnheader {
+  background: #C0C0C0;
+}
+
+table.gmi tr.odd {
+  background: #FFFFFF;
+}
+
+table.gmi tr.even {
+  background: #F0F0F0;
+}
+
+table.gmi tr:hover td {
+  background: #E0E0E0;
+}
+
+table.gmi tr td, table.gmi tr.columnheader th {
+  border-left: 1px solid #C0C0C0;
+  border-right: 1px solid #C0C0C0;
+}
+
+.old {
+  font-weight: bold;
+  color: #FFAF00;
+}
+
+.veryold {
+  font-weight: bold;
+  color: #FF0000;
+}
+</style>
+{% block scriptheader %}
+{% endblock %}
+{% endblock %}
+
+{% block content %}
+<div class="appmenu">
+  <ul>
+    <li><a href="/gmi/">Index</a></li>
+    <li><a href="/gmi/?format=csv">CSV</a></li>
+    <li><a href="/gmi/?format=xml">XML</a></li>
+    <li><a href="/gmi/calculator/">Calculator</a></li>
+    <li><a href="/gmi/help/">Documentation</a></li>
+  </ul>
+</div>
+{% block gmicontent %}
+{% endblock %}
+{% endblock %}

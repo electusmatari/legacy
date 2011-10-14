@@ -1,0 +1,57 @@
+{% extends "shop/base-handle.html" %}
+{% load formatting %}
+
+{% block appcontent %}
+<h1>Handle Shop Order by {{name}} ({{standing}})</h1>
+
+<p>Quicklink: <a href="/industry/prices/">Pricelist</a></p>
+
+<table class="data">
+  <thead>
+    <tr>
+      <th>Quantity</th>
+      <th>Typename</th>
+      <th>Location</th>
+      <th>Modifier</th>
+      <th>Price p.u.</th>
+      <th>Price</th>
+    </tr>
+  </thead>
+  <tbody>
+{% for order, product in order_list %}
+<tr class="{% cycle odd,even %}">
+  <td class="numeric">{{order.quantity}}</td>
+  <td>{{order.typename}}</td>
+  <td>{{order.office.name}}</td>
+  <td>
+    {{order.discount|title}} price (x{{order.multiplier}})<br />
+    {% if order.office.multiplier != 1.0 %}
+    Office modifier (x{{order.office.multiplier}})<br />
+    {% endif %}
+  </td>
+  <td class="numeric">{{order.price_pu|floatcomma}}</td>
+  <td class="numeric">{{order.price_total|floatcomma}}</td>
+</tr>
+{% endfor %}
+  </tbody>
+  <tfoot>
+    <tr>
+      <th colspan="5">Total:</th>
+      <td class="numeric">{{total|floatcomma}}</td>
+    </tr>
+    <tr>
+      <th colspan="5">Total as told to the customer:</th>
+      <td class="numeric">{{customer_total|floatcomma}}</td>
+    </tr>
+</table>
+<form method="post" action="">
+{% for order, product in order_list %}
+  <input type="hidden" name="orderid" value="{{order.id}}" />
+{% endfor %}
+  <input type="submit" value="Close orders" />
+</form>
+
+<form method="get" action="/shop/handle">
+  <input type="submit" value="Cancel" />
+</form>
+{% endblock %}

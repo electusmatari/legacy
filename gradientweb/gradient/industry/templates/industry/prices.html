@@ -1,0 +1,54 @@
+{% extends "industry/base.html" %}
+
+{% block scriptheader %}
+<script type="text/javascript" src="/media/js/jquery.js"></script>
+<script type="text/javascript" src="/media/js/calc.js"></script>
+<script type="text/javascript">
+$(function () {
+    calculator($("#result"), $("#search"), $("#data"),
+               {{jsondata|safe}});
+});
+</script>
+<style type="text/css">
+#searchdiv {
+  margin: 0.5em 0;
+}
+</style>
+{% endblock %}
+
+{% block appcontent %}
+<h2>Gradient Internal Price List</h2>
+<p>Last updated: {{lastupdate|date:"Y-m-d H:i"}}</p>
+
+<p>This is the official price list of Gradient, calculated from index
+  production cost, statistical chance for invention and reverse
+  engineering, and a safety margin based on effort or risk to produce
+  the item.</p>
+
+<p>HQ tends to buy minerals very close to index price, hence why we
+  ask for 2% extra there to compensate for this higher purchase price.
+  We sell to corp members at this production cost, and sell to allies
+  at 5% markup. Neutrals get market price, hostiles get roughly double
+  the market price.</p>
+
+<div style="float: right; margin: 2.4em 0 0 1em; width: 50%">
+<div id="result"></div>
+
+<div class="modifier">
+  <input type="checkbox" id="calcmod" class="calcmod" name="HQ
+  modifier"
+         value="1.02" />HQ Modifier (2%)<br />
+  <input type="checkbox" class="calcmod" name="Ally price"
+         value="1.05" />Ally price (5%)
+</div>
+</div>
+
+<div style="width: 50%">
+<div id="searchdiv"><span style="white-space: nowrap">Search:
+<input type="text" id="search"></input>
+</span></div>
+
+<div id="data"></div>
+</div>
+<div style="clear: both"></div>
+{% endblock %}

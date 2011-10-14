@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block pagetitle %}Gradient Shop Handling{% endblock %}
+{% block title %}Gradient{% endblock %}
+{% block subtitle %}<h2>Freedom Through Strength. Strength Through Industry.</h2>{% endblock %}
+{% block employeesclass %} class="selected"{% endblock %}
+{% block header %}
+<style type="text/css">
+table.messages {
+  width: 60%;
+  border-collapse: collapse;
+  border: 1px solid #808080;
+}
+
+table.messages td.poster {
+  width: 20%;
+  text-align: center;
+}
+
+table.messages td {
+  padding: 0.5em 1em;
+  border: 1px solid #808080;
+  vertical-align: top;
+}
+</style>
+{% block appheader %}
+{% endblock %}
+{% endblock %}
+
+{% block content %}
+<div class="appmenu">
+  <ul>
+    <li><a href="/shop/handle/">Open Orders</a></li>
+    <li><a href="/shop/handle/messages/">Messages</a></li>
+    <li><a href="/shop/handle/orders/">Closed Orders</a></li>
+  </ul>
+</div>
+{% block appcontent %}
+{% endblock %}
+{% endblock %}

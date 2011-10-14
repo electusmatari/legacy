@@ -1,0 +1,78 @@
+{% extends "gts/base.html" %}
+{% load formatting %}
+
+{% block gtscontent %}
+<h1>Ticket List</h1>
+
+<div class="filter">
+  <form action="" method="get">
+<table class="filtertable">
+  <tr>
+    <th>State</th>
+    <th>Type</th>
+    <th>Creator &amp; Owner</th>
+    <th></th>
+  </tr>
+<tr><td>
+{% for state in state_list %}
+  <input id="st{{state.id}}" type="checkbox" name="state"
+         value="{{state.name}}"
+         {% if state.name in state_filter %}checked="true"{% endif %}
+         /><label for="st{{state.id}}">{{state.displayname}}</label><br />
+{% endfor %}
+</td><td>
+{% for ttype in type_list %}
+  <input id="tt{{ttype.id}}" type="checkbox" name="type"
+         value="{{ttype.name}}"
+         {% if ttype.name in type_filter %}checked="true"{% endif %}
+         /><label for="tt{{ttype.id}}"><span class="tooltipped wide"
+>{{ttype.name}}<span class="tooltip"
+>{{ttype.description|safe}}</span></span></label><br />
+{% endfor %}
+</td><td>
+<table><tr><td>
+  <label for="owner">Owner:</label>
+</td><td>
+<input id="owner" type="text" name="owner" value="{{owner_filter}}" />
+</td></tr><tr><td>
+  <label for="createdby">Created&nbsp;by:</label>
+</td><td>
+  <input id="createdby" type="text" name="createdby" value="{{createdby_filter}}" />
+</td></tr></table>
+</td><td>
+    <input type="submit" value="Filter Ticket List" />
+</td></tr></table>
+  </form>
+</div>
+
+{% if is_paginated %}
+<div class="pagination" style="margin: 0.5em 0">
+  <span class="step-links">
+    {% if page_obj.has_previous %}
+    <a href="?{{page_obj.previous_page_number|setpage:request}}">previous</a>
+    {% endif %}
+    <span class="current">
+      Page {{page_obj.number}} of {{page_obj.paginator.num_pages}}
+    </span>
+    {% if page_obj.has_next %}
+    <a href="?{{page_obj.next_page_number|setpage:request}}">next</a>
+    {% endif %}
+  </span>
+</div>
+{% endif %}
+
+{% for ticket in ticket_list %}
+<div class="ticket">
+  <h2><a href="/gts/{{ticket.id}}/">Ticket #{{ticket.id}}</a>:
+    {{ticket.type.name}}
+    ({{ticket.state.name}})
+    on {{ticket.created|date:"Y-m-d H:i"}}
+    by {{ticket.createdby.profile.name}}
+  </h2>
+  <div class="tickettext">
+    {{ticket.text|urlize|linebreaks|truncatewords_html:32}}
+  </div>
+</div>
+{% endfor %}
+
+{% endblock %}

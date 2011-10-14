@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+{% block pagetitle %}Gradient Ticket System{% endblock %}
+{% block title %}Gradient Ticket System{% endblock %}
+{% block subtitle %}<h2>Freedom Through Strength. Strength Through Industry.</h2>{% endblock %}
+{% block employeesclass %} class="selected"{% endblock %}
+{% block header %}
+<style type="text/css">
+.ticket {
+  background: #F0F0C0;
+  border: 1px solid #E0E0B0;
+  margin: 0.5em;
+  padding: 0.5em;
+}
+
+.ticket h2 {
+  font-size: 100%;
+  font-weight: bold;
+  margin: 0 0 0.5em 0;
+  padding: 0;
+}
+
+.ticket h2 a, .ticket h2 a:visited {
+  color: black;
+}
+
+.ticket table tr th {
+  text-align: left;
+}
+
+.ticket .ticketactions form {
+  display: inline;
+}
+
+.comment {
+  border: 1px solid #C0C0C0;
+  background: #E0E0E0;
+  margin: 0.5em 0;
+  padding: 0.2em 0.5em;
+}
+
+.comment .author {
+  font-style: italic;
+}
+
+.comment .text {
+  margin: 0.2em 0 0 0.2em;
+}
+
+.filter table {
+  border-collapse: collapse;
+  padding: 0;
+  margin: 0;
+}
+
+.filter td {
+  vertical-align: top;
+}
+
+.filter table.filtertable {
+  border: 1px solid #C0C0C0;
+  margin: 0.2em 0;
+}
+
+.filter table.filtertable td {
+  padding-right: 0.5em;
+}
+
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="appmenu">
+  <ul>
+    <li><a href="/gts/">Overview</a></li>
+    <li><a href="/gts/?state=open">Open Tickets</a></li>
+    <li><a href="/gts/?state=in-progress&amp;owner={{user.profile.name}}&amp;type=all">My Accepted Tickets</a></li>
+    <li><a href="/gts/?createdby={{user.profile.name}}&amp;owner=&amp;type=all">My Created Tickets</a></li>
+    <li><a href="/gts/?state=closed&amp;owner=&amp;createdby={{user.profile.name}}&amp;type=all">My Closed Tickets</a></li>
+    <li><a href="/gts/create/">New Ticket</a></li>
+    <li><a href="/gts/configuration/">Configuration</a></li>
+    <li><a href="/gts/help/">Documentation</a></li>
+  </ul>
+</div>
+{% block gtscontent %}
+{% endblock %}
+{% endblock %}

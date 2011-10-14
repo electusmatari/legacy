@@ -1,0 +1,44 @@
+{% extends "gmi/base.html" %}
+
+{% block gmicontent %}
+<h1>Documentation</h1>
+
+<p>The Gradient Material Index describes the current market prices of
+  various production-relevant materials in the Republic. It is used by
+  Gradient for purchase and sale. We buy minerals and many other
+  materials at index price in our production offices.</p>
+
+<p>While the index also gives the region-specific prices and also the
+  Jita price, this is mostly for convenience and as a quick reference.
+  Although when there is not enough trade in a material in the
+  Republic, we fall back to the Jita price.</p>
+
+<h2>Index Source</h2>
+
+<p>The index is calculated as the 7-day average of all material
+  purchases and sales in the Republic proper (Heimatar, Metropolis and
+  Molden Heath). This refers to the <em>market history</em> in your
+  neocom, not the currently available orders. The 7-day average gives
+  some robustness against sporadic fluctuations.</p>
+
+<p>The data is regularly uploaded by our pilots. This sometimes can
+  result in slightly outdated data. The index marks prices based on
+  data older than 3 days with an orange exclamation mark, and prices
+  based on data older than 7 days with a red exclamation mark. You can
+  hover your cursor over the exclamation marks to see details.</p>
+
+<h2>Algorithm</h2>
+
+<p>For each region, we first try to calculate the 7-day average. If
+  this is not available, it uses the 28-day average (4 weeks). If this
+  is also not available, we fall back to the 364-day average (52
+  weeks). If this does not exist, either, we use a price of 0.0 and a
+  volume of 0.</p>
+
+<p>Then, to calculate the Republic index, we base the data on the
+  indeces for the three regions of the Republic proper: Heimatar,
+  Metropolis and Molden Heath, again using the 7d/28/d/364d averages
+  as above. If for the resuling price is 0.0, or if the trade volume
+  in the Republic is less than 1% of the trade volume in Jita, we fall
+  back to the Jita price.</p>
+{% endblock %}

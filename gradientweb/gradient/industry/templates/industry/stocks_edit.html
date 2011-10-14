@@ -1,0 +1,31 @@
+{% extends "industry/base.html" %}
+
+{% block scriptheader %}
+{% include "industry/autocomplete.html" %}
+{% endblock %}
+
+{% block appcontent %}
+{% if instance %}
+<h2>Edit Stock Level</h2>
+{% else %}
+<h2>Create Stock Level Request</h2>
+{% endif %}
+
+<table>
+  <tbody>
+<form method="post" action="">
+  {{form}}
+  {% if instance %}
+  <tr><td></td><td><input type="submit" value="Save" /></td></tr>
+  {% else %}
+  <tr><td></td><td><input type="submit" value="Create" /></td></tr>
+  {% endif %}
+</form>
+{% if instance %}
+<form method="get" action="/industry/stocks/{{instance.id}}/delete/">
+  <tr><td></td><td><input type="submit" value="Delete" /></td></tr>
+</form>
+{% endif %}
+  </tbody>
+</table>
+{% endblock %}

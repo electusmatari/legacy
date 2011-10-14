@@ -1,0 +1,104 @@
+{% extends "shop/base.html" %}
+
+{% block rhsheader %}
+<style type="text/css">
+.rhs-menu {
+  float: right;
+  border: 1px solid #C0C0C0;
+  width: 20%;
+  padding: 0.5em;
+  margin: 0 1em;
+}
+
+.rhs-box {
+  clear: both;
+  margin-bottom: 1em;
+}
+
+.user-box img {
+  float: left;
+  margin: 0 0.5em 0.5em 0;
+}
+
+.cart-box, .order-box {
+  text-align: center;
+}
+
+.cart-box img, .order-box img {
+  border: 0;
+}
+
+.cart-box a, .order-box a {
+  color: black;
+  text-decoration: none;
+}
+
+.rhs-box.disclaimer {
+  font-size: x-small;
+  font-style: italic;
+}
+</style>
+{% endblock %}
+
+{% block rhscontent %}
+<div class="rhs-menu">
+  <div class="rhs-box user-box">
+{% if shopuser.characterid %}
+    <img src="http://image.eveonline.com/Character/{{shopuser.characterid}}_64.jpg" />
+    Welcome, {{shopuser.name}}!<br />
+You have
+{% if shopuser.messagecount == 0 %}
+<a href="/shop/messages/">no new messages</a>.
+{% else %}
+<strong><a href="/shop/messages/">{{shopuser.messagecount}} new
+  message{{shopuser.messagecount|pluralize}}</a>.</strong>
+{% endif %}
+{% if shopuser.discount == None %}
+    <p>You have no standings set by Gradient. The prices displayed in
+    this shop are our Ally Prices&mdash;to receive this discount, you
+    will need
+    to <a href="http://www.electusmatari.com/forums/showthread.php?tid=11227&amp;id=98017#pid98017">negotiate
+    positive standings with Electus Matari</a>.</p>
+{% endif %}
+{% else %}
+    <img src="http://image.eveonline.com/Character/1_64.jpg" />
+    Welcome, customer!<br />
+    Please take a look through our sortiment, but to order products and
+    even to see your appropriate discounts, you
+    will <a href="/shop/auth/">have to authenticate</a>.
+{% endif %}
+  </div>
+  <hr style="clear: both; width: 50%">
+  <div class="rhs-box cart-box">
+    <a href="/shop/cart/">
+      <img src="/media/img/shop/cart.png"><br />
+      Shopping&nbsp;Cart<br />
+      ({{shopuser.cartcount}}&nbsp;Item{{shopuser.cartcount|pluralize}})
+    </a>
+  </div>
+  <hr style="clear: both; width: 50%">
+  <div class="rhs-box order-box">
+    <a href="/shop/order/">
+      <img src="/media/img/shop/order.png"><br />
+      Your&nbsp;Orders<br />
+      ({{shopuser.ordercount}}&nbsp;Open)
+    </a>
+  </div>
+  <hr style="clear: both; width: 50%">
+  <div class="rhs-box disclaimer">
+    <p><b>Personal use:</b> The prices here are set low to allow our
+      allies to fight better for the Republic. This means that we ask
+      you to purchase only for personal use, and not for resale.</p>
+    <p><b>Prices:</b> The Gradient shop aims to display up-to-date and
+      competetive prices, but due to the nature of markets, actual
+      prices may vary both up and down. Should the final price not be
+      satisfactory, please do not hesitate to decline the
+      contract.</p>
+    <p><b>Products:</b> We aim to provide our full sortiment at most
+      sales points, but we can not guarantee availability. Gradient
+      reserves the right to decline orders based on lack of
+      availability of the products, or to recommend moving the order
+      to another location.</p>
+  </div>
+</div>
+{% endblock %}

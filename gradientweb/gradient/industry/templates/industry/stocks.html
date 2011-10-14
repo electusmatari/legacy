@@ -1,0 +1,102 @@
+{% extends "industry/base.html" %}
+{% load formatting %}
+
+{% block scriptheader %}
+<link rel="stylesheet" href="/media/css/jquery-ui.css" type="text/css" />
+<script type="text/javascript" src="/media/js/jquery.js"></script>
+<script type="text/javascript" src="/media/js/jquery-ui.js"></script>
+<script type="text/javascript">
+$(function () {
+  $(".typeinput").autocomplete({
+    source: "/industry/json/invtypes/",
+    minLength: 3,
+  });
+  $(".stationinput").autocomplete({
+    source: "/industry/json/stations/",
+    minLength: 3,
+  });
+});
+</script>
+
+<style type="text/css">
+table.data {
+  margin: 1em 0;
+}
+
+.low {
+  background: #FF9F9F;
+}
+
+ul.ui-autocomplete {
+  height: 5em;
+  overflow-y: scroll;
+  overflow-x: hidden
+}
+
+.buttons form {
+  display: inline;
+}
+</style>
+{% endblock %}
+
+{% block appcontent %}
+{% if watched %}
+<h2>Watched Stock Levels</h2>
+<p>Your selection from <a href="/industry/stocks/">all stock
+    levels</a>.</p>
+{% else %}
+<h2>Stock Levels</h2>
+{% endif %}
+<p>Last updated: {{lastupdate|date:"Y-m-d H:i"}}</p>
+
+<p>Stock level requirements for various offices. The list will mark
+  entries as red if the current stock level is below the "low" value,
+  and will note a missing quantity up to the "high" value.</p>
+
+{% for stationname, stock_list in station_list %}
+<h3>{{stationname}}</h3>
+
+<table class="data">
+  <thead>
+    <tr>
+      <th>Typename</th>
+      <th>Low</th>
+      <th>High</th>
+      <th>Current</th>
+      <th>Missing</th>
+      <th>Comment</th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for stock in stock_list %}
+    <tr class="{% cycle odd,even %}">
+      <td>{{stock.typename}}</td>
+      <td class="numeric">{{stock.low|intcomma}}</td>
+      <td class="numeric">{{stock.high|intcomma}}</td>
+      <td class="numeric{% if stock.is_low %} low{% endif %}">{{stock.current|intcomma}}</td>
+      <td class="numeric">{{stock.missing|intcomma}}</td>
+      <td>{{stock.comment}}</td>
+      <td class="buttons">
+        <form method="get" action="/industry/stocks/{{stock.id}}/edit/">
+          <input type="submit" value="Edit" />
+        </form>
+        {% if watched %}
+        <form method="post" action="/industry/stocks/{{stock.id}}/unwatch/">
+          <input type="submit" value="Stop Watching" />
+        </form>
+        {% else %}
+        {% if user not in stock.watcher.all %}
+        <form method="post" action="/industry/stocks/{{stock.id}}/watch/">
+          <input type="submit" value="Watch" />
+        </form>
+        {% endif %}
+        {% endif %}
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endfor %}
+
+{% endblock %}

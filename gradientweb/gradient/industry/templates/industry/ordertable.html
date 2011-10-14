@@ -1,0 +1,65 @@
+{% load formatting %}
+
+<table class="data ordertable sortable">
+  <thead>
+    <tr>
+      {% if not pilot_name %}
+      <th>Pilot</th>
+      {% endif %}
+      <th>Typename</th>
+
+      <th class="{sorter: 'number'} expire_days">Expires (days)</th>
+      <th class="{sorter: 'number'} vol_remaining">Vol. remaining</th>
+      <th class="{sorter: 'number'} price_col">Price</th>
+      <th class="{sorter: 'number'} cost_col">Cost</th>
+      <th class="{sorter: 'procent'} profit_margin">Profit margin</th>
+      <th class="{sorter: 'number'} profit_per_item">Profit per item</th>
+
+      <th class="{sorter: 'number'} sales_per_day">Sales per day</th>
+      <th class="{sorter: 'number'} profit_per_day">Profit per day</th>
+      <th class="{sorter: 'number'} est_days_remaining">Est. days remaining</th>
+      <th class="{sorter: 'number'} competition_price">Competition Price</th>
+      <th class="{sorter: 'number'} suggested_price">Suggested Price</th>
+      <th class="{sorter: 'procent'} trend_col">Trend</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for order in order_list %}
+    <tr{% if order.profitperitem < 0 %} class="unprofitable"
+       {% else %}{% if order.profitmargin < 0.1 %} class="lowprofit"
+       {% endif %}{% endif %}
+       >
+      {% if not pilot_name %}
+      <td>{{order.pilotname}}</th>
+      {% endif %}
+      <td>{{order.typename}}</td>
+
+      <td class="numeric expire_days">{{order.expiredays}}</td>
+      <td class="numeric vol_remaining">{{order.volremaining|intcomma}}</td>
+
+      <td class="numeric price_col">{{order.price|floatcomma}}</td>
+      <td class="numeric cost_col">{{order.productioncost|floatcomma}}</td>
+      <td class="numeric profit_margin">{{order.profitmargin|percentage}}</td>
+      <td class="numeric profit_per_item">{{order.profitperitem|floatcomma}}</td>
+
+      <td class="numeric sales_per_day">{{order.salesperday|floatcomma}}</td>
+      <td class="numeric profit_per_day">{{order.profitperday|floatcomma}}</td>
+      {% if order.daysremaining == None %}
+      <td class="numeric est_days_remaining">?</td>
+      {% else %}
+      <td class="numeric est_days_remaining">{{order.daysremaining|intcomma}}</td>
+      {% endif %}
+      {% if order.competitionprice == None %}
+      <td class="numeric competition_price">?</td>
+      {% else %}
+      <td class="numeric competition_price">{{order.competitionprice|floatcomma}}</td>
+      {% endif %}
+      {% if order.suggestedprice == None %}
+      <td class="numeric suggested_price">?</td>
+      {% else %}
+      <td class="numeric suggested_price">{{order.suggestedprice|floatcomma}}</td>
+      {% endif %}
+      <td class="numeric trend_col">{{order.trend|percentage}}</td>
+    {% endfor %}
+  </tbody>
+</table>

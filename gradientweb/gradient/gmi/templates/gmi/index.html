@@ -1,0 +1,57 @@
+{% extends "gmi/base.html" %}
+{% load formatting %}
+
+{% block gmicontent %}
+<h1>Gradient Material Index</h1>
+
+<table class="gmi">
+{% for row in index_table %}
+{% if row.row == 'header' %}
+<tr class="groupheader">
+  <th colspan="8"><div class="header">{{row.name}}</div></th>
+</tr>
+<tr class="columnheader">
+  <th>Typename</th><th>Index</th><th>Change</th><th>Volume</th>
+  <th>Heimatar</th><th>Metropolis</th><th>Molden Heath</th><th>Jita</th>
+</tr>
+{% else %}
+<tr class="{% cycle 'odd' 'even' %}">
+  <td>{{row.typename}}</td>
+  <td class="numeric">{{row.entry.republic|floatcomma}}</td>
+  <td class="numeric">{{row.entry.republicchange|percentagechange}}</td>
+  <td class="numeric">
+    {% if row.entry.republicvolume == 0 %}
+    -
+    {% else %}
+    {{row.entry.republicvolume|intcomma}}
+    {% endif %}
+  </td>
+  <td class="numeric">
+    {% with row.entry.heimatarage as age %}
+    {% include "gmi/ageinfo.html" %}
+    {% endwith %}
+    {{row.entry.heimatar|floatcomma}}
+  </td>
+  <td class="numeric">
+    {% with row.entry.metropolisage as age %}
+    {% include "gmi/ageinfo.html" %}
+    {% endwith %}
+    {{row.entry.metropolis|floatcomma}}
+  </td>
+  <td class="numeric">
+    {% with row.entry.moldenheathage as age %}
+    {% include "gmi/ageinfo.html" %}
+    {% endwith %}
+    {{row.entry.moldenheath|floatcomma}}
+  </td>
+  <td class="numeric">
+    {% with row.entry.jitaage as age %}
+    {% include "gmi/ageinfo.html" %}
+    {% endwith %}
+    {{row.entry.jita|floatcomma}}
+  </td>
+</tr>
+{% endif %}
+{% endfor %}
+</table>
+{% endblock %}

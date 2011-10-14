@@ -1,0 +1,216 @@
+body {
+  font-family: sans-serif;
+  padding: 0;
+  margin: 8px;
+  background: #C0C0C0;
+}
+
+#header {
+  background: url('/media/img/gradient-logo.png')
+    no-repeat left center;
+  padding-left: 128px;
+  text-align: left;
+  height: 128px;
+  border: 1px solid #606060;
+  background-color: #808080;
+}
+
+#header h1 {
+  font-size: 64px;
+  padding: 0 16px 0;
+  margin: 0;
+}
+
+#header h2 {
+  font-size: 24px;
+  padding: 0 16px 0;
+  margin: 0;
+}
+
+#menu {
+  width: 100%
+}
+
+#menu ul {
+  padding: 1px 0;
+  margin: 0;
+  list-style-type: none;
+}
+
+#menu ul li {
+  float: left;
+  margin: 0;
+  padding: 0;
+  width: 20%
+}
+
+#menu ul li a, #menu ul li a:visited {
+  display: block;
+  margin: 5px 2px;
+  padding: 2px 5px;
+  text-decoration: none;
+  font-weight: bold;
+  background: #532D2A;
+  color: #C0C0C0;
+}
+
+#menu ul li.selected a, #menu ul li.selected a:visited {
+  background: #808080;
+  color: #000000;
+}
+
+#messages {
+  clear: both;
+  margin: 0.2em 0 0.5em 0;
+}
+
+#messages ul {
+  padding: 1px 0;
+  margin: 0;
+  list-style-type: none;
+}
+
+#messages ul li {
+  margin: 0.1em 0;
+  padding: 0 0.5em;
+}
+
+#messages ul li.info, #messages ul li.success {
+  background: #9FFF9F;
+  border: 1px solid #8FEF8F;
+}
+
+#messages ul li.error {
+  background: #FF9F9F;
+  border: 1px solid #EF8F8F;
+}
+
+#content {
+  clear: both;
+  padding: 1em;
+  background: url('/media/img/gear.png')
+    no-repeat top center;
+  background-color: white;
+  min-height: 512px;
+}
+
+#content h1, #content h2, #content h3 {
+  margin: 0;
+  padding: 0;
+}
+
+#content h2 {
+  margin-top: 1em;
+}
+
+#footer {
+  background: #532D2A;
+  text-align: center;
+  margin: 5px 0 0 0;
+  padding: 2px 0;
+}
+
+#footer a, #footer a:visited {
+  color: #C0C0C0;
+}
+
+.appmenu {
+  position: relative;
+  top: -1em;
+  left: 1em;
+  background: #C0C0C0;
+  border: 1px solid #B0B0B0;
+  float: right;
+  margin: 0.5em;
+  padding: 0.5em;
+}
+
+.appmenu ul {
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+}
+
+.appmenu h2 {
+  font-size: 100%;
+  font-weight: bold;
+}
+
+.appmenu ul li {
+  background: #532D2A;
+  border: 1px solid #431D1A;
+  margin: 0.2em 0;
+  padding: 0.2em;
+  white-space: nowrap;
+}
+
+.appmenu ul li a, .appmenu ul li a {
+  text-decoration: none;
+  font-weight: bold;
+  color: #C0C0C0;
+}
+
+.numeric {
+  text-align: right;
+  white-space: nowrap;
+}
+
+table.data {
+  border-collapse: collapse;
+  border: 1px solid #808080;
+}
+
+table.data tr {
+  background: #C0C0C0;
+}
+
+table.data tr.odd {
+  background: #FFFFFF;
+}
+
+table.data tr.even {
+  background: #F0F0F0;
+}
+
+table.data tr td, table.data tr th {
+  border: 1px solid #808080;
+  padding: 0 0.5em;
+}
+
+table tbody th, table tfoot th {
+  text-align: left;
+}
+
+.tooltipped {
+  position: relative;
+}
+
+.tooltipped .tooltip {
+  display: block;
+  position: absolute;
+  left: 1.2em;
+  top: 1.5em;
+  text-align: left;
+  z-index: 23;
+  min-width: 10em;
+  font-weight: bold;
+
+  background: #532D2A;
+  border: 1px solid black;
+  color: #C0C0C0;
+  padding: 0.2em 0.5em;
+
+  visibility: hidden;
+}
+
+.tooltipped.wide .tooltip {
+  min-width: 17em;
+}
+
+.tooltipped:hover .tooltip {
+  visibility: visible;
+}
+
+a img {
+  border: 0;
+}
