@@ -5,12 +5,13 @@ from django.contrib import messages
 from django.db import connection
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import get_object_or_404
+from django.views.generic.list_detail import object_list
 from django.views.generic.simple import direct_to_template
 
 from gradient.decorators import require_gradient
 from gradient.rc.models import Change
 from gradient.industry.models import PriceList, BlueprintOriginal
-from gradient.industry.models import Stock, StockLevel
+from gradient.industry.models import Stock, StockLevel, Transaction
 from gradient.industry.models import MarketOrder, WantedMarketOrder
 from gradient.industry.models import LastUpdate, PublicMarketOrder
 from gradient.industry.dbutils import get_typeid, get_typename, get_itemname
@@ -380,6 +381,26 @@ def bpos_delete(request, bpoid):
     else:
         return direct_to_template(request, 'industry/bpos_delete.html',
                                   extra_context={'instance': instance})
+
+@require_gradient
+def transactions_view(request):
+    if 'all' in request.GET:
+        display_pilot = True
+        qs = Transaction.objects.all()
+    else:
+        display_pilot = False
+        qs = Transaction.objects.filter(
+            characterid=request.user.profile.characterid
+            )
+    return object_list(request,
+                       queryset=qs,
+                       paginate_by=20,
+                       template_object_name='transaction',
+                       template_name='industry/transactions.html',
+                       extra_context={
+            'display_pilot': display_pilot,
+            'request': request,
+            })
 
 @require_gradient
 def json_invtype(request):

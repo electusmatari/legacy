@@ -1,0 +1,57 @@
+{% extends "industry/base.html" %}
+{% load formatting %}
+
+{% block appheader %}
+<style type="text/css">
+table.data tbody tr.buy td.price {
+  color: #FF0000;
+  font-weight: bold;
+}
+table.data tbody tr.sell td.price {
+  color: #00AF00;
+  font-weight: bold;
+}
+</style>
+{% endblock %}
+
+{% block appcontent %}
+<h1>Market Transactions</h1>
+
+{% include "paginatorng.html" %}
+
+<table class="data">
+  <thead>
+    <tr>
+      <th>Timestamp</th>
+      <th>Account</th>
+      <th>Type</th>
+      <th>Quantity</th>
+      <th>Price (p.u.)</th>
+      <th>Price (total)</th>
+{% comment %}
+      <th>Client</th>
+      <th>Employee</th>
+{% endcomment %}
+      <th>Station</th>
+    </tr>
+  </thead>
+  <tbody>
+{% for t in transaction_list %}
+<tr class="{% cycle odd,even %} {% if t.transactiontype == 'buy' %}buy{% else %}sell{% endif %}">
+  <td>{{t.timestamp|date:"Y-m-d H:i"}}</td>
+  <td>{{t.accountname}}</td>
+  <td>{{t.typename}}</td>
+  <td class="numeric">{{t.quantity|intcomma}}</td>
+  <td class="numeric price">{{t.price|floatcomma}}</td>
+  <td class="numeric price">{{t.price_total|floatcomma}}</td>
+{% comment %}
+  <td>{{t.clientname}}</td>
+  <td>{{t.charactername}}</td>
+{% endcomment %}
+  <td>{{t.stationname}}</td>
+</tr>
+{% endfor %}
+  </tbody>
+</table>
+{% endblock %}
+

@@ -529,18 +529,18 @@ class ShopUser(object):
     @classmethod
     def from_request(cls, request):
         if 'grdshopuser' in request.session:
-            return request.session['grdshopuser']
-        elif (request.user.is_authenticated() and 
-              request.user.profile.characterid is not None):
+            shopuser = request.session['grdshopuser']
+        else:
             shopuser = cls()
+        if (request.user.is_authenticated() and 
+            request.user.profile.characterid is not None and
+            shopuser.characterid is None):
             shopuser.characterid = request.user.profile.characterid
             try:
                 shopuser.recheck()
             except:
                 shopuser = cls()
-            return shopuser
-        else:
-            return cls()
+        return shopuser
 
     def save(self, request):
         request.session['grdshopuser'] = self

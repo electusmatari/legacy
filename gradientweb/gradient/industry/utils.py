@@ -469,6 +469,7 @@ METROPOLIS = 10000042
 THEFORGE = 10000002
 RENS = 30002510
 RENS_BTT = 60004588
+JITA44 = 60003760
 
 def update_publicmarket():
     regionlimit = [('regionlimit', regionid) for regionid in 
@@ -510,8 +511,8 @@ def publicmarket_save(typeid, tree):
 def update_marketprice():
     orders = {}
     totalvolume = {}
-    for pmo in PublicMarketOrder.objects.filter(stationid=RENS_BTT,
-                                                ordertype='sell'):
+    for pmo in PublicMarketOrder.objects.filter(ordertype='sell',
+                                                regionid=HEIMATAR):
         orders.setdefault(pmo.typeid, [])
         orders[pmo.typeid].append((pmo.price, pmo.volremain, pmo.last_seen))
         totalvolume.setdefault(pmo.typeid, 0)
@@ -546,6 +547,7 @@ def update_transaction(grd, accountkey):
             quantity=entry.quantity,
             price=entry.price,
             clientid=entry.clientID,
+            characterid=entry.characterID,
             stationid=entry.stationID,
             transactiontype=entry.transactionType,
             journalid=entry.journalTransactionID

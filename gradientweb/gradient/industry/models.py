@@ -3,8 +3,14 @@ import datetime
 from django.db import models
 from django.contrib.auth.models import User
 
+from gradient.industry.dbutils import get_typename, get_itemname
+
 ORDERTYPE_CHOICES = [('sell', 'Sell Order'),
                      ('buy', 'Buy Order')]
+
+class Account(models.Model):
+    accountkey = models.IntegerField()
+    name = models.CharField(max_length=128)
 
 class BlueprintOriginal(models.Model):
     typeid = models.BigIntegerField(unique=True)
@@ -38,12 +44,40 @@ class Transaction(models.Model):
     quantity = models.IntegerField()
     price = models.FloatField()
     clientid = models.BigIntegerField()
+    characterid = models.BigIntegerField()
     stationid = models.BigIntegerField()
     transactiontype = models.CharField(max_length=5)
     journalid = models.BigIntegerField()
 
     class Meta:
-        ordering = ["timestamp"]
+        ordering = ["-timestamp"]
+
+    @property
+    def accountname(self):
+        try:
+            return Account.objects.get(accountkey=self.accountkey).name
+        except Account.DoesNotExist:
+            return self.accountkey
+
+    @property
+    def typename(self):
+        return get_typename(self.typeid)
+
+    @property
+    def price_total(self):
+        return self.price * self.quantity
+
+    @property
+    def clientname(self):
+        return self.clientid
+
+    @property
+    def charactername(self):
+        return self.characterid
+
+    @property
+    def stationname(self):
+        return get_itemname(self.stationid)
 
 class Journal(models.Model):
     journalid = models.BigIntegerField(unique=True)
