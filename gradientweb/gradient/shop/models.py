@@ -135,3 +135,8 @@ class Message(models.Model):
 
     class Meta:
         ordering = ['created']
+
+# This is a somewhat silly way of extending the User model by a
+# boolean value.
+class OrderHandler(models.Model):
+    user = models.OneToOneField(User, primary_key=True)

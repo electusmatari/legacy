@@ -1,4 +1,5 @@
 import datetime
+import logging
 import urllib
 from xml.etree import ElementTree
 
@@ -472,6 +473,7 @@ RENS_BTT = 60004588
 JITA44 = 60003760
 
 def update_publicmarket():
+    log = logging.getLogger('industry')
     regionlimit = [('regionlimit', regionid) for regionid in 
                    [HEIMATAR, METROPOLIS, MOLDENHEATH, THEFORGE]]
     for pl in PriceList.objects.all():
@@ -480,8 +482,9 @@ def update_publicmarket():
         try:
             data = urllib.urlopen(url).read()
             tree = ElementTree.fromstring(data)
-        except:
-            pass
+        except Exception as e:
+            log.info("Couldn't retrieve public market info for %s: %s" %
+                     (pl.typename, str(e)))
         else:
             publicmarket_save(pl.typeid, tree)
     set_last_update('public-market', datetime.datetime.utcnow())
@@ -509,18 +512,34 @@ def publicmarket_save(typeid, tree):
         save_order('buy', order)
 
 def update_marketprice():
+    typeid_set = set()
     orders = {}
     totalvolume = {}
+    btt_orders = {}
+    btt_totalvolume = {}
     for pmo in PublicMarketOrder.objects.filter(ordertype='sell',
                                                 regionid=HEIMATAR):
+        typeid_set.add(pmo.typeid)
         orders.setdefault(pmo.typeid, [])
         orders[pmo.typeid].append((pmo.price, pmo.volremain, pmo.last_seen))
         totalvolume.setdefault(pmo.typeid, 0)
         totalvolume[pmo.typeid] += pmo.volremain
+        if pmo.stationid == RENS_BTT:
+            btt_orders.setdefault(pmo.typeid, [])
+            btt_orders[pmo.typeid].append((pmo.price, pmo.volremain,
+                                           pmo.last_seen))
+            btt_totalvolume.setdefault(pmo.typeid, 0)
+            btt_totalvolume[pmo.typeid] += pmo.volremain
+
     MarketPrice.objects.all().delete()
-    for typeid, typeorders in orders.items():
+    for typeid in typeid_set:
+        if typeid in btt_orders:
+            typeorders = btt_orders[typeid]
+            cutoff = btt_totalvolume[typeid] * 0.05
+        else:
+            typeorders = orders[typeid]
+            cutoff = totalvolume[typeid] * 0.05
         typeorders.sort()
-        cutoff = totalvolume[typeid] * 0.05
         volumesum = 0
         for price, volume, last_seen in typeorders:
             volumesum += volume
@@ -616,7 +635,9 @@ def update_pricelist(grd):
                                  productioncost=productioncost,
                                  safetymargin=safetymargin)
         known.add(product.typeid)
-        inventable.extend(bptype.invent_to())
+        # We lack the parts for the Anshar...
+        if product.typename != 'Obelisk':
+            inventable.extend(bptype.invent_to())
     for bpc in inventable:
         if bpc.typeid in bposet:
             continue

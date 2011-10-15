@@ -14,6 +14,7 @@ from django.views.generic.list_detail import object_list
 
 from gradient.decorators import require_gradient
 from gradient.shop.models import SalesOffice, ProductList, Order, Message
+from gradient.shop.models import OrderHandler
 
 
 def require_auth(func):
@@ -613,3 +614,9 @@ class ShopUser(object):
                 self.standing = contact.standing
                 break
         self.lastchecked = datetime.datetime.utcnow()
+
+def set_shop_status(request, status):
+    if OrderHandler.objects.filter(user=request.user).exists():
+        status['openorders'] = Order.objects.filter(closed=None).count()
+        status['unreadmessages'] = Message.objects.filter(
+            read_by_handler=False).count()
