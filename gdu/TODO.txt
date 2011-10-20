@@ -1,0 +1,13 @@
+* Clean up directors
+
+* Wait for directory change
+http://sourceforge.net/projects/pywin32/files/pywin32/Build216/pywin32-216.win32-py2.7.exe/download
+http://timgolden.me.uk/python/win32_how_do_i/watch_directory_for_changes.html
+* Add API & missing handlers
+- api.py
+- Also the server side
+* Updater
+- DON'T automatically download
+- Display notification: "New version available, download here..."
+* Baloon info
+http://code.google.com/p/readertray/source/browse/trunk/readergui.py
