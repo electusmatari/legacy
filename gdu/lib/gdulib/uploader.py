@@ -4,11 +4,12 @@ import threading
 import time
 
 class Uploader(threading.Thread):
-    def __init__(self, control, dataq):
+    def __init__(self, control, dataq, stats):
         super(Uploader, self).__init__()
         self.daemon = True
         self.control = control
         self.dataq = dataq
+        self.stats = stats
 
     def run(self):
         while True:
@@ -21,4 +22,6 @@ class Uploader(threading.Thread):
     def run2(self):
         while True:
             data = self.dataq.get()
-            logging.info("Upload: %s" % json.dumps(data))
+            self.stats.numfiles += 1
+            self.stats.numbytes += len(json.dumps(data))
+            # FIXME! Use api.py and self.control.auth_token :o)

@@ -2,10 +2,12 @@
 
 import logging
 import sys
+import webbrowser
+import _winreg
 
 import wx
 
-from gdulib import api
+from gdulib import rpc
 from gdulib import handler
 from gdulib import version
 
@@ -65,32 +67,73 @@ class ConfigPanel(wx.Panel):
     def __init__(self, parent):
         wx.Panel.__init__(self, parent=parent, id=wx.ID_ANY)
         self.config = wx.Config(version.APPNAME, version.VENDORNAME)
-        self.checkboxes = []
+
         sizer = wx.BoxSizer(wx.VERTICAL)
+        sizer.Add(self.init_auth_panel(), flag=wx.ALL | wx.EXPAND, border=5)
+        sizer.Add(self.init_method_panel(), flag=wx.ALL | wx.EXPAND, border=5)
+        sizer.Add(self.init_other_panel(), flag=wx.ALL | wx.EXPAND, border=5)
+        self.SetSizer(sizer)
 
-        auth_panel = wx.Panel(self)
-        auth_sizer = wx.BoxSizer(wx.HORIZONTAL)
-        st = wx.StaticText(auth_panel, label="Auth Token: ",
+    def init_auth_panel(self):
+        panel = wx.Panel(self)
+        sb = wx.StaticBox(panel, label="Authentication")
+        sizer = wx.StaticBoxSizer(sb, wx.HORIZONTAL)
+
+        st = wx.StaticText(panel, label="Auth Token: ",
                            style=wx.TE_DONTWRAP)
-        auth_sizer.Add(st, flag=wx.ALL)
+        sizer.Add(st, flag=wx.ALL)
 
-        tc = wx.TextCtrl(auth_panel, -1, self.config.Read("auth_token"))
+        tc = wx.TextCtrl(panel, -1, self.config.Read("auth_token"))
+        self.auth_token = tc
+        self.auth_lost_focus(None) # initialize color
         tc.SetMaxLength(64)
         tc.Bind(wx.EVT_SET_FOCUS, self.auth_got_focus)
         tc.Bind(wx.EVT_KILL_FOCUS, self.auth_lost_focus)
-        auth_sizer.Add(tc, flag=wx.ALL | wx.EXPAND, proportion=1)
-        auth_panel.SetSizer(auth_sizer)
-        self.auth_token = tc
-        self.auth_lost_focus(None)
-        sizer.Add(auth_panel, flag=wx.ALL | wx.EXPAND, border=5)
+        sizer.Add(tc, flag=wx.ALL | wx.EXPAND, proportion=1)
 
+        checkb = wx.Button(panel, label="Check")
+        checkb.Bind(wx.EVT_BUTTON, self.on_check)
+        sizer.Add(checkb, tc, flag=wx.ALL)
+
+        getb = wx.Button(panel, label="Get Your Token")
+        checkb.Bind(wx.EVT_BUTTON, self.on_get)
+        sizer.Add(getb, tc, flag=wx.ALL)
+
+        panel.SetSizer(sizer)
+        return panel
+
+    def init_method_panel(self):
+        panel = wx.Panel(self)
+        sb = wx.StaticBox(panel, label="Data Uploads")
+        sizer = wx.StaticBoxSizer(sb, wx.VERTICAL)
+        self.checkboxes = []
         for h in sorted(handler.FILE_HANDLER.values(),
                         key=lambda x: x.display):
-            cb = ConfigCheckBox(self, h.method,
-                                tooltip=h.description,
-                                label=h.display)
-            sizer.Add(cb, flag=wx.ALL | wx.EXPAND, border=5)
-        self.SetSizer(sizer)
+            cb = ConfigCheckBox(panel, h.method, self.config,
+                                label=h.display,
+                                tooltip=h.description)
+            sizer.Add(cb, flag=wx.ALL | wx.EXPAND, border=2)
+            self.checkboxes.append(cb)
+        panel.SetSizer(sizer)
+        return panel
+
+    def init_other_panel(self):
+        panel = wx.Panel(self)
+        sb = wx.StaticBox(panel, label="Miscellaneous Options")
+        sizer = wx.StaticBoxSizer(sb, wx.VERTICAL)
+        cb = AutostartCheckBox(panel, version.APPLONGNAME,
+                               label="Autostart on Windows log-in",
+                               tooltip=("Automatically start when the "
+                                        "current user logs in"))
+        sizer.Add(cb, flag=wx.ALL | wx.EXPAND, border=2)
+        cb = ConfigCheckBox(panel, 'show_all_rpc_calls', self.config,
+                            label='Show all RPC calls',
+                            tooltip=("Show all RPC calls as they happen; "
+                                     "mostly of technical interest"))
+        self.show_all_rpc_calls = cb
+        sizer.Add(cb, flag=wx.ALL | wx.EXPAND, border=2)
+        panel.SetSizer(sizer)
+        return panel
 
     def auth_got_focus(self, event):
         if self.auth_token:
@@ -100,29 +143,83 @@ class ConfigPanel(wx.Panel):
         if self.auth_token:
             auth_token = self.auth_token.GetValue()
             self.config.Write("auth_token", auth_token)
-            if api.check_auth_token(auth_token):
+            if rpc.check_auth_token(auth_token):
                 self.auth_token.SetBackgroundColour("#AFFFAF")
             else:
                 self.auth_token.SetBackgroundColour("#FFAFAF")
 
+    def on_check(self, event):
+        self.auth_lost_focus(event)
+
+    def on_get(self, event):
+        webbrowser.open(version.AUTH_TOKEN_URL,
+                        new=2 # New Tab
+                        )
+
 
 class ConfigCheckBox(wx.CheckBox):
-    def __init__(self, parent, method, tooltip=None, *args, **kwargs):
+    def __init__(self, parent, option, config, default=True,
+                 tooltip=None, *args, **kwargs):
         wx.CheckBox.__init__(self, parent, *args, **kwargs)
         if tooltip is not None:
             self.SetToolTip(wx.ToolTip(tooltip))
-        self.method = method
-        self.config = parent.config
-        if self.config.Exists(method):
-            self.SetValue(self.config.ReadBool(method))
+        self.option = option
+        self.config = config
+        if self.config.Exists(option):
+            self.SetValue(self.config.ReadBool(option))
         else:
-            self.SetValue(True)
-            self.config.WriteBool(method, True)
+            self.SetValue(default)
+            self.config.WriteBool(option, default)
 
         self.Bind(wx.EVT_CHECKBOX, self.toggle)
 
     def toggle(self, event):
-        self.config.WriteBool(self.method, self.GetValue())
+        self.config.WriteBool(self.option, self.GetValue())
+
+
+class AutostartCheckBox(wx.CheckBox):
+    def __init__(self, parent, appname,
+                 tooltip=None, *args, **kwargs):
+        wx.CheckBox.__init__(self, parent, *args, **kwargs)
+        if tooltip is not None:
+            self.SetToolTip(wx.ToolTip(tooltip))
+        self.appname = appname
+        self.registry = _winreg.ConnectRegistry(None,
+                                                _winreg.HKEY_CURRENT_USER)
+        if self.get_autostart():
+            self.SetValue(True)
+        else:
+            self.SetValue(False)
+        self.Bind(wx.EVT_CHECKBOX, self.toggle)
+
+    def toggle(self, event):
+        self.set_autostart(self.GetValue())
+
+    def regkey(self):
+        return _winreg.OpenKey(
+            self.registry,
+            r"Software\Microsoft\Windows\CurrentVersion\Run",
+            0,
+            _winreg.KEY_ALL_ACCESS)
+
+    def get_autostart(self):
+        with self.regkey() as key:
+            try:
+                _winreg.QueryValueEx(key, self.appname)
+                return True
+            except WindowsError:
+                return False
+
+    def set_autostart(self, do_autostart):
+        with self.regkey() as key:
+            if do_autostart:
+                _winreg.SetValueEx(key, self.appname, 0, _winreg.REG_SZ,
+                                   sys.executable)
+            else:
+                try:
+                    _winreg.DeleteValue(key, self.appname)
+                except WindowsError:
+                    pass
 
 
 class LogPanel(wx.Panel):

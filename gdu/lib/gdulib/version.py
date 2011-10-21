@@ -6,6 +6,8 @@ VERSION = 1.0
 
 VERSIONSTRING = "%.1f" % VERSION
 
+AUTH_TOKEN_URL = "http://gradient.electusmatari.com/gmi/"
+
 ABOUT = """\
 %s v%s
 Copyright (c) 2011 Jorgen Schaefer. All rights reserved.

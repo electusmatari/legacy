@@ -2,7 +2,7 @@
 
 import wx
 
-from gdulib import api
+from gdulib import rpc
 from gdulib import gui
 from gdulib import control
 

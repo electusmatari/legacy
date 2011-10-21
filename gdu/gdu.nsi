@@ -22,4 +22,7 @@ SectionEnd
 Section "Uninstall"
   Delete $INSTDIR\Uninst.exe
   RMDir /r /REBOOTOK $INSTDIR
+  Delete "$SMPROGRAMS\Gradient Data Uploader\Gradient Data Uploader.lnk"
+  Delete "$SMPROGRAMS\Gradient Data Uploader\Uninstall.lnk"
+  RMDir "$SMPROGRAMS\Gradient Data Uploader"
 SectionEnd
