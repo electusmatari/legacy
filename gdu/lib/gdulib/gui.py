@@ -6,6 +6,7 @@ import webbrowser
 import _winreg
 
 import wx
+import wx.html
 
 from gdulib import rpc
 from gdulib import handler
@@ -15,7 +16,8 @@ class MainFrame(wx.Frame):
     def __init__(self):
         wx.Frame.__init__(self, None,
                           title='Gradient Data Uploader',
-                          size=(600, 480))
+                          size=(640, 480),
+                          style=wx.ICONIZE | wx.DEFAULT_FRAME_STYLE)
         self.statusbar = self.CreateStatusBar()
 
         panel = wx.Panel(self)
@@ -52,15 +54,14 @@ class Notebook(wx.Notebook):
         wx.Notebook.__init__(self, parent, id=wx.ID_ANY, style=wx.BK_DEFAULT)
 
         self.config = ConfigPanel(self)
-        self.config.SetBackgroundColour("#DFDFDF")
+        # self.config.SetBackgroundColour("#DFDFDF")
         self.AddPage(self.config, "Configuration")
         
         self.log = LogPanel(self)
-        self.log.SetBackgroundColour("#DFDFDF")
+        # self.log.SetBackgroundColour("#DFDFDF")
         self.AddPage(self.log, "Log")
 
         self.about = AboutPanel(self)
-        self.about.SetBackgroundColour("#DFDFDF")
         self.AddPage(self.about, "About")
 
 class ConfigPanel(wx.Panel):
@@ -81,10 +82,12 @@ class ConfigPanel(wx.Panel):
 
         st = wx.StaticText(panel, label="Auth Token: ",
                            style=wx.TE_DONTWRAP)
-        sizer.Add(st, flag=wx.ALL)
+        sizer.Add(st, flag=wx.LEFT | wx.RIGHT | wx.ALIGN_CENTRE_VERTICAL,
+                  border=5)
 
         tc = wx.TextCtrl(panel, -1, self.config.Read("auth_token"))
         self.auth_token = tc
+        self.auth_token_ok = False
         self.auth_lost_focus(None) # initialize color
         tc.SetMaxLength(64)
         tc.Bind(wx.EVT_SET_FOCUS, self.auth_got_focus)
@@ -93,11 +96,11 @@ class ConfigPanel(wx.Panel):
 
         checkb = wx.Button(panel, label="Check")
         checkb.Bind(wx.EVT_BUTTON, self.on_check)
-        sizer.Add(checkb, tc, flag=wx.ALL)
+        sizer.Add(checkb, flag=wx.ALL)
 
         getb = wx.Button(panel, label="Get Your Token")
-        checkb.Bind(wx.EVT_BUTTON, self.on_get)
-        sizer.Add(getb, tc, flag=wx.ALL)
+        getb.Bind(wx.EVT_BUTTON, self.on_get)
+        sizer.Add(getb, flag=wx.ALL)
 
         panel.SetSizer(sizer)
         return panel
@@ -127,6 +130,7 @@ class ConfigPanel(wx.Panel):
                                         "current user logs in"))
         sizer.Add(cb, flag=wx.ALL | wx.EXPAND, border=2)
         cb = ConfigCheckBox(panel, 'show_all_rpc_calls', self.config,
+                            default=False,
                             label='Show all RPC calls',
                             tooltip=("Show all RPC calls as they happen; "
                                      "mostly of technical interest"))
@@ -138,15 +142,18 @@ class ConfigPanel(wx.Panel):
     def auth_got_focus(self, event):
         if self.auth_token:
             self.auth_token.SetBackgroundColour("White")
+            self.auth_token.SetSelection(-1, -1)
 
-    def auth_lost_focus(self, event):
+    def auth_lost_focus(self, event, do_notify=False):
         if self.auth_token:
             auth_token = self.auth_token.GetValue()
             self.config.Write("auth_token", auth_token)
             if rpc.check_auth_token(auth_token):
                 self.auth_token.SetBackgroundColour("#AFFFAF")
+                self.auth_token_ok = True
             else:
                 self.auth_token.SetBackgroundColour("#FFAFAF")
+                self.auth_token_ok = False
 
     def on_check(self, event):
         self.auth_lost_focus(event)
@@ -236,13 +243,15 @@ class LogPanel(wx.Panel):
 class AboutPanel(wx.Panel):
     def __init__(self, parent):
         wx.Panel.__init__(self, parent=parent, id=wx.ID_ANY)
-        self.text = wx.StaticText(self, style=wx.ALIGN_CENTRE,
-                                  label=version.ABOUT)
-        sizer = wx.BoxSizer(wx.HORIZONTAL)
-        sizer.Add(self.text, 
-                  flag=wx.ALL | wx.ALIGN_CENTRE_VERTICAL,
-                  proportion=1)
+        html = wxHTML(self)
+        sizer = wx.BoxSizer(wx.VERTICAL)
+        sizer.Add(html, flag=wx.ALL|wx.EXPAND, proportion=1)
         self.SetSizer(sizer)
+        html.SetPage(version.ABOUTHTML)
+
+class wxHTML(wx.html.HtmlWindow):
+    def OnLinkClicked(self, link):
+        webbrowser.open(link.GetHref(), new=2)
 
 ##################################################################
 # Hiding in the systray

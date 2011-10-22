@@ -24,8 +24,8 @@ class Status(threading.Thread):
     def run2(self):
         while True:
             self.control.status(
-                "Watching %s %s, %s in %s %s uploaded, "
-                "fileq %s, dataq %s" %
+                "Watching %s %s, uploaded %s in %s %s, "
+                "parse queue %s, upload queue %s" %
                 (self.numdirs,
                  "directory" if self.numdirs == 1 else "directories",
                  sizestring(self.numbytes),

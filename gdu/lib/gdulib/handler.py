@@ -11,6 +11,7 @@ class Handler(threading.Thread):
         self.control = control
         self.fileq = fileq
         self.dataq = dataq
+        self.uploaded = set()
 
     def run(self):
         while True:
@@ -21,10 +22,16 @@ class Handler(threading.Thread):
                 time.sleep(10)
 
     def run2(self):
+        # FIXME! We should clean up self.uploaded from time to time
         while True:
             filename = self.fileq.get()
             try:
                 obj = cache_load(filename)
+            except IOError:
+                # We regularly get a "permission denied" when the file
+                # is still locked, ignore this. We get a new notification
+                # when the file is done
+                continue
             except:
                 logging.exception("Can't load file %s" % filename)
                 continue
@@ -34,16 +41,18 @@ class Handler(threading.Thread):
             methodcall = make_methodcall(obj[0])
             data = cache_dump(self.control, obj)
             if self.control.show_all_rpc_calls:
-                logging.info("RPC call: %s" % methodcall)
+                logging.info("EVE RPC call: %s" % methodcall)
             if data is not None:
-                self.dataq.put(data)
+                key = filename, data['timestamp']
+                if key not in self.uploaded:
+                    self.uploaded.add(key)
+                    self.dataq.put(data)
                 
 def cache_dump(control, obj):
     method = make_methodcall(obj[0], False)
     if not control.handle_method(method):
         return None
-    timestamp = wintime_to_datetime(obj[1]['version'][0]
-                                    ).strftime("%Y-%m-%d %H:%M:%S")
+    timestamp = obj[1]['version'][0]
     handler = FILE_HANDLER.get(method)
     if handler is not None:
         d = handler.handle(obj)
@@ -100,12 +109,22 @@ Upload current buy and sell orders when the market is viewed\
         sellorder, buyorder = obj[1]['lret']
         result = []
         for order in sellorder + buyorder:
+            if regionid != order.regionID:
+                logging.warning("Order ID %s regionID (%s) differs from RPC "
+                                "call regionID (%s)" % (order.orderID,
+                                                        order.regionID,
+                                                        regionid))
+            if typeid != order.typeID:
+                logging.warning("Order ID %s typeID (%s) differs from RPC "
+                                "call typeID (%s)" % (order.orderID,
+                                                      order.typeID,
+                                                      typeid))
             result.append(dict((name, getattr(order, name))
                                for name in [
-                        'price', 'volRemaining', 'typeID', 'range', 'orderID',
+                        'price', 'volRemaining', 'range', 'orderID',
                         'volEntered', 'minVolume', 'bid', 'issueDate',
-                        'duration', 'stationID', 'regionID', 'solarSystemID',
-                        'jumps'
+                        'duration', 'stationID', 'solarSystemID', 'jumps'
+                        # 'typeID', 'regionID'
                         ]))
         return {'method': self.method,
                 'regionid': regionid,
@@ -123,8 +142,6 @@ Upload current victory points when the occupation map is viewed\
         result = []
         for factionid, details in obj[1]['lret'].items():
             for sysid, threshold, current in details['defending']:
-                if current == 0:
-                    continue
                 result.append({'faction': factionid,
                                'system': sysid,
                                'threshold': threshold,

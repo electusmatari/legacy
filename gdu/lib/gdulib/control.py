@@ -1,6 +1,8 @@
 import logging
 import Queue
 
+import wx
+
 from gdulib import rpc, version
 
 from gdulib.status import Status
@@ -18,6 +20,10 @@ class AppControl(object):
         return self.frame.notebook.config.auth_token.GetValue()
 
     @property
+    def auth_token_ok(self):
+        return self.frame.notebook.config.auth_token_ok
+
+    @property
     def show_all_rpc_calls(self):
         return self.frame.notebook.config.show_all_rpc_calls.GetValue()
 
@@ -25,16 +31,20 @@ class AppControl(object):
         self.frame.statusbar.SetStatusText(text)
 
     def handle_method(self, methodname):
-        for cb in self.frame.checkboxes:
+        for cb in self.frame.notebook.config.checkboxes:
             if cb.option == methodname:
                 return cb.GetValue()
         return True
 
-    def is_configured_correctly(self):
-        auth_token = self.auth_token
-        if not rpc.check_auth_token(auth_token):
-            return False
-        return True
+    def configuration_problem(self, message):
+        if self.frame.IsIconized():
+            self.frame.Iconize(False)
+        if not self.frame.IsShown():
+            self.frame.Show(True)
+            self.frame.Raise()
+        self.frame.notebook.ChangeSelection(0)
+        wx.MessageBox(message, "Configuration Problem",
+                      wx.OK | wx.ICON_ERROR)
 
     def initialize(self):
         logging.info("%s %s starting." % (version.APPLONGNAME,

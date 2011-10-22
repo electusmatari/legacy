@@ -1,29 +1,165 @@
-* grdweb API
-/json/rpc/
-- POST: {'auth_token': '...',
-         'method': '...',
-         'args': '...'}
-- Returns {'error': ...} or {'result': ...}
-
-Methods:
-- check_auth_token()
-  => {'result': {'isvalid': True|False, 'username': ...}}
-- gmu_submit(data)
-  {'method': ...,
-   'timestamp': ...,
-   ...}
-* Add RPC upload
-- RPC upload
-- rpc.py (rename from api.py)
-* Updater
+* Make webpage
+http://gradient.electusmatari.com/uploader/
+- Description
+- Move industry/autoupload/ to gmi/autoupload/
+http://gradient.electusmatari.com/uploader/token/
+http://gradient.electusmatari.com/uploader/files/
+http://gradient.electusmatari.com/uploader/files/gdu.exe
+http://gradient.electusmatari.com/uploader/files/version.txt
+* New version check
 - DON'T automatically download
 - Display notification: "New version available, download here..."
+/uploader/files/version.txt
+- control.configuration_problem("New version available")
+  - And open website on "OK"
+* Notify of crash
+- Upload exception backtraces
+* Sanity check
+On startup, some sanity checks:
+- in /cache/, check for evepreiumpatch*.exe, notify about them being
+  present
+- Check for old MachoNet folders (and their size), notify about them
+  being present
+- Check total size of current MachoNet folder, inform about that
+* Public API
+- Copy FacWarSystems.xml.aspx
+  solarSystemID solarSystemName
+  occupyingFactionID occupyingFactionName
+  owningFactionID owningFactionName
+  victoryPoints threshold
+  contested
+* Notifications
+** Server side (Python)
+SELECT tid, username, subject
+FROM mybb_threads
+WHERE fid in (%(FID_LIST)s)
+  AND NOT sticky
+  AND subject REGEXP '^[0-9]+\.[0-9]{2}\.[0-9]{2}'
+  AND subject >= %(TODAY)s;
 
-/json/gdu/
-=> {'type': 'versioncheck'}
-<= {'type': 'versioncheck', 'result': 1.2}
+FID_LIST:
+- 111 => Electus Matari
+- 144 => Gradient
+- 145 => Lutinari Syndicate
+- 149 => Ally
 
-Make the uploader not correctly configured
-Gives a popup dialog box
-* Baloon info
-http://code.google.com/p/readertray/source/browse/trunk/readergui.py
+TODAY:
+now = datetime.datetime.utcnow()
+today = "%s.%02i.%02i" % (now.year - 1898, now.month, now.day)
+
+subject:
+- r"^(\d+\.\d{2}\.\d{2}).*\| *(\d\d?:\d{2}) *\|(?: *([^|]*\S) *\|)? *(.*)"
+  => (date, time, location|None, text)
+
+/operations/
+- Explain notifications, display firefox plugin, etc.
+
+/operations/json/
+= [{'url': 'http://.../',
+    'username': ...,
+    'time': <time in milliseconds>,
+    'location': ...,
+    'text': ...},
+   ...]
+** Client side (JavaScript)
+new Date().getTime() => current ms
+- Check every 5 (15?) minutes
+- Announce ops 1h in advance, 15 minutes in advance, and when they
+  start
+- Remember tids for announced ops in 3 groups
+  - If the op time for a tid changes, forget it again
+- Forget tids that are not in a JSON result anymore
+- icon: http://www.electusmatari.com/media/img/emlogo.png
+
+Upcoming Operations table:
+- Replace "announce" stuff with notification display
+  - "Notifications disabled/enabled/not supported"
+    => link to notifications page
+
+Firefox extension:
+https://addons.mozilla.org/en-US/firefox/addon/html-notifications/
+
+API specification:
+http://www.chromium.org/developers/design-documents/desktop-notifications/api-specification
+
+Example sourcode:
+
+window.webkitNotifications.checkPermission()
+=> 0 - window.webkitNotifications.PERMISSION_ALLOWED
+   - Explicitly allowed
+=> 1 - window.webkitNotifications.PERMISSION_NOT_ALLOWED
+   - No decision yet
+=> 2 - window.webkitNotifications.PERMISSION_DENIED
+   - Explicitly forbidden
+
+window.webkitNotifications.requestPermission(function () {
+  - do checkPermission again
+  - then handle the user request ...
+  - *might* not be called on DENIED
+})
+
+n = window.webkitNotifications.createNotification("icon", "title", "body")
+n.show()
+- Icon can be any image URL
+- Title can be any string (no HTML)
+- body is text (with newlinest), allows <a> and <b> HTML
+* Far future
+** eve-cache.com, api.eve-cache.com
+/
+- Tabs: Overview / Market / Factional Warfare / Auth Token / Uploader
+- Overview: Quick blurb about the site, ad for the uploader
+  - Thanks to Entity for his library!
+- Auth Token:
+  - Enter API key, get token
+
+/faction/<name>/
+- Selected display of FacWarTopStats
+- Tabs: Yesterday / Last Week / All Time
+
+/market/history/?typeID=&regionID=&days=
+- History graph or table like in-game
+
+/market/orders/?typeID=&regionID=
+- Current market orders displayed like in-game
+
+api.eve-cache.com
+- Public API for all uploaded stuff
+- Look&feel like the official EVE API
+
+- /eve/CorpFaction.xml.aspx?ids=<id>,<id>,...
+  => id= name= factionid= factionname=
+  - Add "last info from..." tag, too
+- /market/PriceHistory.xml.aspx?regionID=&typeID=&days=<n>
+- /market/Orders.xml.aspx?regionID=&typeID=
+  => Currently active orders
+- /market/OrderHistory.xml.aspx?regionID=&typeID=&fromID=<n>
+  => Order uploads, either last day or from that fromID, at most 1000
+- /map/FacWarSystems.xml.aspx
+  => Same as official API, plus victoryPoints and threshold
+
+Later:
+- Add something for pilot IDs for evewho?
+
+lookupSvc.LookupPlayerCharacters
+>>> obj[0]
+('lookupSvc', 'LookupPlayerCharacters', u'Jilnor', 1)
+>>> obj[1]['lret'].header.Keys()
+['characterID', 'characterName', 'typeID']
+
+charMgr.GetTopBounties
+>>> obj[1]['lret'].header.Keys()
+['characterID', 'ownerName', 'bounty', 'online']
+- 50 names
+** eve-napfest.com
+- No registration needed
+- Add API key for contacts check
+  - Contacts page also has a "API key active?" display
+
+/
+- Search for corp/alliance
+- "Add API Key" box to the right
+- Top lists: Most standings, most pilots blue/red, etc.
+/corp/<name>/
+/alliance/<name>/
+- Standings of this corp / alliance
+- Tabs: Positive / Negative / Changes
