@@ -18,7 +18,7 @@ class Uploader(threading.Thread):
             try:
                 self.run2()
             except:
-                logging.exception("Exception during Uploader run")
+                self.control.exception("Exception during Uploader run")
                 time.sleep(10)
 
     def run2(self):

@@ -1,5 +1,8 @@
+import datetime
 import logging
 import Queue
+import urllib
+import webbrowser
 
 import wx
 
@@ -13,6 +16,7 @@ from gdulib.uploader import Uploader
 class AppControl(object):
     def __init__(self, frame):
         self.frame = frame
+        self.last_exception = None
         self.initialize()
 
     @property
@@ -36,15 +40,24 @@ class AppControl(object):
                 return cb.GetValue()
         return True
 
-    def configuration_problem(self, message):
+    def exception(self, text):
+        now = datetime.datetime.now()
+        if (self.last_exception is None or
+            (now - self.last_exception) > datetime.timedelta(minutes=5)):
+            # Only once every 5 minutes
+            rpc.submit_exception(self.auth_token, text)
+            self.last_exception = now
+        logging.exception(text)
+
+    def configuration_problem(self, message, title="Configuration Problem",
+                              style=wx.OK | wx.ICON_ERROR):
         if self.frame.IsIconized():
             self.frame.Iconize(False)
         if not self.frame.IsShown():
             self.frame.Show(True)
             self.frame.Raise()
         self.frame.notebook.ChangeSelection(0)
-        wx.MessageBox(message, "Configuration Problem",
-                      wx.OK | wx.ICON_ERROR)
+        return wx.MessageBox(message, title, style)
 
     def initialize(self):
         logging.info("%s %s starting." % (version.APPLONGNAME,
@@ -61,3 +74,31 @@ class AppControl(object):
         h.start()
         u = Uploader(self, self.dataq, s)
         u.start()
+
+    def check_version(self):
+        current = float(urllib.urlopen("http://gradient.electusmatari.com/uploader/files/version.txt").read())
+        if (current - version.VERSION) > 0.005:
+            response = self.configuration_problem(
+                "A new version of the Gradient Data Uploader is available.\n"
+                "Your version: %.1f\n"
+                "Available: %.1f\n"
+                "Do you wish to download it?" % (version.VERSION, current),
+                style=(wx.ICON_INFORMATION |
+                       wx.YES_NO))
+            if response == wx.YES:
+                webbrowser.open("http://gradient.electusmatari.com/uploader/",
+                                new=2)
+            
+    def check_token(self):
+        if self.auth_token_ok:
+            return True
+        if self.auth_token == "":
+            message = ("You have not configured an authentication token yet. "
+                       "You will not be able to upload data until you have "
+                       "done so.")
+        else:
+            message = ("The authentication token you have specified is "
+                       "invaid. Please configure a correct token.")
+        self.configuration_problem(message)
+        return False
+

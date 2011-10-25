@@ -3,6 +3,7 @@ import threading
 import time
 
 from gdulib.cacheutils import cache_load, make_methodcall, wintime_to_datetime
+from gdulib import rpc
 
 class Handler(threading.Thread):
     def __init__(self, control, fileq, dataq):
@@ -18,7 +19,7 @@ class Handler(threading.Thread):
             try:
                 self.run2()
             except:
-                logging.exception("Exception during Handler run")
+                self.control.exception("Exception during Handler run")
                 time.sleep(10)
 
     def run2(self):
@@ -33,7 +34,7 @@ class Handler(threading.Thread):
                 # when the file is done
                 continue
             except:
-                logging.exception("Can't load file %s" % filename)
+                self.control.exception("Can't load file %s" % filename)
                 continue
             if len(obj) != 2:
                 logging.info("Cache file isn't a method call: %s" % filename)
@@ -142,8 +143,8 @@ Upload current victory points when the occupation map is viewed\
         result = []
         for factionid, details in obj[1]['lret'].items():
             for sysid, threshold, current in details['defending']:
-                result.append({'faction': factionid,
-                               'system': sysid,
+                result.append({'factionid': factionid,
+                               'systemid': sysid,
                                'threshold': threshold,
                                'current': current})
         return {'method': self.method,

@@ -18,7 +18,7 @@ class Status(threading.Thread):
             try:
                 self.run2()
             except:
-                logging.exception("Exception during Status run")
+                self.control.exception("Exception during Status run")
                 time.sleep(10)
 
     def run2(self):

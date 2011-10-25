@@ -1,29 +1,3 @@
-APPNAME = "GDU"
-APPLONGNAME = "Gradient Data Uploader"
-APPURL = "http://gradient.electusmatari.com/uploader/"
-AUTH_TOKEN_URL = "http://gradient.electusmatari.com/uploader/token/"
-
-VENDORNAME = "Gradient"
-COPYRIGHT = "Copyright (C) 2011 Jorgen Schaefer"
-
-VERSION = 0.5
-VERSIONSTRING = "%.1f" % VERSION
-
-DESCRIPTION = """\
-The Gradient Data Uploader is a data mining tool that watches the
-cache files of EVE Online clients for interesting data, extracts the
-data, and uploads it to the Gradient website.\
-"""
-
-ABOUT = """\
-%s v%s
-Copyright (c) 2011 Jorgen Schaefer. All rights reserved.
-(aka Arkady Sadik)
-
-Released under the 2-clause BSD License.
-""" % (APPLONGNAME, VERSIONSTRING)
-
-LICENSE = """\
 Copyright 2011 Jorgen Schaefer. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -54,15 +28,3 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 The views and conclusions contained in the software and documentation
 are those of the authors and should not be interpreted as representing
 official policies, either expressed or implied, of Jorgen Schaefer.
-"""
-
-ABOUTHTML = """
-<h1>%(APPLONGNAME)s v%(VERSIONSTRING)s</h1>
-<b>%(COPYRIGHT)s</b><br />
-
-<p>%(DESCRIPTION)s</p>
-
-<p><a href="%(APPURL)s">Application Homepage</a></p>
-
-<pre>%(LICENSE)s</pre>
-""" % locals()

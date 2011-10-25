@@ -67,7 +67,7 @@ class Notebook(wx.Notebook):
 class ConfigPanel(wx.Panel):
     def __init__(self, parent):
         wx.Panel.__init__(self, parent=parent, id=wx.ID_ANY)
-        self.config = wx.Config(version.APPNAME, version.VENDORNAME)
+        self.config = wx.Config(version.APPLONGNAME, version.VENDORNAME)
 
         sizer = wx.BoxSizer(wx.VERTICAL)
         sizer.Add(self.init_auth_panel(), flag=wx.ALL | wx.EXPAND, border=5)

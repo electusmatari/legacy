@@ -56,7 +56,8 @@ class Watcher(threading.Thread):
             try:
                 self.watch_single_dir2(dirname)
             except:
-                logging.exception("Exception during watching of %s" % dirname)
+                self.control.exception("Exception during watching of %s" %
+                                       dirname)
                 time.sleep(10)
 
     def watch_single_dir2(self, dirname):

@@ -1,12 +1,11 @@
 import httplib
 import json
+import traceback
 
-def rpc_call(auth_token, method, args):
+def rpc_call(method, args):
     conn = httplib.HTTPConnection("gradient.electusmatari.com")
-    conn.request("POST", "/uploader/json/rpc/",
-                 json.dumps({'auth_token': auth_token,
-                             'method': method,
-                             'args': args}),
+    conn.request("POST", "/uploader/json/rpc/%s/" % method,
+                 json.dumps(args),
                  {'Content-Type': 'text/json'})
     response = conn.getresponse()
     data = response.read()
@@ -23,11 +22,18 @@ def rpc_call(auth_token, method, args):
     return obj['result']
 
 def check_auth_token(auth_token):
-    v = rpc_call(auth_token, 'check_auth_token', None)
-    return v['isvalid']
+    return rpc_call('check', {'auth_token': auth_token})
 
 def submit_cache_data(auth_token, data):
-    return rpc_call(auth_token, 'submit_cache_data', data)
+    data = data.copy()
+    data['auth_token'] = auth_token
+    return rpc_call('submit', data)
+
+def submit_exception(auth_token, text):
+    return rpc_call('exception',
+                    {'auth_token': auth_token,
+                     'description': text,
+                     'trace': traceback.format_exc()})
 
 class RPCError(Exception):
     pass
