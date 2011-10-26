@@ -22,7 +22,7 @@ from gradient.uploader.models import MarketOrder, MarketOrderLastUpload
 from emtools.intel.models import Pilot, Corporation, Faction
 
 def view_overview(request):
-    if request.user is not None:
+    if request.user.is_authenticated():
         try:
             token = AuthToken.objects.get(user=request.user).tokenstring
         except AuthToken.DoesNotExist:
@@ -36,7 +36,7 @@ def view_overview(request):
                        'isigb': isigb})
 
 def view_token(request):
-    if request.user is not None:
+    if request.user.is_authenticated():
         try:
             token = AuthToken.objects.get(user=request.user)
         except AuthToken.DoesNotExist:
@@ -47,7 +47,7 @@ def view_token(request):
         if token is not None:
             token.tokenstring = generate_auth_token()
             token.save()
-        elif request.user is not None:
+        elif request.user.is_authenticated():
             AuthToken.objects.create(
                 user=request.user,
                 tokenstring=generate_auth_token()
@@ -212,9 +212,11 @@ def json_suggest_corporations(request):
     current = datetime.datetime.utcnow() - datetime.timedelta(days=1)
     c = connection.cursor()
     c.execute("SELECT corporationid "
-              "FROM intel_corporation "
-              "WHERE factionid = 500003 "
-              "AND lastcache < %s "
+              "FROM intel_corporation c "
+              "     INNER JOIN intel_faction f "
+              "ON c.faction_id = f.id "
+              "WHERE f.name = 'Amarr Empire' "
+              "AND (lastcache IS NULL OR lastcache < %s) "
               "ORDER BY lastcache ASC",
               (current,))
     result = [corpid for (corpid,) in c.fetchall()]

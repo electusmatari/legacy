@@ -3,7 +3,7 @@ import datetime
 from django.db import models
 from django.contrib.auth.models import User
 
-from gradient.industry.dbutils import get_typename, get_itemname
+from gradient.dbutils import get_typename, get_itemname
 
 ORDERTYPE_CHOICES = [('sell', 'Sell Order'),
                      ('buy', 'Buy Order')]

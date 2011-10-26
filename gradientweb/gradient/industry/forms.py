@@ -2,8 +2,8 @@ from django import forms
 
 from gradient.industry.models import WantedMarketOrder, StockLevel
 from gradient.industry.models import BlueprintOriginal
-from gradient.industry.dbutils import get_itemname, get_itemid
-from gradient.industry.dbutils import get_typename, get_typeid
+from gradient.dbutils import get_itemname, get_itemid
+from gradient.dbutils import get_typename, get_typeid
 
 class StationField(forms.CharField):
     def clean(self, data):

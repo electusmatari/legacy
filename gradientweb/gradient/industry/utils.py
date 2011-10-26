@@ -3,14 +3,18 @@ import logging
 import urllib
 from xml.etree import ElementTree
 
-from django.db import connection, transaction
+from django.db import transaction
 from django.db.models import Sum
 
 from emtools.ccpeve.models import APIKey
 
+from gradient.index.models import Index
+
+from gradient.dbutils import get_typename, get_stationsystem, get_systemregion
+from gradient.dbutils import system_distance
+
 from gradient.industry.dbutils import InvType, get_decryptors
-from gradient.industry.dbutils import get_typename, stationid_to_systemid
-from gradient.industry.dbutils import systemid_to_regionid, system_distance
+
 from gradient.industry.models import BlueprintOriginal
 from gradient.industry.models import set_last_update
 from gradient.industry.models import Transaction, Journal, PriceList
@@ -253,21 +257,15 @@ class Bag(object):
             self[k] *= number
         return self
 
-class Index(object):
+class IndexCalculator(object):
     def __init__(self):
         self.index = {}
-        c = connection.cursor()
-        c.execute("SELECT t.typename, h.republic, h.jita "
-                  "FROM gmi_index i "
-                  "     INNER JOIN gmi_indexhistory h "
-                  "       ON i.latest_id = h.id "
-                  "     INNER JOIN ccp.invtypes t "
-                  "       ON h.typeid = t.typeid")
-        for typename, value, jita in c.fetchall():
-            if typename in USE_JITA_INDEX:
-                self.index[typename] = jita
+        
+        for row in Index.objects.all():
+            if row.typename in USE_JITA_INDEX:
+                self.index[row.typename] = row.jita
             else:
-                self.index[typename] = value
+                self.index[row.typename] = row.value
 
     def bag_cost(self, bag):
         total = 0.0
@@ -366,7 +364,7 @@ def get_component_list(typename):
     invtype = InvType.from_typename(typename)
     # Blueprint
     bplist = blueprints(invtype)
-    index = Index()
+    index = IndexCalculator()
     if len(bplist) > 0:
         result = []
         for bp in bplist:
@@ -499,7 +497,7 @@ def publicmarket_save(typeid, tree):
             last_seen=now,
             ordertype=ordertype,
             regionid=int(order.find("region").text),
-            systemid=stationid_to_systemid(stationid),
+            systemid=get_stationsystem(stationid),
             stationid=stationid,
             range=int(order.find("range").text),
             typeid=typeid,
@@ -617,7 +615,7 @@ def update_journal(grd, accountkey):
 
 def update_pricelist(grd):
     set_last_update('pricelist', datetime.datetime.utcnow())
-    index = Index()
+    index = IndexCalculator()
     bposet = set()
     inventable = []
     known = set()
@@ -710,7 +708,7 @@ def get_safetymargin(product):
                            (tl, product.typename))
 
 def update_marketorder(grd):
-    index = Index()
+    index = IndexCalculator()
     pricelist = dict((p.typename, p.productioncost * p.safetymargin)
                      for p in PriceList.objects.all())
     MarketOrder.objects.all().delete()
@@ -895,8 +893,8 @@ def make_stationid(locationid):
     
 def get_competitionprice(ordertype, stationid, typeid, volremaining,
                          orderprice, orderrange):
-    systemid = stationid_to_systemid(stationid)
-    regionid = systemid_to_regionid(systemid)
+    systemid = get_stationsystem(stationid)
+    regionid = get_systemregion(systemid)
     qs = PublicMarketOrder.objects.filter(
         ordertype=ordertype,
         regionid=regionid,

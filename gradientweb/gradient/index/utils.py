@@ -1,7 +1,7 @@
 import datetime
 
 from gradient import dbutils
-from gradient.uploader.models import MarketHistory
+from gradient.uploader.models import MarketHistory, MarketHistoryLastUpload
 from gradient.index.models import Index, IndexHistory
 
 def update_index():
@@ -11,30 +11,34 @@ def update_index():
         idxh = IndexHistory()
         idxh.typeid = idx.typeid
         # Heimatar
-        price, volume, age = get_region_index(idx.typeid, dbutils.HEIMATAR)
+        price, volume = get_region_index(idx.typeid, dbutils.HEIMATAR)
         idxh.heimatarchange = idx.heimatarchange = price - idx.heimatar
         idxh.heimatar = idx.heimatar = price
         idxh.heimatarvolume = idx.heimatarvolume = volume
-        idxh.heimatarage = idx.heimatarage = age
+        idxh.heimatarage = idx.heimatarage = get_region_age(idx.typeid,
+                                                            dbutils.HEIMATAR)
         # Metropolis
-        price, volume, age = get_region_index(idx.typeid, dbutils.METROPOLIS)
+        price, volume = get_region_index(idx.typeid, dbutils.METROPOLIS)
         idxh.metropolischange = idx.metropolischange = price - idx.metropolis
         idxh.metropolis = idx.metropolis = price
         idxh.metropolisvolume = idx.metropolisvolume = volume
-        idxh.metropolisage = idx.metropolisage = age
+        idxh.metropolisage = idx.metropolisage = get_region_age(idx.typeid,
+                                                                dbutils.METROPOLIS)
         # Molden Heath
-        price, volume, age = get_region_index(idx.typeid, dbutils.MOLDENHEATH)
+        price, volume = get_region_index(idx.typeid, dbutils.MOLDENHEATH)
         idxh.moldenheathchange = idx.moldenheathchange = (price -
                                                           idx.moldenheath)
         idxh.moldenheath = idx.moldenheath = price
         idxh.moldenheathvolume = idx.moldenheathvolume = volume
-        idxh.moldenheathage = idx.moldenheathage = age
+        idxh.moldenheathage = idx.moldenheathage = get_region_age(idx.typeid,
+                                                                  dbutils.MOLDENHEATH)
         # The Forge
-        price, volume, age = get_region_index(idx.typeid, dbutils.THEFORGE)
+        price, volume = get_region_index(idx.typeid, dbutils.THEFORGE)
         idxh.jitachange = idx.jitachange = price - idx.jita
         idxh.jita = idx.jita = price
         idxh.jitavolume = idx.jitavolume = volume
-        idxh.jitaage = idx.jitaage = age
+        idxh.jitaage = idx.jitaage = get_region_age(idx.typeid,
+                                                    dbutils.THEFORGE)
         # Republic
         price, volume = get_republic_index(idx)
         idxh.republicchange = idx.republicchange = price - idx.republic
@@ -51,6 +55,15 @@ def update_index():
         update_refineable(idx, idxh)
         idx.save()
         idxh.save()
+
+def get_region_age(typeid, regionid):
+    now = datetime.datetime.now()
+    try:
+        mhlu = MarketHistoryLastUpload.objects.get(typeid=typeid,
+                                                   regionid=regionid)
+        return (now - mhlu.cachetimestamp).days
+    except MarketHistoryLastUpload.DoesNotExist:
+        return 3650
 
 def get_region_index(typeid, regionid):
     # Price is the average price of the last 7 days with transactions
@@ -76,11 +89,7 @@ def get_region_index(typeid, regionid):
     else:
         price = 0.0
     volume = volume7d
-    if firstdate is None:
-        age = 367
-    else:
-        age = (now - firstdate).days
-    return price, volume, age
+    return price, volume
 
 def get_republic_index(idx):
     # Average price of the regions
@@ -110,7 +119,7 @@ def update_refineable(idx, idxh):
     jitaprice = 0
     try:
         for typeid, quantity in dbutils.reprocess(idx.typeid):
-            material = Index.objects.get(typeid=typeid)
+            material = Index.objects.filter(typeid=typeid)[0:1].get()
             price += quantity * material.republic
             heimatarprice += quantity * material.heimatar
             metropolisprice += quantity * material.metropolis

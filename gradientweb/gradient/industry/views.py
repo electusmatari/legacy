@@ -14,8 +14,8 @@ from gradient.industry.models import PriceList, BlueprintOriginal
 from gradient.industry.models import Stock, StockLevel, Transaction
 from gradient.industry.models import MarketOrder, WantedMarketOrder
 from gradient.industry.models import LastUpdate
-from gradient.industry.dbutils import get_typeid, get_typename, get_itemname
-from gradient.industry.dbutils import get_membername, get_itemid
+from gradient.dbutils import get_typeid, get_typename, get_itemname
+from gradient.dbutils import get_membername, get_itemid
 from gradient.industry.utils import last_price, get_component_list
 from gradient.industry.forms import WantedMarketOrderForm, StockLevelForm
 from gradient.industry.forms import BlueprintOriginalForm

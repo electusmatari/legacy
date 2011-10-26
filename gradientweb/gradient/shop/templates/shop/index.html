@@ -60,7 +60,7 @@
 {% include "shop/product.html" %}
 {% empty %}
 <p>We are afraid we were not able to find any products matching your
-  query. Please try a different search term.</p>
+  query, "{{needle}}". Please try a different search term.</p>
 {% endfor %}
 
 {% if page.has_other_pages %}

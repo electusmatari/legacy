@@ -90,7 +90,6 @@ INSTALLED_APPS = (
     'emtools.emauth',
     'gradient.grdstatic',
     'gradient.shop',
-    'gradient.gmi',
     'gradient.index',
     'gradient.recruitment',
     'gradient.rc',
