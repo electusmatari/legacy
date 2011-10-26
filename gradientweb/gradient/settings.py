@@ -91,9 +91,12 @@ INSTALLED_APPS = (
     'gradient.grdstatic',
     'gradient.shop',
     'gradient.gmi',
+    'gradient.index',
+    'gradient.recruitment',
     'gradient.rc',
     'gradient.gts',
     'gradient.industry',
+    'gradient.uploader',
 )
 
 AUTH_PROFILE_MODULE = 'emauth.Profile'

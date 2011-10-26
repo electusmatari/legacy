@@ -40,6 +40,22 @@ def get_itemid(itemname):
     else:
         return None
 
+def get_systemfaction(systemid):
+    c = connection.cursor()
+    c.execute("SELECT COALESCE(s.factionid, c.factionid, r.factionid) "
+              "FROM ccp.mapsolarsystems s "
+              "     INNER JOIN ccp.mapconstellations c "
+              "       ON s.constellationid = c.constellationid "
+              "     INNER JOIN ccp.mapregions r "
+              "       ON c.regionid = r.regionid "
+              "WHERE s.solarsystemid = %s",
+              (systemid,))
+    if c.rowcount > 0:
+        return c.fetchone()[0]
+    else:
+        return None
+    
+
 def get_membername(charid):
     grd = APIKey.objects.get(name='Gradient').corp()
     for row in grd.MemberTracking().members:

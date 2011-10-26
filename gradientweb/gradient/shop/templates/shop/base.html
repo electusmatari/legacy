@@ -29,6 +29,11 @@ table.messages td {
   border: 1px solid #808080;
   vertical-align: top;
 }
+
+#browsebutton {
+  float: left;
+  margin-right: 1em;
+}
 </style>
 {% block rhsheader %}
 {% endblock %}
@@ -38,6 +43,10 @@ table.messages td {
 
 {% block content %}
 <div id="shopsearch">
+<form id="browsebutton" method="get" action="/shop/">
+<input type="hidden" name="search" value="" />
+<input type="submit" value="Browse All" />
+</form>
 <form method="get" action="/shop/">
 <label style="height: 3em; vertical-align: middle" for="searchinput">Search:</label>
 <input id="searchinput" type="text" size="42" name="search"

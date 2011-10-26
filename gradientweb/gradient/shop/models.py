@@ -48,6 +48,7 @@ class SalesOffice(models.Model):
         ordering = ['id']
 
 class Order(models.Model):
+    created = models.DateTimeField(auto_now_add=True)
     # Customer
     characterid = models.BigIntegerField()
     name = models.CharField(max_length=255)

@@ -54,3 +54,7 @@ def setpage(value, arg):
 @register.filter
 def itemdb(value):
     return value.replace(" ", "_")
+
+@register.filter
+def format(value, fmt):
+    return fmt %  value

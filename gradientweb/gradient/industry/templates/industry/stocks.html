@@ -53,6 +53,12 @@ ul.ui-autocomplete {
   entries as red if the current stock level is below the "low" value,
   and will note a missing quantity up to the "high" value.</p>
 
+{% if not watched %}
+<form method="get" action="/industry/stocks/create/">
+<input type="submit" value="Create new stock level request" />
+</form>
+{% endif %}
+
 {% for stationname, stock_list in station_list %}
 <h3>{{stationname}}</h3>
 

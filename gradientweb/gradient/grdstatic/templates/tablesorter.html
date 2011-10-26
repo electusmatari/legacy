@@ -8,7 +8,11 @@ $.tablesorter.addParser({
     return false;
   },
   format: function (s) {
-    return s.replace(/,/g, "") * 100;
+    if (s == "?") {
+      return Number.POSITIVE_INFINITY;
+    } else {
+      return s.replace(/,/g, "") * 100;
+    }
   },
   type: 'numeric'
 });

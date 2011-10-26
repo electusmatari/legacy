@@ -36,7 +36,7 @@ $(function () {
 <h2>Customer: {{customer}} ({{standing}})</h2>
 
 {% if message %}
-<p>Last message from {{message.created|date:"Y-m-d H:i"}}: <em>{{message.text}}.</em></p>
+<p>Last message on {{message.created|date:"Y-m-d H:i"}} by {{message.authorname}}: <em>{{message.text}}.</em></p>
 
 <p><a href="/shop/handle/messages/{{characterid}}/">All
     messages</a></p>

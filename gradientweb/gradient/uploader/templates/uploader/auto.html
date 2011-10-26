@@ -1,0 +1,78 @@
+{% extends "uploader/base.html" %}
+
+{% block appheader %}
+<style type="text/css">
+button {
+  width: 17em;
+}
+
+#buttons {
+  margin-top: 2em;
+}
+</style>
+
+{% if isigb %}
+<script type="text/javascript" src="/media/js/jquery.js"></script>
+<script type="text/javascript" src="/media/js/uploader.js"></script>
+{% endif %}
+{% endblock %}
+
+{% block appcontent %}
+{% include "ooc.html" %}
+<h1>Automatic Upload</h1>
+
+<p>This site allows you to automatically upload data. Make sure you
+  have the uploader installed and running.</p>
+
+{% if not isigb %}
+<div style="background: #FFAFAF; border: 1px solid #FF0000;
+            padding: 1em 2em; margin: 2em; width: 30em; text-align: center">
+  Please view this page in the in-game browser. It's not useful
+  outside of the client.
+</div>
+{% else %}
+{% if not regionid %}
+<div style="background: #FFAFAF; border: 1px solid #FF0000;
+            padding: 1em 2em; margin: 2em; width: 30em; text-align: center">
+  To automatically browse the market, you need to trust this
+  site. Once you trust the site, please reload this page.<br />
+  <button type="button" onclick="CCPEVE.requestTrust('http://gradient.electusmatari.com')">Trust this site</button>
+</div>
+{% else %}
+<h2>Step 1: Open Market Window</h2>
+
+<p>Open a market window to allow you to adjust the tab you see.</p>
+
+<button type="button" onclick="CCPEVE.showMarketDetails(34)">Open Market Window</button>
+
+<h2>Step 2: Select Tab</h2>
+
+<p>Please select either the "Price History" tab for the Material Index
+or the "Market Data" tab for our industry site. Then choose an upload
+method below. If you select the "Price History", use the table layout
+and display 5 days only for fastest loading.</p>
+
+<h2>Step 3: Upload for {{regionname}}</h2>
+
+<div id="buttons">
+  <div id="startstop">
+    <button type="button" id="startstopb" disabled="disabled">Pause</button>
+    <span id="startstopi"></span>
+  </div>
+  <div id="history">
+    <button type="button" id="historyb">Price History</button>
+    <span id="historyi"></span>
+  </div>
+  <div id="orders">
+    <button type="button" id="ordersb">Market Data</button>
+    <span id="ordersi"></span>
+  </div>
+  <div id="corps">
+    <button type="button" id="corpsb">Amarr Militia Corporations</button>
+    <span id="corpsi"></span>
+  </div>
+</div>
+
+{% endif %}
+{% endif %}
+{% endblock %}

@@ -1,0 +1,38 @@
+{% extends "recruitment/base.html" %}
+{% load utils %}
+
+{% block appcontent %}
+<div class="appmenu">
+  <ul>
+    {% for p in questionnaire %}
+    <li><a href="/recruitment/apply/{{forloop.counter}}/">{{p.title}}</a></li>
+    {% endfor %}
+  </ul>
+</div>
+
+<h1>{{page.title}}</h1>
+
+{% include "recruitment/agent.html" %}
+
+<form method="post" action="">
+
+{% for q in page.questions %}
+{% if q.name %}
+<div style="width: 40em; float: left; clear: left">
+<p>{{q.text|safe}}</p>
+
+<textarea name="{{q.name}}" style="width: 40em; height: 8em"
+>{{applicant.answers|dictget:q.name}}</textarea>
+</div>
+{% endif %}
+{% endfor %}
+
+<div style="clear: left"></div>
+{% if last_page %}
+<input type="submit" value="Finish" />
+{% else %}
+<input type="submit" value="Next Page" />
+{% endif %}
+</form>
+
+{% endblock %}

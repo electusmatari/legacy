@@ -52,6 +52,10 @@
 </div>
 {% endif %}
 
+{% if indexpage %}
+<h2>Special Offers</h2>
+{% endif %}
+
 {% for product in product_list %}
 {% include "shop/product.html" %}
 {% empty %}

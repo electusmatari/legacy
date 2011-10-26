@@ -1,0 +1,13 @@
+{% extends "recruitment/base.html" %}
+
+{% block appcontent %}
+<h1>API Error</h1>
+
+<p>We are terribly sorry, but there seems to be a problem accessing
+  the API server. This means we can not process your application right
+  now.</p>
+
+<p>The error was: {{error}}</p>
+
+<p>Please try again later.</p>
+{% endblock %}

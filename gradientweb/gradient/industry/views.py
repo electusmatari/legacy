@@ -2,7 +2,7 @@ import datetime
 import json
 
 from django.contrib import messages
-from django.db import connection
+from django.db import connection, IntegrityError, transaction
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import get_object_or_404
 from django.views.generic.list_detail import object_list
@@ -13,7 +13,7 @@ from gradient.rc.models import Change
 from gradient.industry.models import PriceList, BlueprintOriginal
 from gradient.industry.models import Stock, StockLevel, Transaction
 from gradient.industry.models import MarketOrder, WantedMarketOrder
-from gradient.industry.models import LastUpdate, PublicMarketOrder
+from gradient.industry.models import LastUpdate
 from gradient.industry.dbutils import get_typeid, get_typename, get_itemname
 from gradient.industry.dbutils import get_membername, get_itemid
 from gradient.industry.utils import last_price, get_component_list
@@ -273,7 +273,13 @@ def stocks_edit(request, stockid=None):
             sl = form.save(commit=False)
             sl.stationid = get_itemid(sl.stationname)
             sl.typeid = get_typeid(sl.typename)
-            sl.save()
+            try:
+                sl.save()
+            except IntegrityError:
+                transaction.rollback()
+                messages.add_message(request, messages.ERROR,
+                                     'Stock level already exists')
+                return HttpResponseRedirect('/industry/stocks/')
             try:
                 st = Stock.objects.get(typeid=sl.typeid,
                                        stationid=sl.stationid)
@@ -448,42 +454,6 @@ def json_station(request):
                   ("%%%s%%" % term,))
         lis = [name for (name,) in c.fetchall()]
     return HttpResponse(json.dumps(lis), mimetype="text/plain")
-
-def autoupload_view(request):
-    return direct_to_template(request, 'industry/autoupload.html')
-
-from gradient.gmi.utils import TYPE_DATA, upload_age
-
-def autoupload_json(request):
-    viewtype = request.GET.get('uploadtype', 'history')
-    region = request.META.get('HTTP_EVE_REGIONNAME', None)
-    regionid = get_itemid(region)
-    type_list = []
-    if viewtype == 'history':
-        for typename, rowtype in TYPE_DATA:
-            if rowtype == 'header':
-                continue
-            typeid = get_typeid(typename)
-            if regionid and upload_age(regionid, typeid) <= 1:
-                continue
-            type_list.append((typename, typeid))
-    elif viewtype == 'orders':
-        if regionid is None:
-            for pl in PriceList.objects.all():
-                type_list.append((pl.typename, pl.typeid))
-        else:
-            aged_orders = []
-            for pl in PriceList.objects.all():
-                pmo = PublicMarketOrder.objects.filter(regionid=regionid,
-                                                       typeid=pl.typeid)
-                if len(pmo) > 0:
-                    last_seen = max(entry.last_seen for entry in pmo)
-                else:
-                    last_seen = datetime.datetime(2000, 1, 1)
-                aged_orders.append((last_seen, (pl.typename, pl.typeid)))
-            aged_orders.sort()
-            type_list = [b for (a, b) in aged_orders]
-    return HttpResponse(json.dumps(type_list), mimetype="text/json")
 
 def get_object(cls, **kwargs):
     try:

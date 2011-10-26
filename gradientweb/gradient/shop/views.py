@@ -38,9 +38,11 @@ def index_view(request):
                'shopuser': shopuser}
     if request.method == 'POST':
         return add_to_cart(request, shopuser)
-    context['needle'] = request.GET.get('search', '')
-    if len(context['needle']) == 0:
+    context['needle'] = request.GET.get('search', None)
+    if context['needle'] is None:
+        context['needle'] = ""
         context['product_list'] = top_3()
+        context['indexpage'] = True
     else:
         objects = ProductList.objects.filter(
             typename__icontains=context['needle'])
@@ -69,7 +71,7 @@ def add_to_cart(request, shopuser):
     except ValueError:
         return HttpResponseRedirect(next_url)
     try:
-        product = ProductList.objects.get(typeid=typeid)
+        ProductList.objects.get(typeid=typeid)
     except ProductList.DoesNotExist:
         return HttpResponseRedirect(next_url)
     shopuser.add(typeid, qty)
@@ -331,8 +333,8 @@ def handle_view(request):
         characterid = order.characterid
         standing = order.standing_string()
         try:
-            message = Message.objects.filter(characterid=characterid,
-                                             handler=None).reverse()[0]
+            message = Message.objects.filter(characterid=characterid
+                                             ).reverse()[0]
         except IndexError:
             message = None
         customer_list.append((name, characterid, standing, message,
@@ -533,14 +535,22 @@ class ShopUser(object):
             shopuser = request.session['grdshopuser']
         else:
             shopuser = cls()
-        if (request.user.is_authenticated() and 
-            request.user.profile.characterid is not None and
-            shopuser.characterid is None):
+        if (shopuser.characterid is None and
+            request.user.is_authenticated() and 
+            request.user.profile.characterid is not None
+            ):
             shopuser.characterid = request.user.profile.characterid
             try:
                 shopuser.recheck()
             except:
                 shopuser = cls()
+        if (shopuser.lastchecked is not None and
+            shopuser.lastchecked < (datetime.datetime.utcnow() -
+                                    datetime.timedelta(days=1))):
+            try:
+                shopuser.recheck()
+            except:
+                pass
         return shopuser
 
     def save(self, request):
