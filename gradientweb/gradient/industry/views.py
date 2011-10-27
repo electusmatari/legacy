@@ -119,6 +119,14 @@ def marketorders_view(request):
         order_dict[order.station][ordertype].append(order)
         if pilot_name is None:
             order.pilotname = get_membername(order.characterid)
+        if request.GET.get('all') is None:
+            equal = MarketOrder.objects.filter(stationid=order.stationid,
+                                               typeid=order.typeid,
+                                               ordertype=order.ordertype)
+            equal = equal.exclude(
+                characterid=request.user.profile.characterid)
+            order.othercorp = [get_membername(other.characterid)
+                               for other in equal]
     for wanted in wanted_set:
         station = get_itemname(wanted.stationid)
         typename = get_typename(wanted.typeid)
@@ -149,24 +157,32 @@ def marketorders_view(request):
                 else:
                     profitmargin = (productioncost - price) / price
                 profitperitem = productioncost - price
-            order_dict[station][ordertype].append(
-                KeyValue(stationid=wanted.stationid,
-                         stationname=station,
-                         typeid=wanted.typeid,
-                         typename=typename,
-                         ordertype=ordertype,
-                         expires=datetime.datetime(2000, 1, 1),
-                         volremaining=0,
-                         price=price,
-                         productioncost=productioncost,
-                         salesperday=0.0,
-                         trend=0.0,
-                         expiredays=0,
-                         profitmargin=profitmargin,
-                         profitperitem=profitperitem,
-                         daysremaining=0,
-                         profitperday=0,
-                         ))
+            order = KeyValue(stationid=wanted.stationid,
+                             stationname=station,
+                             typeid=wanted.typeid,
+                             typename=typename,
+                             ordertype=ordertype,
+                             expires=datetime.datetime(2000, 1, 1),
+                             volremaining=0,
+                             price=price,
+                             productioncost=productioncost,
+                             salesperday=0.0,
+                             trend=0.0,
+                             expiredays=0,
+                             profitmargin=profitmargin,
+                             profitperitem=profitperitem,
+                             daysremaining=0,
+                             profitperday=0,
+                             )
+            order_dict[station][ordertype].append(order)
+            if request.GET.get('all') is None:
+                equal = MarketOrder.objects.filter(stationid=order.stationid,
+                                                   typeid=order.typeid,
+                                                   ordertype=order.ordertype)
+                equal = equal.exclude(
+                    characterid=request.user.profile.characterid)
+                order.othercorp = [get_membername(other.characterid)
+                                   for other in equal]
 
     order_list = []
     for station, otypes in order_dict.items():

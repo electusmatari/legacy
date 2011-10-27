@@ -32,7 +32,19 @@
       {% if not pilot_name %}
       <td>{{order.pilotname}}</th>
       {% endif %}
-      <td>{{order.typename}}</td>
+      <td>
+        {{order.typename}}
+        {% if order.othercorp %}
+        <span class="tooltipped"><img src="/media/img/icons/info.png" />
+          <span class="tooltip">
+            Also on the market by
+            {% for name in order.othercorp %}
+            {{name}}{% if not forloop.last %}, {% endif %}
+            {% endfor %}
+          </span>
+        </span>
+        {% endif %}
+      </td>
 
       <td class="numeric expire_days">{{order.expiredays}}</td>
       <td class="numeric vol_remaining">{{order.volremaining|intcomma}}</td>
