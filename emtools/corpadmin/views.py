@@ -37,15 +37,15 @@ def view_apiconfig(request):
         form = APIKeyForm(request.POST)
         if form.is_valid():
             if apikey is not None:
-                apikey.userid = form.cleaned_data['userid']
-                apikey.apikey = form.cleaned_data['apikey']
+                apikey.keyid = form.cleaned_data['keyid']
+                apikey.vcode = form.cleaned_data['vcode']
                 apikey.active = True
                 apikey.save()
             else:
                 APIKey.objects.create(
                     name=request.user.profile.corp,
-                    userid=form.cleaned_data['userid'],
-                    apikey=form.cleaned_data['apikey'],
+                    keyid=form.cleaned_data['keyid'],
+                    vcode=form.cleaned_data['vcode'],
                     characterid=request.user.profile.characterid,
                     active=True,
                     message="",

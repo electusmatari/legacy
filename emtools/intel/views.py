@@ -301,7 +301,7 @@ def view_submit(request):
                                       'form': form},
                        template_object_name='trace')
 
-def get_pilot(name, charid=None):
+def get_pilot(name=None, charid=None):
     api = apiroot()
     try:
         if charid is None:

@@ -35,7 +35,7 @@ MEDIA_ROOT = '/var/www/electusmatari.com/media/'
 # URL that handles the media served from MEDIA_ROOT. Make sure to use a
 # trailing slash if there is a path component (optional in other cases).
 # Examples: "http://media.lawrence.com", "http://example.com/media/"
-MEDIA_URL = 'http://new.electusmatari.com/media/'
+MEDIA_URL = 'http://www.electusmatari.com/media/'
 
 # URL prefix for admin media -- CSS, JavaScript and images. Make sure to use a
 # trailing slash.
@@ -91,7 +91,6 @@ INSTALLED_APPS = (
     'emtools.emauth',
     'emtools.emadmin',
     'emtools.corpadmin',
-    'emtools.gmi',
     'emtools.profits',
     'emtools.intel',
     'emtools.tools',
@@ -101,7 +100,6 @@ INSTALLED_APPS = (
     'emtools.recruitment',
     'emtools.grdpersonnel',
     'emtools.corpreport',
-    'emtools.industry',
 )
 
 AUTH_PROFILE_MODULE = 'emauth.Profile'

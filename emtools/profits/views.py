@@ -3,7 +3,8 @@ from django.views.generic.simple import direct_to_template
 
 from emtools.emauth.decorators import require_mybbgroup
 
-from emtools.gmi.models import Index
+import sys ; sys.path.append("/home/forcer/Projects/gradient/")
+from gradient.index.models import Index
 
 ORE_NOTES = {
     'Veldspar': "High-Sec (1.0)",
@@ -117,11 +118,11 @@ def view_ore(request, ice=False):
 def get_index(request):
     location = request.GET.get('location', 'Republic')
     if location == 'Jita':
-        return dict((index.latest.typename, index.latest.jita)
+        return dict((index.typename, index.jita)
                     for index in Index.objects.all())
     elif location == 'Rens':
-        return dict((index.latest.typename, index.latest.heimatar)
+        return dict((index.typename, index.heimatar)
                     for index in Index.objects.all())
     else:
-        return dict((index.latest.typename, index.latest.republic)
+        return dict((index.typename, index.republic)
                     for index in Index.objects.all())

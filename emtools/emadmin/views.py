@@ -92,21 +92,20 @@ def view_stats(request):
               "       (SELECT SUM(n_live_tup) FROM pg_stat_all_tables), "
               "       pg_database_size('eve')")
     postgresql_databases = c.fetchall()
-    c.execute("SELECT CASE WHEN nspname = 'public' "
-              "            THEN C.relname "
-              "            ELSE nspname || '.' || C.relname "
-              "       END, "
-              "       st.n_live_tup, "
-              "       pg_relation_size(C.oid) AS size "
-              "FROM pg_class C "
-              "     LEFT JOIN pg_namespace N "
-              "       ON (N.oid = C.relnamespace) "
-              "     INNER JOIN pg_stat_all_tables st "
-              "       ON st.relid = C.oid "
-              "WHERE reltype != 0 "
-              #"  AND nspname NOT IN ('pg_catalog', 'information_schema', "
-              #"                      'pg_toast') "
-              "ORDER BY size DESC")
+    c.execute("""
+SELECT CASE WHEN nspname = 'public'
+            THEN relname
+            ELSE nspname || '.' || relname
+       END AS "relation",
+       C.reltuples::numeric AS rows,
+       pg_total_relation_size(C.oid) AS "total_size"
+  FROM pg_class C
+  LEFT JOIN pg_namespace N ON (N.oid = C.relnamespace)
+  WHERE nspname NOT IN ('pg_catalog', 'information_schema')
+    AND C.relkind <> 'i'
+    AND nspname !~ '^pg_toast'
+  ORDER BY pg_total_relation_size(C.oid) DESC
+""")
     postgresql_tables = c.fetchall()
     return direct_to_template(request, 'emadmin/stats.html',
                               extra_context={'tab': 'stats',
@@ -114,3 +113,17 @@ def view_stats(request):
                                              'mysql_tables': mysql_tables,
                                              'postgresql_databases': postgresql_databases,
                                              'postgresql_tables': postgresql_tables})
+
+
+import sys
+sys.path.append("/home/forcer/Projects/gradient")
+import json
+from django.http import HttpResponse
+from gradient.gts.views import set_ticket_status
+from gradient.shop.views import set_shop_status
+def json_status(request):
+    status = {}
+    if request.user.is_authenticated():
+        set_ticket_status(request, status)
+        set_shop_status(request, status)
+    return HttpResponse(json.dumps(status), mimetype="text/javascript")

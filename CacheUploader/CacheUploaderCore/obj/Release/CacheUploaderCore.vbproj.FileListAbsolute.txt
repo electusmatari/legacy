@@ -1,0 +1,22 @@
+d:\Dirk\Documents\Visual Studio 2010\Projects\CacheUploader\CacheUploaderCore\bin\Release\CacheUploaderCore.dll.config
+d:\Dirk\Documents\Visual Studio 2010\Projects\CacheUploader\CacheUploaderCore\bin\Release\CacheUploaderCore.dll
+d:\Dirk\Documents\Visual Studio 2010\Projects\CacheUploader\CacheUploaderCore\bin\Release\CacheUploaderCore.pdb
+d:\Dirk\Documents\Visual Studio 2010\Projects\CacheUploader\CacheUploaderCore\bin\Release\CacheUploaderCore.xml
+d:\Dirk\Documents\Visual Studio 2010\Projects\CacheUploader\CacheUploaderCore\obj\Release\ResolveAssemblyReference.cache
+d:\Dirk\Documents\Visual Studio 2010\Projects\CacheUploader\CacheUploaderCore\obj\Release\CacheUploaderCore.Resources.resources
+d:\Dirk\Documents\Visual Studio 2010\Projects\CacheUploader\CacheUploaderCore\obj\Release\GenerateResource.read.1.tlog
+d:\Dirk\Documents\Visual Studio 2010\Projects\CacheUploader\CacheUploaderCore\obj\Release\GenerateResource.write.1.tlog
+d:\Dirk\Documents\Visual Studio 2010\Projects\CacheUploader\CacheUploaderCore\obj\Release\CacheUploaderCore.dll
+d:\Dirk\Documents\Visual Studio 2010\Projects\CacheUploader\CacheUploaderCore\obj\Release\CacheUploaderCore.xml
+d:\Dirk\Documents\Visual Studio 2010\Projects\CacheUploader\CacheUploaderCore\obj\Release\CacheUploaderCore.pdb
+D:\Programming\Projekte\CacheUploader\devel\CacheUploaderCore\bin\Release\CacheUploaderCore.dll.config
+D:\Programming\Projekte\CacheUploader\devel\CacheUploaderCore\bin\Release\CacheUploaderCore.dll
+D:\Programming\Projekte\CacheUploader\devel\CacheUploaderCore\bin\Release\CacheUploaderCore.pdb
+D:\Programming\Projekte\CacheUploader\devel\CacheUploaderCore\bin\Release\CacheUploaderCore.xml
+D:\Programming\Projekte\CacheUploader\devel\CacheUploaderCore\obj\Release\ResolveAssemblyReference.cache
+D:\Programming\Projekte\CacheUploader\devel\CacheUploaderCore\obj\Release\CacheUploaderCore.Resources.resources
+D:\Programming\Projekte\CacheUploader\devel\CacheUploaderCore\obj\Release\GenerateResource.read.1.tlog
+D:\Programming\Projekte\CacheUploader\devel\CacheUploaderCore\obj\Release\GenerateResource.write.1.tlog
+D:\Programming\Projekte\CacheUploader\devel\CacheUploaderCore\obj\Release\CacheUploaderCore.dll
+D:\Programming\Projekte\CacheUploader\devel\CacheUploaderCore\obj\Release\CacheUploaderCore.xml
+D:\Programming\Projekte\CacheUploader\devel\CacheUploaderCore\obj\Release\CacheUploaderCore.pdb

@@ -1,0 +1,13 @@
+d:\Dirk\Documents\Visual Studio 2010\Projects\CacheUploader\HashFileCreator\bin\Release\HashFileCreator.exe
+d:\Dirk\Documents\Visual Studio 2010\Projects\CacheUploader\HashFileCreator\bin\Release\HashFileCreator.pdb
+d:\Dirk\Documents\Visual Studio 2010\Projects\CacheUploader\HashFileCreator\bin\Release\HashFileCreator.xml
+d:\Dirk\Documents\Visual Studio 2010\Projects\CacheUploader\HashFileCreator\bin\Release\CacheUploaderCore.dll
+d:\Dirk\Documents\Visual Studio 2010\Projects\CacheUploader\HashFileCreator\bin\Release\CacheUploaderCore.pdb
+d:\Dirk\Documents\Visual Studio 2010\Projects\CacheUploader\HashFileCreator\bin\Release\CacheUploaderCore.xml
+d:\Dirk\Documents\Visual Studio 2010\Projects\CacheUploader\HashFileCreator\obj\x86\Release\ResolveAssemblyReference.cache
+d:\Dirk\Documents\Visual Studio 2010\Projects\CacheUploader\HashFileCreator\obj\x86\Release\HashFileCreator.Resources.resources
+d:\Dirk\Documents\Visual Studio 2010\Projects\CacheUploader\HashFileCreator\obj\x86\Release\GenerateResource.read.1.tlog
+d:\Dirk\Documents\Visual Studio 2010\Projects\CacheUploader\HashFileCreator\obj\x86\Release\GenerateResource.write.1.tlog
+d:\Dirk\Documents\Visual Studio 2010\Projects\CacheUploader\HashFileCreator\obj\x86\Release\HashFileCreator.exe
+d:\Dirk\Documents\Visual Studio 2010\Projects\CacheUploader\HashFileCreator\obj\x86\Release\HashFileCreator.xml
+d:\Dirk\Documents\Visual Studio 2010\Projects\CacheUploader\HashFileCreator\obj\x86\Release\HashFileCreator.pdb

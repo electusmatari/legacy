@@ -19,14 +19,15 @@
 
 <h2>Prospects ({{prospect_count}})</h2>
 
-<p><em>Prospects above 30 days, but hired before 113.02.01, are
-    automatically treated as being hired on that day.</em></p>
-
 <table class="data">
 <thead>
 <tr>
   <th>Name</th>
+  <th>Action</th>
   <th>Age</th>
+  <th>Forum Auth</th>
+  <th>Posted</th>
+  <th>Roster</th>
   <th>Inactive</th>
   <th>Notes</th>
 </tr>
@@ -43,8 +44,90 @@
     {% endif %}
     {{details.showinfo}}
   </td>
-  <td class="numeric">{{details.age}}</td>
-  <td class="numeric">{{details.lastactive}}</td>
+
+  <td
+    {% if details.inactive %}
+    style="background-color: #FF0000">Remove
+    {% else %}
+    {% if details.canbepromoted %}
+    style="background-color: #00FF00">Promote
+    {% else %}
+    {% if details.d120 %}
+    style="background-color: #FF0000">Remove
+    {% else %}
+    {% if details.d60 and not details.auth %}
+    style="background-color: #FF0000">Remove
+    {% else %}
+    {% if details.d60 and not details.intro_thread %}
+    style="background-color: #FF0000">Remove
+    {% else %}
+    {% if details.d60 and not details.roster %}
+    style="background-color: #FF0000">Remove
+    {% else %}
+    {% if details.d30 %}
+    style="background-color: #FFFF00">Nudge
+    {% else %}
+    >Wait
+    {% endif %}
+    {% endif %}
+    {% endif %}
+    {% endif %}
+    {% endif %}
+    {% endif %}
+    {% endif %}
+  </td>
+
+  <td class="numeric"
+    {% if details.d120 %}
+      style="background-color: #FF0000"
+    {% else %}
+    {% if details.d30 %}
+      style="background-color: #00FF00"
+    {% endif %}
+    {% endif %}
+    >
+    {{details.age}}
+  </td>
+  <td
+    {% if details.auth %}
+    style="background-color: #00FF00">Yes
+    {% else %}
+    {% if details.d60 %}
+    style="background-color: #FF0000">No
+    {% else %}
+    style="background-color: #FFFF00">No
+    {% endif %}
+    {% endif %}
+  </td>
+  <td
+    {% if details.intro_thread %}
+    style="background-color: #00FF00">Yes
+    {% else %}
+    {% if details.d60 %}
+    style="background-color: #FF0000">No
+    {% else %}
+    style="background-color: #FFFF00">No
+    {% endif %}
+    {% endif %}
+  </td>
+
+  {% if details.roster %}
+  <td style="background-color: #00FF00">Yes</td>
+  {% else %}
+  {% if details.d60 %}
+  <td style="background-color: #FF0000">No</td>
+  {% else %}
+  <td style="background-color: #FFFF00">No</td>
+  {% endif %}
+  {% endif %}
+
+  <td class="numeric"
+    {% if details.inactive %}
+      style="background-color: #FF0000"
+    {% endif %}
+    >
+    {{details.lastactive}}
+  </td>
   <td>
     {% if details.canbepromoted %}
     Can be promoted.
@@ -71,7 +154,7 @@
 </table>
 
 {% if norole_count %}
-<h2>Employees with no Roles ({{norole_count}})</h2>
+<h2>Members with no Roles ({{norole_count}})</h2>
 
 <table class="data">
 <thead>
@@ -138,6 +221,13 @@
 
 <h2>All Members</h2>
 
+{{inactive_count}} <span style="background-color: #FFAFAF">inactive</span>,
+{{onleave_count}} <span style="background-color: #CFAFAF">on leave</span>,
+{{shift_count.1}} <span style="background-color: #FFFFAF">1st shift</span>,
+{{shift_count.2}} <span style="background-color: #AFFFAF">2nd shift</span>,
+{{shift_count.3}} <span style="background-color: #AFAFFF">3rd shift</span>,
+{{noshift_count}} <span>no shift</span>,
+
 <table class="data">
 <thead>
 <tr>
@@ -151,8 +241,29 @@
 </thead>
 <tbody>
 {% for name, details in pilots %}
-<tr class="{% cycle odd,even %}">
-  <td>
+<tr {% if details.inactive %}
+    style="background-color: #FFAFAF"
+    {% else %}
+    {% if details.onleave %}
+    style="background-color: #CFAFAF"
+    {% else %}
+    class="{% cycle odd,even %}"
+    {% endif %}
+    {% endif %}
+ >
+  <td
+{% if details.shift == 1 %}
+style="background-color: #FFFFAF; border: 1px solid #DFDF8F"
+{% else %}
+{% if details.shift == 2 %}
+style="background-color: #AFFFAF; border: 1px solid #8FDF8F"
+{% else %}
+{% if details.shift == 3 %}
+style="background-color: #AFAFFF; border: 1px solid #8F8FDF"
+{% endif %}
+{% endif %}
+{% endif %}
+>
     {% if details.tid %}
     <a href="/forums/showthread.php?tid={{details.tid}}">{{name}}</a>
     {% else %}

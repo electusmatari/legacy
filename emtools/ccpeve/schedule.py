@@ -7,4 +7,5 @@ def expire_cache():
     Cache.objects.filter(cacheduntil__lt=datetime.datetime.utcnow()).delete()
 
 SCHEDULE = [("api-cache-expire", expire_cache, 60),
-            ("api-fetch", get_api_data, 60)]
+            # ("api-fetch", get_api_data, 60)
+            ]

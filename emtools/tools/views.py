@@ -12,7 +12,6 @@ TOOLS = [
     ('Public',
      [('/auth/', 'Authentication', '/media/img/tools/auth.png'),
       ('/standings/', 'Standings', '/media/img/tools/standings.png'),
-      ('/gmi/', 'Gradient Material Index', '/media/img/tools/gmi.png'),
       ])
     ]
 EMTOOLS = [

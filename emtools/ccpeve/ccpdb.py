@@ -54,6 +54,13 @@ def get_locator_agents(system, maxjumps):
             result.append(agent)
     return sorted(result, key=lambda agent: agent['jumps'])
 
+def get_moonid(moonname):
+    c = connection.cursor()
+    c.execute("""
+SELECT itemid FROM ccp.evenames WHERE LOWER(itemname) = LOWER(%s)
+""", (moonname,))
+    return c.fetchone()[0]
+
 def locatoragents(systemname):
     c = connection.cursor()
     c.execute("""

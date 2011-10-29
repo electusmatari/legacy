@@ -32,11 +32,38 @@ def view_members(request):
         pilots[member.name]['location'] = member.location
         pilots[member.name]['ship'] = member.shipType
 
-    personnel_threads = get_personnel_threads()
+    personnel_threads, intro_threads, grd_users = get_forum_details()
+    roster = get_roster()
+
+    for name in pilots:
+        lname = name.lower()
+        if lname in personnel_threads:
+            tid, prefix = personnel_threads[lname]
+            pilots[name]['tid'] = tid
+            if prefix == 20:
+                pilots[name]['canbepromoted'] = True
+            else:
+                pilots[name]['canbepromoted'] = False
+        else:
+            pilots[name]['tid'] = None
+            pilots[name]['canbepromoted'] = False
+        if lname in roster:
+            pilots[name]['roster'] = True
+        if lname in intro_threads:
+            pilots[name]['intro_thread'] = True
+        else:
+            pilots[name]['intro_thread'] = False
+        if lname in grd_users:
+            pilots[name]['auth'] = True
+        else:
+            pilots[name]['auth'] = False
 
     prospect_count = 0
     norole_count = 0
     inactive_count = 0
+    onleave_count = 0
+    shift_count = {1: 0, 2: 0, 3: 0}
+    noshift_count = 0
 
     now = datetime.datetime.utcnow()
     for name, details in pilots.items():
@@ -44,10 +71,29 @@ def view_members(request):
         if 'roleDirector' in details['roles']:
             details['titles'].append('Director')
         if 'Prospect' not in details['titles'] and 'Employee' not in details['titles'] and 'Director' not in details['titles']:
-            details['noroles'] = True
-            norole_count += 1
+            if 'on leave' not in details['freeformtitle'].lower():
+                details['noroles'] = True
+                norole_count += 1
         else:
             details['noroles'] = False
+
+        details['lastactive'] = (now - details.get('logoff', now)).days
+        if 'on leave' in details['freeformtitle'].lower():
+            details['onleave'] = True
+            onleave_count += 1
+        elif details['lastactive'] > 30:
+            inactive_count += 1
+        elif '1/R' in details['freeformtitle']:
+            details['shift'] = 1
+            shift_count[1] += 1
+        elif '2/R' in details['freeformtitle']:
+            details['shift'] = 2
+            shift_count[2] += 1
+        elif '3/R' in details['freeformtitle']:
+            details['shift'] = 3
+            shift_count[3] += 1
+        else:
+            noshift_count += 1
         start = details.get('start', datetime.datetime.utcnow())
         details['age'] = (now - start).days
         if 'Prospect' in details['titles']:
@@ -59,20 +105,11 @@ def view_members(request):
             details['d120'] = age >= 120
         else:
             details['prospect'] = False
-        details['lastactive'] = (now - details.get('logoff', now)).days
-        if details['lastactive'] > 30 and 'on leave' not in details['freeformtitle'].lower():
+        if details['lastactive'] > 30 and 'on leave' not in details['freeformtitle'].lower() and not details['noroles']:
             details['inactive'] = True
-            inactive_count += 1
         else:
             details['inactive'] = False
-        result = personnel_threads.get(name.lower())
-        if result is None:
-            details['tid'] = None
-            prefix = None
-        else:
-            details['tid'], prefix = result
-        if prefix == 20:
-            details['canbepromoted'] = True
+
     pilots = pilots.items()
     pilots.sort(key=lambda a: a[0])
     return direct_to_template(request, 'grdpersonnel/members.html',
@@ -82,16 +119,43 @@ def view_members(request):
             'cacheduntil': datetime.datetime.utcfromtimestamp(max(ms._meta.cachedUntil, mt._meta.cachedUntil)),
             'prospect_count': prospect_count,
             'norole_count': norole_count,
-            'inactive_count': inactive_count})
+            'inactive_count': inactive_count,
+            'shift_count': shift_count,
+            'noshift_count': noshift_count,
+            'onleave_count': onleave_count,
+            })
 
-def get_personnel_threads():
+def get_forum_details():
     db = utils.connect('emforum')
     c = db.cursor()
     c.execute("SELECT LOWER(subject), tid, prefix FROM mybb_threads "
               "WHERE fid IN (129, 130, 131)")
-    return dict((subject, (tid, prefix))
-                for (subject, tid, prefix) in c.fetchall())
+    personnel_threads = dict((subject, (tid, prefix))
+                             for (subject, tid, prefix) in c.fetchall())
+    c.execute("SELECT LOWER(u.username), COUNT(*) "
+              "FROM mybb_threads t "
+              "     INNER JOIN mybb_users u ON t.uid = u.uid "
+              "WHERE t.fid = 123 "
+              "GROUP BY LOWER(u.username)")
+    intro_threads = dict(c.fetchall())
+    c.execute("SELECT LOWER(username) "
+              "FROM mybb_users "
+              "WHERE CONCAT(',', usergroup, ',', additionalgroups, ',') "
+              "LIKE '%,60,%'")
+    grd_users = set(name for (name,) in c.fetchall())
+    return personnel_threads, intro_threads, grd_users
 
+import re
+import urllib
+
+def get_roster():
+    try:
+        u = urllib.urlopen("http://gradient:dualprop@gradient.orava.org/wiki/Roster")
+        s = u.read()
+        return [name.lower()
+                for name in re.findall(r"<li> *(.*?)[ 0-9.]*\n", s)]
+    except:
+        return []
 
 class Bag(object):
     def __init__(self, **kwargs):

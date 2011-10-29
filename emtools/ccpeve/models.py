@@ -8,8 +8,10 @@ from ccputils import InvItem
 
 class APIKey(models.Model):
     name = models.CharField(max_length=255)
-    userid = models.CharField(max_length=32)
-    apikey = models.CharField(max_length=128)
+    keyid = models.CharField(max_length=32, null=True, blank=True)
+    vcode = models.CharField(max_length=128, null=True, blank=True)
+    userid = models.CharField(max_length=32, null=True, blank=True)
+    apikey = models.CharField(max_length=128, null=True, blank=True)
     characterid = models.CharField(max_length=32)
     active = models.BooleanField()
     message = models.TextField(max_length=255, blank=True)
@@ -19,15 +21,17 @@ class APIKey(models.Model):
         return "API Key %s" % self.name
 
     def root(self):
-        return apiroot(userID=self.userid, apiKey=self.apikey)
+        api = apiroot()
+        if self.keyid:
+            return api.auth(keyID=self.keyid, vCode=self.vcode)
+        else:
+            return api.auth(userID=self.userid, apiKey=self.apikey)
 
     def char(self):
-        return apichar(userID=self.userid, apiKey=self.apikey,
-                       characterID=self.characterid)
+        return self.root().character(characterID=self.characterid)
 
     def corp(self):
-        return apicorp(userID=self.userid, apiKey=self.apikey,
-                       characterID=self.characterid)
+        return self.root().corporation(characterID=self.characterid)
 
 class Cache(models.Model):
     cacheduntil = models.DateTimeField()
@@ -36,19 +40,8 @@ class Cache(models.Model):
     params = models.TextField()
     doc = models.TextField()
 
-def apiroot(userID=None, apiKey=None):
-    api = eveapi.EVEAPIConnection(cacheHandler=DBCache())
-    if userID is not None and apiKey is not None:
-        api = api.auth(userID=userID, apiKey=apiKey)
-    return api
-
-def apichar(userID, apiKey, characterID):
-    api = apiroot(userID, apiKey)
-    return api.character(characterID=characterID)
-
-def apicorp(userID, apiKey, characterID):
-    api = apiroot(userID, apiKey)
-    return api.corporation(characterID=characterID)
+def apiroot():
+    return eveapi.EVEAPIConnection(cacheHandler=DBCache())
 
 class DBCache(object):
     def retrieve(self, host, path, params):
@@ -64,17 +57,21 @@ class DBCache(object):
         return cached.doc.encode("utf-8")
 
     def store(self, host, path, params, doc, obj):
-        Cache.objects.filter(
-            host=host, path=path, params=repr(params)
-            ).delete()
         # Ugly hack for bug #106748
         if hasattr(obj, 'cachedUntil'):
             cacheduntil = datetime.datetime.utcfromtimestamp(obj.cachedUntil)
         else:
             cacheduntil = datetime.datetime.utcfromtimestamp(obj.result.cachedUntil)
-        cached = Cache(host=host, path=path, params=repr(params),
-                       doc=doc, cacheduntil=cacheduntil)
-        cached.save()
+        obj, created = Cache.objects.get_or_create(
+            host=host,
+            path=path,
+            params=repr(params),
+            defaults={'doc': doc,
+                      'cacheduntil': cacheduntil})
+        if not created:
+            obj.doc = doc
+            obj.cacheduntil = cacheduntil
+            obj.save()
 
 class MarketHistory(models.Model):
     regionid = models.BigIntegerField()
@@ -178,6 +175,7 @@ class Asset(models.Model):
     quantity = models.IntegerField()
     singleton = models.BooleanField()
     container = models.ForeignKey('self', null=True)
+    rawquantity = models.IntegerField()
 
     @property
     def location(self):

@@ -35,6 +35,9 @@ def get_api_data():
         transaction.commit()
         get_market(sheet.corporationID, corp)
         transaction.commit()
+        # DON'T fetch the journal/log, we do that in the gradient
+        # module.
+        continue
         for row in sheet.walletDivisions:
             get_journal(sheet.corporationID, corp, row.accountKey)
             transaction.commit()
@@ -101,7 +104,9 @@ def get_assets(corpid, corp):
                                     flag=row.flag,
                                     quantity=row.quantity,
                                     singleton=row.singleton,
-                                    container=container)
+                                    container=container,
+                                    rawquantity=getattr(row, 'rawQuantity',
+                                                        row.quantity))
     def create_assets(assets, locationID=None, container=None):
         for row in assets:
             if hasattr(row, 'locationID'):
