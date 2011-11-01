@@ -3,17 +3,16 @@
 # ALTER TABLE intel_kill DROP CONSTRAINT intel_kill_system_id_fkey;
 
 import base64
-import datetime
 import hashlib
 import pickle
 
 from django.contrib.auth.models import User
-from django.db import models, IntegrityError, transaction, connection
+from django.db import models, IntegrityError, transaction
 from django.utils.safestring import mark_safe
 from django.utils.html import escape
 
 from emtools.ccpeve import igb
-from emtools.ccpeve.models import apiroot, SolarSystem
+from emtools.ccpeve.models import SolarSystem
 
 ##################################################################
 # Factions
@@ -26,8 +25,9 @@ class Faction(models.Model):
 # Alliances
 
 class Alliance(models.Model):
-    name = models.CharField(max_length=128)
+    name = models.CharField(max_length=128, blank=True)
     allianceid = models.BigIntegerField(null=True)
+    active = models.BooleanField(default=True)
     ticker = models.CharField(max_length=12, null=True)
     members = models.IntegerField(null=True)
     standing = models.IntegerField(null=True)
@@ -63,6 +63,39 @@ class Alliance(models.Model):
         showinfo = igb.ShowInfoAlliance(self.allianceid).__unicode__()
         return mark_safe('<span class="nobreak">') + link + tag + showinfo + mark_safe('</span>')
 
+    def update_intel(self, timestamp, **kwargs):
+        for field, value in kwargs.items():
+            if field == 'name':
+                if newer_than(timestamp, self.lastapi, self.lastkillinfo):
+                    if self.name != '' and self.name != value:
+                        Change.objects.create(
+                            alliance=self,
+                            changetype='name',
+                            oldstring=self.name,
+                            newstring=value)
+                    self.name = value
+            elif field == 'ticker':
+                if newer_than(timestamp, self.lastapi):
+                    self.ticker = value
+            elif field == 'members':
+                if newer_than(timestamp, self.lastapi):
+                    if self.members != value:
+                        Change.objects.create(
+                            alliance=self,
+                            changetype='members',
+                            oldint=self.members,
+                            newint=value)
+                    self.members = value
+            elif field in ('lastkillinfo', 'lastapi', 'lastcache'):
+                current = getattr(self, field)
+                if current is None:
+                    setattr(self, field, value)
+                else:
+                    setattr(self, field, max(current, value))
+            else:
+                setattr(self, field, value)
+        self.save()
+
     class Meta:
         ordering = ["name"]
 
@@ -72,6 +105,7 @@ class Alliance(models.Model):
 class Corporation(models.Model):
     name = models.CharField(max_length=128, blank=True)
     corporationid = models.BigIntegerField(null=True, default=None)
+    active = models.BooleanField(default=True)
     faction = models.ForeignKey(Faction, null=True, default=None)
     alliance = models.ForeignKey(Alliance, null=True, default=None)
     ticker = models.CharField(max_length=12, null=True, default=None)
@@ -111,13 +145,57 @@ class Corporation(models.Model):
     class Meta:
         ordering = ["name"]
 
-    def update_from_killinfo(self, killtime, alliance, faction):
-        # Corp comes from API or killinfo
-        if ((self.lastapi is None or self.lastapi < killtime) and
-            (self.lastkillinfo is None or self.lastkillinfo < killtime)):
-            self.alliance = alliance
-            self.faction = faction
-            self.save()
+    def update_intel(self, timestamp, **kwargs):
+        for field, value in kwargs.items():
+            if field == 'name':
+                if newer_than(timestamp, self.lastapi, self.lastkillinfo):
+                    if self.name != '' and self.name != value:
+                        Change.objects.create(
+                            corporation=self,
+                            changetype='name',
+                            oldstring=self.name,
+                            newstring=value)
+                    self.name = value
+            elif field == 'faction':
+                if newer_than(timestamp, self.lastcache, self.lastkillinfo):
+                    if self.faction != value:
+                        Change.objects.create(
+                            corporation=self,
+                            changetype='faction',
+                            oldfaction=self.faction,
+                            newfaction=value)
+                    self.faction = value
+            elif field == 'alliance':
+                if newer_than(timestamp, self.lastapi):
+                    if self.alliance != value:
+                        Change.objects.create(
+                            corporation=self,
+                            changetype='alliance',
+                            oldalliance=self.alliance,
+                            newalliance=value)
+                    self.alliance = value
+            elif field == 'ticker':
+                if newer_than(timestamp, self.lastapi):
+                    self.ticker = value
+            elif field == 'members':
+                if newer_than(timestamp, self.lastapi):
+                    if self.members != value:
+                        Change.objects.create(
+                            corporation=self,
+                            changetype='members',
+                            oldint=self.members,
+                            newint=value)
+                    self.members = value
+            elif field in ('lastkillinfo', 'lastapi', 'lastcache'):
+                current = getattr(self, field)
+                if current is None:
+                    setattr(self, field, value)
+                else:
+                    setattr(self, field, max(current, value))
+            else:
+                setattr(self, field, value)
+        self.save()
+
 
 ##################################################################
 # Pilots
@@ -125,6 +203,7 @@ class Corporation(models.Model):
 class Pilot(models.Model):
     name = models.CharField(max_length=128, blank=True)
     characterid = models.BigIntegerField(null=True)
+    active = models.BooleanField(default=True)
     corporation = models.ForeignKey(Corporation, null=True)
     alliance = models.ForeignKey(Alliance, null=True)
     security = models.FloatField(null=True)
@@ -145,13 +224,41 @@ class Pilot(models.Model):
         showinfo = igb.ShowInfoCharacter(self.characterid).__unicode__()
         return mark_safe('<span class="nobreak">') + link + showinfo + mark_safe('</span>')
 
-    def update_from_killinfo(self, killtime, corp, alliance):
-        # Corp comes from API or killinfo
-        if ((self.lastapi is None or self.lastapi < killtime) and
-            (self.lastkillinfo is None or self.lastkillinfo < killtime)):
-            self.corp = corp
-            self.alliance = alliance
-            self.save()
+    def update_intel(self, timestamp, **kwargs):
+        for field, value in kwargs.items():
+            if field == 'name':
+                if newer_than(timestamp, self.lastapi, self.lastkillinfo):
+                    if self.name != '' and self.name != value:
+                        Change.objects.create(
+                            pilot=self,
+                            changetype='name',
+                            oldstring=self.name,
+                            newstring=value)
+                    self.name = value
+            elif field == 'corporation':
+                if newer_than(timestamp, self.lastapi):
+                    if self.alliance != value:
+                        Change.objects.create(
+                            pilot=self,
+                            changetype='corp',
+                            oldcorp=self.corporation,
+                            newcorp=value)
+                    self.corporation = value
+            elif field == 'alliance':
+                if newer_than(timestamp, self.lastkillinfo, self.lastapi):
+                    self.alliance = value
+            elif field == 'security':
+                if newer_than(timestamp, self.lastapi):
+                    self.security = value
+            elif field in ('lastkillinfo', 'lastapi', 'lastcache'):
+                current = getattr(self, field)
+                if current is None:
+                    setattr(self, field, value)
+                else:
+                    setattr(self, field, max(current, value))
+            else:
+                setattr(self, field, value)
+        self.save()
 
 ##################################################################
 # Other models
@@ -166,6 +273,70 @@ class TrackedEntity(models.Model):
         if self.alliance is not None:
             return self.alliance.name
         return "<Tracked Entity %i>" % self.id
+
+class Change(models.Model):
+    timestamp = models.DateTimeField(auto_now_add=True)
+    changetype = models.CharField(max_length=128)
+    pilot = models.ForeignKey(Pilot, null=True, default=None)
+    corporation = models.ForeignKey(Corporation, null=True, default=None)
+    alliance = models.ForeignKey(Alliance, null=True, default=None)
+    oldint = models.IntegerField(null=True, default=None)
+    oldstring = models.CharField(max_length=128, blank=True, default='')
+    oldcorp = models.ForeignKey(Corporation, null=True, related_name='+',
+                                 default=None)
+    oldalliance = models.ForeignKey(Alliance, null=True, related_name='+',
+                                     default=None)
+    oldfaction = models.ForeignKey(Faction, null=True, related_name='+',
+                                    default=None)
+    newint = models.IntegerField(null=True, default=None)
+    newstring = models.CharField(max_length=128, blank=True, default='')
+    newcorp = models.ForeignKey(Corporation, null=True, related_name='+',
+                                 default=None)
+    newalliance = models.ForeignKey(Alliance, null=True, related_name='+',
+                                     default=None)
+    newfaction = models.ForeignKey(Faction, null=True, related_name='+',
+                                    default=None)
+
+    def verbose(self):
+        who = (self.pilot or self.corp or self.alliance).fullname()
+        if self.changetype == 'members':
+            change = self.newint - self.oldint
+            if change > 0:
+                return "%s gained %s members" % (who, change)
+            else:
+                return "%s lost %s members" % (who, -change)
+        elif self.changetype == 'name':
+            return "%s changed name to %s" % (self.oldstring, self.newstring)
+        elif self.changetype == 'corp':
+            if self.oldcorp is None:
+                return ("%s joined corp %s" %
+                        (who, self.newcorp.fullname()))
+            else:
+                return ("%s changed corp from %s to %s" %
+                        (who, self.oldcorp.fullname(),
+                         self.newcorp.fullname()))
+        elif self.changetype == 'alliance':
+            if self.oldalliance is None:
+                return ("%s joined alliance %s" %
+                        (who, self.newalliance.fullname()))
+            elif self.newalliance is None:
+                return ("%s left alliance %s" %
+                        (who, self.newalliance.fullname()))
+            else:
+                return ("%s changed alliance from %s to %s" %
+                        (who, self.oldalliance.fullname(),
+                         self.newalliance.fullname()))
+        elif self.changetype == 'faction':
+            if self.oldfaction is None:
+                return ("%s joined faction %s" %
+                        (who, self.newfaction.fullname()))
+            elif self.newfaction is None:
+                return ("%s left faction %s" %
+                        (who, self.newfaction.fullname()))
+            else:
+                return ("%s changed faction from %s to %s" %
+                        (who, self.oldfaction.fullname(),
+                         self.newfaction.fullname()))
 
 class ChangeLog(models.Model):
     timestamp = models.DateTimeField(auto_now_add=True)
@@ -268,11 +439,13 @@ class KillManager(models.Manager):
                                                       p.factionname)
                 obj.involvedfactions.add(faction)
             if pilot is not None:
-                pilot.update_from_killinfo(ki.killtime,
-                                           corp=corp, alliance=alliance)
+                pilot.update_intel(ki.killtime,
+                                   corporation=corp,
+                                   alliance=alliance)
             if corp is not None:
-                corp.update_from_killinfo(ki.killtime,
-                                          alliance=alliance, faction=faction)
+                corp.update_intel(ki.killtime,
+                                  alliance=alliance,
+                                  faction=faction)
         return obj, True
 
 class Kill(models.Model):
@@ -301,3 +474,9 @@ class Feed(models.Model):
 
     def __unicode__(self):
         return self.url
+
+def newer_than(checkts, *timestamps):
+    for ts in timestamps:
+        if ts is not None and checkts < ts:
+            return False
+    return True

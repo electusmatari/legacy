@@ -8,7 +8,6 @@ from django.views.generic.simple import direct_to_template
 
 urlpatterns = patterns('',
     (r'^shop/', include('gradient.shop.urls')),
-    (r'^gmi/', include('gradient.gmi.urls')),
     (r'^index/', include('gradient.index.urls')),
     (r'^recruitment/', include('gradient.recruitment.urls')),
     (r'^rc/', include('gradient.rc.urls')),

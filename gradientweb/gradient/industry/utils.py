@@ -162,7 +162,7 @@ def build(blueprint):
     if blueprint.me >= 0:
         wf = bwf * 0.01 * (1.0 / (blueprint.me + 1))
     else:
-        wf = bwf * 0.01 * (1 - blueprint.me)
+        wf = bwf * (1.1 - (blueprint.me / 10.0))
     for (key, val) in base.items():
         base[key] += int(round(val * wf))
     return (base + more)

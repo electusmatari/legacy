@@ -99,7 +99,6 @@ INSTALLED_APPS = (
     'emtools.fw',
     'emtools.recruitment',
     'emtools.grdpersonnel',
-    'emtools.corpreport',
 )
 
 AUTH_PROFILE_MODULE = 'emauth.Profile'

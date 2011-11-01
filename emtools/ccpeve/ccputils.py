@@ -78,6 +78,7 @@ class InvItem(object):
         # 82000000 <= itemid < 90000000
         elif 90000000 <= itemid < 91000000:
             return 'Character' # Old, newer characters get a Player Item
+        # Seen characters > 91000000, too!
         # 91000000 <= itemid < 98000000
         elif 98000000 <= itemid < 99000000:
             return 'Corporation' # Old, newer corporations get a Player Item

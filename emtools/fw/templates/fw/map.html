@@ -1,0 +1,60 @@
+{% extends "fw/base.html" %}
+{% load em %}
+
+{% block content %}
+{% if igb %}
+{% if not igb.trusted %}
+<ul class="messages">
+<li class="error">This site is currently not trusted by your browser.
+  This means that the buttons to set your destination to these systems
+  will not work. Reload this page once you trusted this site to get
+  rid of this warning.<br />
+
+<button onClick="CCPEVE.requestTrust('http://www.electusmatari.com/')">
+Trust this site
+</button>
+</li>
+</ul>
+{% endif %}
+{% else %}
+<ul class="messages">
+<li class="debug">If you view this page in the neocom browser, you
+  will get buttons to set your destination to these systems.</li>
+</ul>
+{% endif %}
+
+<h1>Factional Warfare Victory Points</h1>
+
+<p>Data from {{lastupdated|date:"Y-m-d H:i"}}</p>
+
+<p><em>Help keep the data current&mdash;install the
+  <a href="http://gradient.electusmatari.com/uploader/">Gradient Data
+  Uploader</a> today!</em></p>
+
+{% for faction, logo, system_list in map %}
+<h2><img src="{{logo}}" />{{faction}}</h2>
+
+<table class="data" style="width: 23em">
+  <thead>
+    <tr><th>System</th><th>VP</th><th>%</th></tr>
+  </thead>
+  <tbody>
+  {% for system in system_list %}
+  <tr class="{% cycle even,odd %}">
+    <td>
+      {{system.solarsystemname}}
+      {% if igb %}
+      <a href="#" onclick="CCPEVE.setDestination({{system.solarsystemid}}); return false">
+      <img src="/media/img/icons/autopilot.png" />
+      </a>
+      {% endif %}
+    </td>
+    <td class="numeric">{{system.victorypoints|intcomma}}</td>
+    <td class="numeric">{{system.percentage}}</td>
+  </tr>
+  {% endfor %}
+  </tbody>
+</table>
+
+{% endfor %}
+{% endblock %}
