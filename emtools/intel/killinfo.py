@@ -3,6 +3,25 @@
 from emtools.ccpeve.ccpdb import get_moonid
 
 import datetime
+import logging
+
+def is_characterid(itemid):
+    return (3000000 <= itemid < 4000000 or # NPC
+            90000000 <= itemid < 91000000 or # Old player
+            100000000 <= itemid) # New player
+
+def is_corporationid(itemid):
+    return (1000000 <= itemid < 2000000 or # NPC
+            98000000 <= itemid < 99000000 or # Old player corp
+            100000000 <= itemid) # New player corp
+
+def is_allianceid(itemid):
+    return (99000000 <= itemid < 100000000 or # Old player alliance
+            100000000 <= itemid) # New player alliance
+
+def is_factionid(itemid):
+    return 500000 <= itemid < 1000000
+
 
 class Killinfo(object):
     def __init__(self):
@@ -21,19 +40,33 @@ class Killinfo(object):
         self.items = []
 
     def fix(self):
-        self.fix_ccp_idiocies()
-        self.fix_edk_idiocies()
+        try:
+            self.fix_ccp_idiocies()
+            self.fix_edk_idiocies()
+        except:
+            logging.exception("Exception during fix")
+            raise
 
     def fix_ccp_idiocies(self):
+        # Translating the alliance name that indicates "no alliance"
+        # is awesome. Oh, it can also be "None" or "Unknown",
+        # depending on whether it's the involved party or the victim.
+        # Consistency is for the fearful.
         for p in [self.victim] + self.attackers:
-            if p.alliancename.lower() in ['Неизвестно', u'неизвестно',
-                                          'неизвестно', 'het', 'unbekannt',
-                                          'keine', 'unknown', 'none']:
+            if (p.alliancename is not None and
+                p.alliancename.lower() in [u'Неизвестно', u'неизвестно', u'het',
+                                           u'unbekannt', u'keine',
+                                           u'unknown', u'none']):
+                p.alliancename = None
+                p.allianceid = None
+            if p.alliancename in [u'\u041d\u0415\u0422', u'\u041d\u0435\u0438\u0437\u0432\u0435\u0441\u0442\u043d\u043e']:
                 p.alliancename = None
                 p.allianceid = None
 
     def fix_edk_idiocies(self):
-        if '- Moon ' in self.victim.charactername:
+        # EDK fucks up moon parsing a lot. Moons are not characters,
+        # they're moons. It's hard, because EDK is dumb.
+        if self.victim.charactername is not None and '- Moon ' in self.victim.charactername:
             self.victim.moonid = get_moonid(self.victim.charactername.strip())
             self.victim.characterid = None
             self.victim.charactername = None
@@ -43,17 +76,32 @@ class Killinfo(object):
                     'caldari state': (500001, 'Caldari State')
                     }
         for p in [self.victim] + self.attackers:
-            if p.allianceName.lower() in factions:
-                p.factionid, p.factionname = factions[p.allianceName.lower()]
-                p.alliancename = None
-                p.allianceid = None
-            if " - " in p.charactername: # NPC
+            # EDK fakes factions by treating them as alliances,
+            # because EDK is dumb.
+            if ((p.alliancename is not None and
+                 p.alliancename.lower() in factions)):
+                p.factionid, p.factionname = factions[p.alliancename.lower()]
+                p.alliancename = ''
+                p.allianceid = 0
+            # EDK also often fucks up NPC name parsing, because EDK is dumb.
+            if ((p.charactername is not None and
+                 " - " in p.charactername)): # NPC
                 p.charactername = ''
                 p.characterid = 0
-            if p.characterid < 500000: # typeID is not a characterID, ffs
+            # Oh, and EDK also often puts wrong values (like, typeIDs
+            # or solarSystemIDs) into corporationid or characterid
+            # fields, because EDK is dumb. Verifying allianceid for
+            # good measure - you never know, you see, because EDK is
+            # dumb.
+            if p.allianceid is not None and not is_allianceid(p.allianceid):
+                p.alliancename = ''
+                p.allianceid = 0
+            if p.corporationid is not None and not is_corporationid(p.corporationid):
+                p.corporationname = ''
+                p.corporationid = 0
+            if p.characterid is not None and not is_characterid(p.characterid):
                 p.characterid = 0
                 p.charactername = ''
-
 
 class Person(object):
     def __init__(self, characterid=None, charactername=None,
@@ -158,6 +206,8 @@ def parse_api_page(xml):
             att.corporationname = strn(attacker.get('corporationName'))
             att.allianceid = intn(attacker.get('allianceID'))
             att.alliancename = strn(attacker.get('allianceName'))
+            att.factionid = intn(attacker.get('factionID'))
+            att.factionname = strn(attacker.get('factionName'))
             att.security = attacker.get('securityStatus')
             att.damagedone = intn(attacker.get('damageDone'))
             att.finalblow = bool(attacker.get('finalBlow'))
@@ -171,6 +221,7 @@ def parse_api_page(xml):
             i.qtydropped = intn(item.get('qtyDropped'))
             i.qtydestroyed = intn(item.get('qtyDestroyed'))
             ki.items.append(i)
+        ki.fix()
         result.append(ki)
     return result
 

@@ -17,7 +17,7 @@ urlpatterns = patterns('',
     ('^tools/timezones/', include('emtools.timezones.urls')),
 #    ('^tools/fw/', include('emtools.fw.urls')),
     ('^tools/profits/', include('emtools.profits.urls')),
-    ('^tools/operations/', include('emtools.operations.urls')),
+    ('^operations/', include('emtools.operations.urls')),
     ('^tools/', include('emtools.tools.urls')),
     ('^banner/', 'emtools.tools.views.view_banner'),
 

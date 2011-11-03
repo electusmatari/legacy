@@ -10,6 +10,9 @@ sys.path.append("/home/forcer/Projects/gradient")
 from gradient.uploader.models import FacWarSystem
 from emtools.intel.models import Pilot, Corporation, Faction
 
+from emtools.emauth.decorators import require_mybbgroup
+
+@require_mybbgroup(['Electus Matari', 'Ally', 'Militia Intel'])
 def view_map(request):
     lu = FacWarSystem.objects.all()[0].cachetimestamp
     minmatar = FacWarSystem.objects.filter(
@@ -46,13 +49,16 @@ def corp_image(corpid):
         return None
     return faction_image(corp.faction)
 
-def pilot_image(charid):
+def pilot_image_and_corp(charid):
     try:
         pilot = Pilot.objects.select_related(
             depth=2).get(characterid=charid)
-    except Corporation.DoesNotExist:
-        return None
-    return faction_image(pilot.corporation.faction)
+    except Pilot.DoesNotExist:
+        return None, None
+    if pilot.corporation is None:
+        return None, None
+    return (faction_image(pilot.corporation.faction),
+            pilot.corporation)
 
 def faction_image(faction):
     if faction is None:
@@ -68,6 +74,7 @@ def faction_image(faction):
     else:
         return None
 
+@require_mybbgroup(['Electus Matari', 'Ally', 'Militia Intel'])
 def view_topstats(request):
     api = apiroot()
     fwts = api.eve.FacWarTopStats()
@@ -76,12 +83,15 @@ def view_topstats(request):
                      corporations=[],
                      factions=[])
     for rank, entry in enumerate(fwts.characters.VictoryPointsLastWeek):
+        image, corp = pilot_image_and_corp(entry.characterID)
         vplastweek.characters.append(Bag(rank=rank + 1,
                                          id=entry.characterID,
                                          name=entry.characterName,
                                          points=entry.victoryPoints,
                                          igb=igb.ShowInfoCharacter(entry.characterID),
-                                         faction=pilot_image(entry.characterID)))
+                                         faction=image,
+                                         corp="(Unknown)" if corp is None else corp.name,
+                                         corpigb="" if corp is None else igb.ShowInfoCorp(corp.corporationid)))
     for rank, entry in enumerate(fwts.corporations.VictoryPointsLastWeek):
         vplastweek.corporations.append(Bag(rank=rank + 1,
                                            id=entry.corporationID,

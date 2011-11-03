@@ -161,6 +161,12 @@ class FetcherThread(threading.Thread):
         self.stats = stats
 
     def run(self):
+        try:
+            self.run2()
+        except:
+            logging.exception("Exception during FetcherThread run")
+
+    def run2(self):
         while True:
             (feedid, feedtype, url, state) = self.feedq.get()
             try:
@@ -379,9 +385,24 @@ def get_evsco_feeds(entities_per_feed=1):
 def clean_kills():
     old = datetime.datetime.now() - datetime.timedelta(days=28*2)
     c = connection.cursor()
-    c.execute("DELETE FROM intel_kill_involved "
+    c.execute("DELETE FROM intel_kill_involvedpilots inv "
               "WHERE (SELECT timestamp FROM intel_kill "
-              "       WHERE intel_kill.id = intel_kill_involved.kill_id "
+              "       WHERE intel_kill.id = inv.kill_id "
+              "      ) < %s",
+              (old,))
+    c.execute("DELETE FROM intel_kill_involvedcorps inv "
+              "WHERE (SELECT timestamp FROM intel_kill "
+              "       WHERE intel_kill.id = inv.kill_id "
+              "      ) < %s",
+              (old,))
+    c.execute("DELETE FROM intel_kill_involvedalliances inv "
+              "WHERE (SELECT timestamp FROM intel_kill "
+              "       WHERE intel_kill.id = inv.kill_id "
+              "      ) < %s",
+              (old,))
+    c.execute("DELETE FROM intel_kill_involvedfactions inv "
+              "WHERE (SELECT timestamp FROM intel_kill "
+              "       WHERE intel_kill.id = inv.kill_id "
               "      ) < %s",
               (old,))
     c.execute("DELETE FROM intel_kill WHERE timestamp < %s",

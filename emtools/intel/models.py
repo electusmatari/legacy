@@ -298,7 +298,7 @@ class Change(models.Model):
                                     default=None)
 
     def verbose(self):
-        who = (self.pilot or self.corp or self.alliance).fullname()
+        who = (self.pilot or self.corporation or self.alliance).fullname()
         if self.changetype == 'members':
             change = self.newint - self.oldint
             if change > 0:
@@ -329,14 +329,14 @@ class Change(models.Model):
         elif self.changetype == 'faction':
             if self.oldfaction is None:
                 return ("%s joined faction %s" %
-                        (who, self.newfaction.fullname()))
+                        (who, self.newfaction.name))
             elif self.newfaction is None:
                 return ("%s left faction %s" %
-                        (who, self.newfaction.fullname()))
+                        (who, self.newfaction.name))
             else:
                 return ("%s changed faction from %s to %s" %
-                        (who, self.oldfaction.fullname(),
-                         self.newfaction.fullname()))
+                        (who, self.oldfaction.name,
+                         self.newfaction.name))
 
 class ChangeLog(models.Model):
     timestamp = models.DateTimeField(auto_now_add=True)
@@ -444,8 +444,10 @@ class KillManager(models.Manager):
                                    alliance=alliance)
             if corp is not None:
                 corp.update_intel(ki.killtime,
-                                  alliance=alliance,
-                                  faction=faction)
+                                  alliance=alliance)
+                if faction is not None:
+                    corp.update_intel(ki.killtime,
+                                      faction=faction)
         return obj, True
 
 class Kill(models.Model):
@@ -463,6 +465,13 @@ class Kill(models.Model):
 
     def __unicode__(self):
         return self.hash
+
+    @property
+    def killinfo(self):
+        if not hasattr(self, "_killinfo"):
+            self._killinfo = pickle.loads(base64.b64decode(self.pickle))
+        return self._killinfo
+
 
 class Feed(models.Model):
     feedtype = models.CharField(max_length=32)

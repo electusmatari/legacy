@@ -46,7 +46,7 @@
 
 <table class="data">
 <thead>
-<tr><th>Rank</th><th>VP</th><th></th><th>Name</th></tr>
+<tr><th>Rank</th><th>VP</th><th></th><th>Name</th><th>Corporation</th></tr>
 </thead>
 <tbody>
 {% for char in vplastweek.characters %}
@@ -55,6 +55,7 @@
   <td class="numeric">{{char.points|intcomma}}</td>
   <td>{% if char.faction %}<img src="{{char.faction}}" />{% endif %}</td>
   <td>{{char.name}} {{char.igb}}</td>
+  <td>{{char.corp}} {{char.corpigb}}</td>
 </tr>
 {% endfor %}
 </tbody>
