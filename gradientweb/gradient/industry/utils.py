@@ -508,16 +508,21 @@ def publicmarket_save(regionid, typeid, tree):
     if reported_time is None:
         evemetrics_time = datetime.datetime(2000, 1, 1)
     else:
+        # For a reason completely beyond me, evecental does not report
+        # years. Add the year to the time stamp to avoid a silly Feb
+        # 29 bug.
         evemetrics_time = datetime.datetime.strptime(
-            reported_time.text,
-            "%m-%d %H:%M:%S"
-            ).replace(year=now.year)
+            "%s-%s" % (now.year, reported_time.text),
+            "%Y-%m-%d %H:%M:%S"
+            )
     try:
         gdu_time = MarketOrderLastUpload.objects.get(regionid=regionid,
                                                      typeid=typeid
                                                      ).cachetimestamp
     except MarketOrderLastUpload.DoesNotExist:
         gdu_time = datetime.datetime(2000, 1, 1)
+    # This can break when the date changes from one year to the next.
+    # We'll have to live with that.
     if evemetrics_time > gdu_time:
         publicmarket_save2(regionid, typeid, tree)
     else:
