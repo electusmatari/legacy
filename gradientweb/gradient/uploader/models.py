@@ -26,6 +26,9 @@ class MarketHistoryLastUpload(models.Model):
     regionid = models.BigIntegerField(db_index=True)
     typeid = models.BigIntegerField(db_index=True)
 
+    class Meta:
+        unique_together = [('typeid', 'regionid')]
+
 class MarketHistory(models.Model):
     upload = models.ForeignKey(Upload)
     cachetimestamp = models.DateTimeField()
@@ -79,6 +82,9 @@ class FacWarSystem(models.Model):
     owningfactionname = models.CharField(max_length=128)
     victorypoints = models.IntegerField()
     threshold = models.IntegerField()
+
+    def percentage(self):
+        return "%.1f%%" % ((self.victorypoints * 100.0) / self.threshold)
 
 class FacWarSystemHistory(models.Model):
     upload = models.ForeignKey(Upload)

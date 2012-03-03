@@ -50,6 +50,7 @@ $(function () {
   <thead>
     <tr>
       <th></th>
+      <th>Date</th>
       <th>Quantity</th>
       <th>Product</th>
       <th>Office</th>
@@ -62,6 +63,7 @@ $(function () {
       <td>
         <input type="checkbox" name="orderid" value="{{order.id}}" />
       </td>
+      <td>{{order.created|date:"Y-m-d H:i"}}</td>
       <td class="numeric">{{order.quantity}}</td>
       <td>{{order.typename}}</td>
       <td>{{order.office.name}}</td>

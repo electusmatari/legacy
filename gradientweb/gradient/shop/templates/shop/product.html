@@ -8,7 +8,7 @@
       <img src="/media/img/info.png" />
     </a>
   </span><br />
-  <span class="description">{{product.description|safe|truncatewords_html:32}}</span><br />
+  <span class="description">{{product.shopdescription|safe|truncatewords_html:32}}</span><br />
 {% with product.grdprice as price %}
 {% with product.marketprice as marketprice %}
 <table class="priceinfo">

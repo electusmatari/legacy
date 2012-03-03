@@ -4,6 +4,7 @@ from django.db import models
 from django.contrib.auth.models import User
 
 from gradient.dbutils import get_typename, get_itemname
+from gradient.index.models import Index
 
 ORDERTYPE_CHOICES = [('sell', 'Sell Order'),
                      ('buy', 'Buy Order')]
@@ -79,10 +80,48 @@ class Transaction(models.Model):
     def stationname(self):
         return get_itemname(self.stationid)
 
+class TransactionInfo(models.Model):
+    transaction = models.OneToOneField(Transaction, related_name="info")
+    account = models.ForeignKey(Account)
+    typename = models.CharField(max_length=128)
+    cost = models.FloatField()
+    safetymargin = models.FloatField(default=1.0)
+    stationname = models.CharField(max_length=128)
+    charactername = models.CharField(max_length=128)
+    clientname = models.CharField(max_length=128, null=True)
+    clientstanding = models.IntegerField(null=True)
+    clientcorp = models.CharField(max_length=128)
+    clientcorpid = models.BigIntegerField()
+    clientcorpstanding = models.IntegerField(null=True)
+    clientalliance = models.CharField(max_length=128, blank=True, default='')
+    clientallianceid = models.BigIntegerField(null=True, default=None)
+    clientalliancestanding = models.IntegerField(null=True, default=None)
+
+    @property
+    def standing(self):
+        if self.clientalliancestanding is not None:
+            return self.clientalliancestanding
+        if self.clientcorpstanding is not None:
+            return self.clientcorpstanding
+        if self.clientstanding is not None:
+            return self.clientstanding
+
+    @property
+    def profit(self):
+        if self.transaction.transactiontype == 'sell':
+            per_item = (self.transaction.price -
+                        (self.cost * self.safetymargin))
+        else:
+            per_item = ((self.cost * self.safetymargin) -
+                        self.transaction.price)
+        return self.transaction.quantity * per_item
+
+
 class Journal(models.Model):
     journalid = models.BigIntegerField(unique=True)
     accountkey = models.IntegerField()
     timestamp = models.DateTimeField()
+    reftypeid = models.IntegerField()
     amount = models.FloatField()
     ownerid1 = models.BigIntegerField()
     ownerid2 = models.BigIntegerField()
@@ -224,6 +263,13 @@ class StockLevel(models.Model):
     @property
     def missing(self):
         return max(0, self.high - self.current)
+
+    @property
+    def index(self):
+        try:
+            return Index.objects.filter(typeid=self.typeid)[0:1].get().republic
+        except Index.DoesNotExist:
+            return None
 
     class Meta:
         ordering = ["typename"]

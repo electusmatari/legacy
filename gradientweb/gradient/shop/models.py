@@ -3,6 +3,10 @@ from django.contrib.auth.models import User
 from gradient.industry.models import PriceList, MarketPrice
 
 class ProductList(PriceList):
+    def shopdescription(self):
+        return self.description.replace('<font color="yellow">',
+                                        '<font color="#FF7F00">')
+
     class Meta:
         proxy = True
 
@@ -88,7 +92,7 @@ class Order(models.Model):
         elif self.standing == 0:
             return "neutral"
         else:
-            return "%+i" % order.standing
+            return "%+i" % self.standing
 
 
     class Meta:

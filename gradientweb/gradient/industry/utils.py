@@ -6,18 +6,21 @@ from xml.etree import ElementTree
 from django.db import transaction
 from django.db.models import Sum
 
-from emtools.ccpeve.models import APIKey
+from emtools.ccpeve.models import APIKey, apiroot
 
 from gradient.index.models import Index
+from gradient.uploader.models import MarketOrder as UploadedMarketOrder
+from gradient.uploader.models import MarketOrderLastUpload
 
 from gradient.dbutils import get_typename, get_stationsystem, get_systemregion
-from gradient.dbutils import system_distance
+from gradient.dbutils import system_distance, get_itemname, get_membername
 
 from gradient.industry.dbutils import InvType, get_decryptors
 
 from gradient.industry.models import BlueprintOriginal
 from gradient.industry.models import set_last_update
-from gradient.industry.models import Transaction, Journal, PriceList
+from gradient.industry.models import Transaction, TransactionInfo, Account
+from gradient.industry.models import Journal, PriceList
 from gradient.industry.models import MarketOrder, WantedMarketOrder
 from gradient.industry.models import PublicMarketOrder, MarketPrice
 from gradient.industry.models import Stock, StockLevel
@@ -162,7 +165,7 @@ def build(blueprint):
     if blueprint.me >= 0:
         wf = bwf * 0.01 * (1.0 / (blueprint.me + 1))
     else:
-        wf = bwf * (1.1 - (blueprint.me / 10.0))
+        wf = bwf * 0.01 * (1 + 0.1 - blueprint.me * 0.1)
     for (key, val) in base.items():
         base[key] += int(round(val * wf))
     return (base + more)
@@ -265,7 +268,7 @@ class IndexCalculator(object):
             if row.typename in USE_JITA_INDEX:
                 self.index[row.typename] = row.jita
             else:
-                self.index[row.typename] = row.value
+                self.index[row.typename] = row.republic
 
     def bag_cost(self, bag):
         total = 0.0
@@ -442,24 +445,36 @@ class Component(object):
 
 # model update
 def update():
+    log = logging.getLogger('industry')
+    log.info("Running industry update")
     transaction.commit_unless_managed()
     transaction.enter_transaction_management()
     transaction.managed(True)
     grd = APIKey.objects.get(name='Gradient').corp()
+    log.info("Update public market")
     update_publicmarket()
     transaction.commit()
+    log.info("Update market prices")
     update_marketprice()
     transaction.commit()
+    log.info("Update transactions and journal")
     for accountkey in [1000, 1001, 1002, 1003, 1004, 1005, 1006]:
         update_transaction(grd, accountkey)
         update_journal(grd, accountkey)
     transaction.commit()
+    log.info("Update transaction info")
+    add_transaction_info(grd)
+    transaction.commit()
+    log.info("Update price list")
     update_pricelist(grd)
     transaction.commit()
+    log.info("Update corp market orders")
     update_marketorder(grd)
     transaction.commit()
+    log.info("Update stock levels")
     update_stock(grd)
     transaction.commit()
+    log.info("Industry update done")
     transaction.leave_transaction_management()
 
 MOLDENHEATH = 10000028
@@ -472,25 +487,60 @@ JITA44 = 60003760
 
 def update_publicmarket():
     log = logging.getLogger('industry')
-    regionlimit = [('regionlimit', regionid) for regionid in 
-                   [HEIMATAR, METROPOLIS, MOLDENHEATH, THEFORGE]]
     for pl in PriceList.objects.all():
-        query = urllib.urlencode(regionlimit + [('typeid', str(pl.typeid))])
-        url = "http://api.eve-central.com/api/quicklook?" + query
-        try:
-            data = urllib.urlopen(url).read()
-            tree = ElementTree.fromstring(data)
-        except Exception as e:
-            log.info("Couldn't retrieve public market info for %s: %s" %
-                     (pl.typename, str(e)))
-        else:
-            publicmarket_save(pl.typeid, tree)
+        for regionid in [HEIMATAR, METROPOLIS, MOLDENHEATH, THEFORGE]:
+            query = urllib.urlencode([('regionlimit', regionid),
+                                      ('typeid', str(pl.typeid))])
+            url = "http://api.eve-central.com/api/quicklook?" + query
+            try:
+                data = urllib.urlopen(url).read()
+                tree = ElementTree.fromstring(data)
+            except Exception as e:
+                log.info("Couldn't retrieve public market info for %s: %s" %
+                         (pl.typename, str(e)))
+            else:
+                publicmarket_save(regionid, pl.typeid, tree)
     set_last_update('public-market', datetime.datetime.utcnow())
 
-def publicmarket_save(typeid, tree):
+def publicmarket_save(regionid, typeid, tree):
+    now = datetime.datetime.utcnow()
+    reported_time = tree.find("quicklook//reported_time")
+    if reported_time is None:
+        evemetrics_time = datetime.datetime(2000, 1, 1)
+    else:
+        evemetrics_time = datetime.datetime.strptime(
+            reported_time.text,
+            "%m-%d %H:%M:%S"
+            ).replace(year=now.year)
+    try:
+        gdu_time = MarketOrderLastUpload.objects.get(regionid=regionid,
+                                                     typeid=typeid
+                                                     ).cachetimestamp
+    except MarketOrderLastUpload.DoesNotExist:
+        gdu_time = datetime.datetime(2000, 1, 1)
+    if evemetrics_time > gdu_time:
+        publicmarket_save2(regionid, typeid, tree)
+    else:
+        PublicMarketOrder.objects.filter(regionid=regionid,
+                                         typeid=typeid).delete()
+        for mo in UploadedMarketOrder.objects.filter(regionid=regionid,
+                                                     typeid=typeid):
+            PublicMarketOrder.objects.create(
+                last_seen=now,
+                ordertype="buy" if mo.bid else "sell",
+                regionid=mo.regionid,
+                systemid=mo.solarsystemid,
+                stationid=mo.stationid,
+                range=mo.range,
+                typeid=mo.typeid,
+                volremain=mo.volremaining,
+                price=mo.price
+                )
+        
+def publicmarket_save2(regionid, typeid, tree):
     now = datetime.datetime.utcnow()
     assert str(typeid) == tree.find("quicklook/item").text
-    PublicMarketOrder.objects.filter(typeid=typeid).delete()
+    PublicMarketOrder.objects.filter(regionid=regionid, typeid=typeid).delete()
     def save_order(ordertype, order):
         stationid = int(order.find("station").text)
         PublicMarketOrder.objects.create(
@@ -582,6 +632,80 @@ def update_transaction(grd, accountkey):
         for entry in gwt.transactions:
             save_entry(entry)
 
+def add_transaction_info(grd):
+    api = apiroot()
+    standingmap = dict((row.contactID, row.standing)
+                       for row in grd.ContactList().allianceContactList)
+    for entry in Transaction.objects.filter(info=None):
+        info = TransactionInfo()
+        info.transaction = entry
+        info.account = Account.objects.get(accountkey=entry.accountkey)
+        info.typename = get_typename(entry.typeid)
+        if info.typename is None:
+            continue
+        try:
+            pl = PriceList.objects.get(typeid=entry.typeid)
+            info.cost = pl.productioncost
+            info.safetymargin = pl.safetymargin
+        except PriceList.DoesNotExist:
+            try:
+                index = Index.objects.filter(typeid=entry.typeid)[0:1].get()
+                info.cost = index.republic
+                info.safetymargin = 1.0
+            except Index.DoesNotExist:
+                info.cost = 0.0
+                info.safetymargin = 1.1
+        info.stationname = get_itemname(entry.stationid)
+        if entry.characterid is not None:
+            info.charactername = get_membername(entry.characterid)
+        try:
+            charinfo = api.eve.CharacterInfo(characterID=entry.clientid)
+        except:
+            pass
+        else:
+            info.clientname = charinfo.characterName
+            info.clientstanding = standingmap.get(charinfo.characterID, None)
+            info.clientcorp = charinfo.corporation
+            info.clientcorpid = charinfo.corporationID
+            info.clientcorpstanding = standingmap.get(charinfo.corporationID,
+                                                      None)
+            if hasattr(charinfo, 'allianceID'):
+                info.clientalliance = charinfo.alliance
+                info.clientallianceid = charinfo.allianceID
+                info.clientalliancestanding = standingmap.get(
+                    charinfo.allianceID,
+                    None)
+            info.save()
+            transaction.commit()
+            continue
+        # It's a CorporationID!
+        info.clientname = None
+        info.clientstanding = None
+        info.clientcorpid = entry.clientid
+        name = get_itemname(entry.clientid)
+        if name is not None: # NPC corp
+            info.clientcorp = name
+            info.clientcorpstanding = standingmap.get(entry.clientid, None)
+            info.save()
+            transaction.commit()
+            continue
+        # Player corp
+        try:
+            corpinfo = api.eve.CorporationSheet(corporationID=entry.clientid)
+        except: # Something bad happened, ignore this
+            transaction.rollback()
+            continue
+        info.clientcorp = corpinfo.corporationName
+        info.clientcorpstanding = standingmap.get(corpinfo.corporationID,
+                                                  None)
+        if hasattr(corpinfo, 'allianceID'):
+            info.clientalliance = corpinfo.allianceName
+            info.clientallianceid = corpinfo.allianceID
+            info.clientalliancestanding = standingmap.get(corpinfo.allianceID,
+                                                          None)
+        info.save()
+        transaction.commit()
+
 def update_journal(grd, accountkey):
     def save_entry(entry):
         try:
@@ -593,6 +717,7 @@ def update_journal(grd, accountkey):
             journalid=entry.refID,
             accountkey=accountkey,
             timestamp=datetime.datetime.utcfromtimestamp(entry.date),
+            reftypeid=entry.refTypeID,
             amount=entry.amount,
             ownerid1=entry.ownerID1,
             ownerid2=entry.ownerID2,
@@ -634,8 +759,10 @@ def update_pricelist(grd):
                                  safetymargin=safetymargin)
         known.add(product.typeid)
         # We lack the parts for the Anshar...
-        if product.typename != 'Obelisk':
+        if not (product.typename == 'Obelisk' or
+                product.group().startswith("Rig ")):
             inventable.extend(bptype.invent_to())
+        
     for bpc in inventable:
         if bpc.typeid in bposet:
             continue
@@ -652,7 +779,7 @@ def update_pricelist(grd):
     for wmo in WantedMarketOrder.objects.filter(forcorp=True):
         if wmo.typeid in known:
             continue
-        typename = wmo.typename
+        typename = get_typename(wmo.typeid)
         typeid = wmo.typeid
         product = InvType(typeid, typename)
         productioncost = index.cost(typename)
@@ -672,7 +799,7 @@ def update_pricelist(grd):
         productioncost = index.cost(product.typename)
         if productioncost is None or not productioncost > 0:
             continue
-        productioncost += 250000 # Per-run BPC cost as per Damian
+        productioncost += 25000 # Per-run BPC cost as per Damian
         PriceList.objects.create(typename=product.typename,
                                  typeid=product.typeid,
                                  productioncost=productioncost,
@@ -741,6 +868,8 @@ def update_marketorder(grd):
         have_orders.add((order.charID, order.stationID,
                          ordertype, order.typeID))
         typename = get_typename(order.typeID)
+        if typename is None:
+            typename = '<typeID %s>' % order.typeID
         productioncost = pricelist.get(typename)
         if productioncost is None:
             productioncost = index.materialcost(typename)
@@ -865,6 +994,9 @@ def update_stock(grd):
     Stock.objects.all().delete()
     for stationid, levels in stocks.items():
         for typeid, quantity in levels.items():
+            typename = get_typename(typeid)
+            if typename is None:
+                typename = '<TypeID %s>' % typeid
             try:
                 pl = PriceList.objects.get(typeid=typeid)
             except PriceList.DoesNotExist:
@@ -874,7 +1006,7 @@ def update_stock(grd):
                                             stationid=stationid)
             except StockLevel.DoesNotExist:
                 sl = None
-            Stock.objects.create(typename=get_typename(typeid),
+            Stock.objects.create(typename=typename,
                                  typeid=typeid,
                                  stationid=stationid,
                                  current=quantity,

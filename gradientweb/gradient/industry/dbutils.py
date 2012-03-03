@@ -20,9 +20,9 @@ class InvType(object):
     @classmethod
     def from_typename(cls, typename):
         typeid = get_typeid(typename)
-        typename = get_typename(typeid)
         if typeid is None:
             raise RuntimeError("typename %r does not exist" % typename)
+        typename = get_typename(typeid)
         return cls(typeid=typeid, typename=typename)
 
     def portionsize(self):

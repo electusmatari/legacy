@@ -3,11 +3,11 @@
 
 {% block appheader %}
 <style type="text/css">
-table.data tbody tr.buy td.price {
+table.data tbody tr.buy td.price, table.data tbody tr td.loss {
   color: #FF0000;
   font-weight: bold;
 }
-table.data tbody tr.sell td.price {
+table.data tbody tr.sell td.price, table.data tbody tr td.win {
   color: #00AF00;
   font-weight: bold;
 }
@@ -28,10 +28,11 @@ table.data tbody tr.sell td.price {
       <th>Quantity</th>
       <th>Price (p.u.)</th>
       <th>Price (total)</th>
-{% comment %}
-      <th>Client</th>
+      <th>Profit</th>
+{% if display_pilot %}
       <th>Employee</th>
-{% endcomment %}
+{% endif %}
+      <th>Client</th>
       <th>Station</th>
     </tr>
   </thead>
@@ -40,15 +41,59 @@ table.data tbody tr.sell td.price {
 <tr class="{% cycle odd,even %} {% if t.transactiontype == 'buy' %}buy{% else %}sell{% endif %}">
   <td>{{t.timestamp|date:"Y-m-d H:i"}}</td>
   <td>{{t.accountname}}</td>
-  <td>{{t.typename}}</td>
+  <td>
+    <span class="tooltipped">
+      {{t.info.typename|truncatechars:30}}
+      <span class="tooltip">
+        {{t.info.typename}}
+      </span>
+    </span>
+  </td>
   <td class="numeric">{{t.quantity|intcomma}}</td>
   <td class="numeric price">{{t.price|floatcomma}}</td>
   <td class="numeric price">{{t.price_total|floatcomma}}</td>
-{% comment %}
-  <td>{{t.clientname}}</td>
-  <td>{{t.charactername}}</td>
-{% endcomment %}
-  <td>{{t.stationname}}</td>
+{% if t.info.cost == 0 %}
+  <td class="numeric">?</td>
+{% else %}
+  <td class="numeric {% if t.info.profit >= 0 %}win{% else %}loss{% endif %}">{{t.info.profit|floatcomma}}</td>
+{% endif %}
+{% if display_pilot %}
+  <td>{{t.info.charactername}}
+{% endif %}
+  <td>
+    <span class="tooltipped wide">
+      {{t.info.clientname|truncatechars:17}}
+      {% with t.info.standing as standing %}
+      {% include "standing.html" %}
+      {% endwith %}
+      <span class="tooltip">
+        <i>Pilot:</i> {{t.info.clientname}}
+        {% with t.info.clientstanding as standing %}
+        {% include "standing.html" %}
+        {% endwith %}
+        <br />
+        <i>Corp:</i> {{t.info.clientcorp}}
+        {% with t.info.clientcorpstanding as standing %}
+        {% include "standing.html" %}
+        {% endwith %}
+        {% if t.info.clientalliance %}
+        <br />
+        <i>Alliance:</i> {{t.info.clientalliance}}
+        {% with t.info.clientalliancestanding as standing %}
+        {% include "standing.html" %}
+        {% endwith %}
+        {% endif %}
+      </span>
+    </span>
+  </td>
+  <td>
+    <span class="tooltipped">
+      {{t.info.stationname|truncatechars:23}}
+      <span class="tooltip">
+        {{t.info.stationname}}
+      </span>
+    </span>
+  </td>
 </tr>
 {% endfor %}
   </tbody>

@@ -112,17 +112,18 @@ def json_suggest_markethistory(request):
     c = connection.cursor()
     c.execute("""
 SELECT t.typeid,
-       (SELECT MIN(DATE_PART('days', (NOW() at time zone 'UTC')
-                                      - h.cachetimestamp)) AS age
+       (SELECT MAX(h.cachetimestamp AT TIME ZONE 'UTC')
         FROM uploader_markethistorylastupload h
         WHERE regionid = %s
-          AND h.typeid = t.typeid) AS age
+          AND h.typeid = t.typeid) AS timestamp
 FROM index_index t
 WHERE NOT t.refineable
-ORDER BY age DESC, t.typeid ASC
+ORDER BY timestamp ASC, t.typeid ASC
 """, (regionid,))
-    result = [typeid for (typeid, age) in c.fetchall()
-              if age is None or age > 0]
+    midnight = datetime.datetime.utcnow().replace(hour=0, minute=0, second=0,
+                                                  microsecond=0)
+    result = [typeid for (typeid, timestamp) in c.fetchall()
+              if timestamp is None or timestamp < midnight]
     return HttpResponse(json.dumps(result), content_type="text/json")
 
 @csrf_exempt
@@ -212,26 +213,45 @@ def json_suggest_corporations(request):
     current = datetime.datetime.utcnow() - datetime.timedelta(days=1)
     c = connection.cursor()
     c.execute("SELECT corporationid "
-              "FROM intel_corporation c "
-              "     INNER JOIN intel_faction f "
-              "ON c.faction_id = f.id "
-              "WHERE f.name = 'Amarr Empire' "
-              "AND (lastcache IS NULL OR lastcache < %s) "
-              "ORDER BY lastcache ASC",
-              (current,))
-    result = [corpid for (corpid,) in c.fetchall()]
+              "FROM intel_corporation "
+              "WHERE do_cache_check")
+    result = set(corpid for (corpid,) in c.fetchall())
+    # Current Amarr corps
     c.execute("SELECT corporationid "
               "FROM intel_corporation c "
-              "WHERE EXISTS (SELECT * "
+              "     INNER JOIN intel_faction f "
+              "       ON c.faction_id = f.id "
+              "WHERE c.corporationid >= 98000000 "
+              "  AND f.name = 'Amarr Empire' "
+              "  AND (lastcache IS NULL OR lastcache < %s) "
+              "ORDER BY lastcache ASC",
+              (current,))
+    result.update(corpid for (corpid,) in c.fetchall())
+    # Other FW corps
+    c.execute("SELECT corporationid "
+              "FROM intel_corporation c "
+              "     INNER JOIN intel_faction f "
+              "       ON c.faction_id = f.id "
+              "WHERE c.corporationid >= 98000000 "
+              "  AND f.name != 'Amarr Empire' "
+              "  AND (lastcache IS NULL OR lastcache < %s) "
+              "ORDER BY lastcache ASC",
+              (current,))
+    result.update(corpid for (corpid,) in c.fetchall())
+    # Former Amarr corps
+    c.execute("SELECT corporationid "
+              "FROM intel_corporation c "
+              "WHERE c.corporationid >= 98000000 " # Not NPC
+              "  AND EXISTS (SELECT * "
               "              FROM uploader_corpfactionhistory h "
-              "              WHERE h.endtimestamp IS NOT NULL "
-              "              AND h.factionid = 500003 "
-              "              AND h.corporationid = c.corporationid)"
+              "              WHERE h.corporationid = c.corporationid "
+              "                AND h.factionid = 500003 "
+              "             ) "
               "AND c.lastcache < %s "
               "ORDER BY c.lastcache ASC",
               (current,))
-    result.extend(corpid for (corpid,) in c.fetchall())
-    return HttpResponse(json.dumps(result),
+    result.update(corpid for (corpid,) in c.fetchall())
+    return HttpResponse(json.dumps(list(result)),
                         content_type="text/json")
 
 from functools import wraps
@@ -323,17 +343,10 @@ def everpc_GetCorporationWarFactionID(user, args):
     else:
         faction = None
     corp, created = Corporation.objects.get_or_create(
-        corporationid=corpid,
-        defaults={'name': '',
-                  'faction': faction,
-                  'lastcache': cachetimestamp})
-    if (not created and
-        corp.lastcache is None or
-        corp.lastcache < cachetimestamp):
-        # Update
-        corp.factionid = factionid
-        corp.lastcache = cachetimestamp
-        corp.save()
+        corporationid=corpid)
+    corp.update_intel(cachetimestamp,
+                      faction=faction,
+                      lastcache=cachetimestamp)
 
     cfh, created = CorpFactionHistory.objects.get_or_create(
         corporationid=corpid,
@@ -463,6 +476,7 @@ def everpc_GetVictoryPoints(user, args):
             obj.owningfactionid = dbutils.get_systemfaction(obj.solarsystemid)
             obj.owningfactionname = dbutils.get_itemname(obj.owningfactionid)
         elif cachetimestamp > obj.cachetimestamp:
+            obj.cachetimestamp = cachetimestamp
             obj.occupyingfactionid = row['factionid']
             obj.occupyingfactionname = dbutils.get_itemname(row['factionid'])
             obj.threshold = row['threshold']

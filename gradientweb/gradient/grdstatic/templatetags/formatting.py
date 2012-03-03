@@ -58,3 +58,12 @@ def itemdb(value):
 @register.filter
 def format(value, fmt):
     return fmt %  value
+
+@register.filter
+def truncatechars(value, count):
+    value = str(value)
+    if len(value) > count:
+        return value[:count-3] + "..."
+    else:
+        return value
+

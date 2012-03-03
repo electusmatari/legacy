@@ -7,7 +7,7 @@ from django.views.generic.simple import direct_to_template
 from emtools.ccpeve.models import apiroot, APIKey
 from gradient.recruitment.mybbutils import MyBB
 
-APPLICANT_FORUM = 155 # 129
+APPLICANT_FORUM = 129
 
 def apply_view(request):
     if (not request.user.is_authenticated() or
@@ -29,7 +29,14 @@ def apply_view(request):
                                   extra_context={'applicant': applicant})
 
 def questionnaire(request, page):
-    applicant = Applicant.from_request(request)
+    if (not request.user.is_authenticated() or
+        request.user.profile.characterid is None):
+        return direct_to_template(request, 'recruitment/need-forum-auth.html')
+    try:
+        applicant = Applicant.from_request(request)
+    except Exception as e:
+        return direct_to_template(request, 'recruitment/api-error.html',
+                                  extra_context={'error': str(e)})
     pagenum = int(page)
     if pagenum > len(QUESTIONNAIRE):
         raise Http404
@@ -76,7 +83,9 @@ class Page(object):
         p = Page(self.title)
         p.questions = []
         for q in self.questions:
-            p.questions.append(q.with_applicant(applicant))
+            q2 = q.with_applicant(applicant)
+            if q2 is not None:
+                p.questions.append(q2)
         return p
 
 class CorpHistoryPage(Page):
@@ -322,9 +331,10 @@ def make_forum_post(applicant):
         s.write("[b]%s[/b]\n" % page.title)
         s.write("\n")
         for q in page.questions:
-            s.write("Q: %s\n" % fix_formatting(q.text))
-            s.write("[quote]%s[/quote]\n\n" %
-                    applicant.answers.get(q.name, ""))
+            if q.name:
+                s.write("Q: %s\n" % fix_formatting(q.text))
+                s.write("[quote]%s[/quote]\n\n" %
+                        applicant.answers.get(q.name, ""))
     s.seek(0)
     return s.read()
 

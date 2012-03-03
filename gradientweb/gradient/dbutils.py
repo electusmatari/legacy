@@ -28,7 +28,7 @@ def get_typename(typeid):
 
 def get_itemid(itemname):
     c = connection.cursor()
-    c.execute("SELECT itemid FROM ccp.evenames WHERE "
+    c.execute("SELECT itemid FROM ccp.invuniquenames WHERE "
               "LOWER(itemname) = LOWER(%s)",
               (itemname,))
     if c.rowcount > 0:
@@ -38,7 +38,7 @@ def get_itemid(itemname):
 
 def get_itemname(itemid):
     c = connection.cursor()
-    c.execute("SELECT itemname FROM ccp.evenames WHERE "
+    c.execute("SELECT itemname FROM ccp.invnames WHERE "
               "itemid = %s",
               (itemid,))
     if c.rowcount > 0:
@@ -105,9 +105,13 @@ def system_distance(systemid1, systemid2):
 
 def reprocess(typeid):
     c = connection.cursor()
+    c.execute("SELECT portionsize FROM ccp.invtypes WHERE typeid = %s",
+              (typeid,))
+    portionsize = c.fetchone()[0]
     c.execute("SELECT materialtypeid, quantity FROM ccp.invtypematerials "
               "WHERE typeid = %s", (typeid,))
-    return c.fetchall()
+    return [(mattypeid, quantity / float(portionsize))
+            for (mattypeid, quantity) in c.fetchall()]
 
 def get_membername(charid):
     grd = APIKey.objects.get(name='Gradient').corp()

@@ -9,6 +9,7 @@ from django.core.paginator import Paginator, InvalidPage, EmptyPage
 from django.db import connection
 from django.http import HttpResponse, HttpResponseRedirect, Http404
 from django.shortcuts import get_object_or_404
+from django.views.decorators.csrf import csrf_exempt
 from django.views.generic.simple import direct_to_template
 from django.views.generic.list_detail import object_list
 
@@ -147,7 +148,7 @@ def cart_post(request, shopuser):
                 typeid=typeid,
                 typename=product.typename,
                 quantity=qty,
-                price=product.grdprice,
+                price=product.productioncost * product.safetymargin,
                 multiplier=shopuser.multiplier,
                 # Location
                 office=salespoint,
@@ -374,6 +375,7 @@ def handle_finalize(request, orderid_list):
                                              'customer_total': customer_total})
 
 @require_gradient
+@csrf_exempt
 def handle_split(request):
     try:
         orderid = int(request.POST.get('orderid'))
@@ -512,10 +514,23 @@ WHERE tr.transactiontype = 'sell'
   AND tr.timestamp >= NOW() - INTERVAL '28 days'
 GROUP BY tr.typeid, pl.typename
 ORDER BY profit DESC
-LIMIT 3
+LIMIT 5
 """)
-    return [ProductList.objects.get(typeid=typeid)
-            for (profit, qty, typeid, typename) in c.fetchall()]
+    result = [ProductList.objects.get(typeid=typeid)
+              for (profit, qty, typeid, typename) in c.fetchall()]
+    result2 = []
+    for pl in result:
+        marketprice = pl.marketprice
+        if marketprice is None:
+            continue
+        saving = pl.saving
+        if saving is None:
+            continue
+        if saving / marketprice > 0.1:
+            result2.append(pl)
+        if len(result2) >= 3:
+            break
+    return result2
 
 class ShopUser(object):
     def __init__(self):
@@ -524,7 +539,7 @@ class ShopUser(object):
         self.corpid = None
         self.corpname = None
         self.allianceid = None
-        self.alliancename = None
+        self.alliancename = ''
         self.standing = 0
         self.lastchecked = None
         self.cart = {}
@@ -614,7 +629,7 @@ class ShopUser(object):
         self.corpid = info.corporationID
         self.corpname = info.corporation
         self.allianceid = getattr(info, 'allianceID', None)
-        self.alliancename = getattr(info, 'alliance', None)
+        self.alliancename = getattr(info, 'alliance', '')
           
         em = APIKey.objects.get(name='Gradient').corp()
         cl = em.ContactList()
@@ -625,8 +640,18 @@ class ShopUser(object):
                 break
         self.lastchecked = datetime.datetime.utcnow()
 
-def set_shop_status(request, status):
+def add_shop_status(request, status):
     if OrderHandler.objects.filter(user=request.user).exists():
-        status['openorders'] = Order.objects.filter(closed=None).count()
-        status['unreadmessages'] = Message.objects.filter(
-            read_by_handler=False).count()
+        numopen = Order.objects.filter(closed=None).count()
+        nummessages = Message.objects.filter(read_by_handler=False).count()
+        if numopen > 0 or nummessages > 0:
+            status.append(
+                {'text': "%i open order%s" % (numopen,
+                                              "s" if numopen != 1
+                                              else ""),
+                 'url': 'http://gradient.electusmatari.com/shop/handle/'})
+            status.append(
+                {'text': "%i message%s" % (nummessages,
+                                           "s" if nummessages != 1
+                                           else ""),
+                 'url': "http://gradient.electusmatari.com/shop/handle/messages/"})

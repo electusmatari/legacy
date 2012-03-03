@@ -70,6 +70,7 @@ ul.ui-autocomplete {
       <th>High</th>
       <th>Current</th>
       <th>Missing</th>
+      <th>Index</th>
       <th>Comment</th>
       <th></th>
     </tr>
@@ -82,6 +83,11 @@ ul.ui-autocomplete {
       <td class="numeric">{{stock.high|intcomma}}</td>
       <td class="numeric{% if stock.is_low %} low{% endif %}">{{stock.current|intcomma}}</td>
       <td class="numeric">{{stock.missing|intcomma}}</td>
+{% if stock.index %}
+      <td class="numeric">{{stock.index|floatcomma}}</td>
+{% else %}
+      <td class="numeric">?</td>
+{% endif %}
       <td>{{stock.comment}}</td>
       <td class="buttons">
         <form method="get" action="/industry/stocks/{{stock.id}}/edit/">

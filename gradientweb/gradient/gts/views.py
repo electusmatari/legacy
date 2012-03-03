@@ -1,5 +1,3 @@
-# Create your views here.
-
 import datetime
 
 from django.db.models import Q
@@ -137,23 +135,25 @@ def accept(request, ticketid):
                               text=("%s accepted ticket #%s" %
                                     (request.user.profile.name,
                                      ticket.id)))
-    return HttpResponseRedirect('/gts/%s/' % ticket.id)
+        return HttpResponseRedirect('/gts/%s/' % ticket.id)
+    return HttpResponseRedirect('/gts/')
 
 @require_gradient
 def close(request, ticketid):
-    if request.method == 'POST':
-        ticket = get_object_or_404(Ticket, pk=ticketid)
-        ticket.closed = datetime.datetime.utcnow()
-        if ticket.assignedto != request.user:
-            ticket.assignedto = request.user
-            ticket.assigned = datetime.datetime.utcnow()
-        ticket.state = State.objects.get(name='closed')
-        ticket.save()
-        Change.objects.create(app="gts",
-                              category="ticket",
-                              text=("%s closed ticket #%s" %
-                                    (request.user.profile.name,
-                                     ticket.id)))
+    if request.method != 'POST':
+        return HttpResponseRedirect('/gts/%s/' % ticketid)
+    ticket = get_object_or_404(Ticket, pk=ticketid)
+    ticket.closed = datetime.datetime.utcnow()
+    if ticket.assignedto != request.user:
+        ticket.assignedto = request.user
+        ticket.assigned = datetime.datetime.utcnow()
+    ticket.state = State.objects.get(name='closed')
+    ticket.save()
+    Change.objects.create(app="gts",
+                          category="ticket",
+                          text=("%s closed ticket #%s" %
+                                (request.user.profile.name,
+                                 ticket.id)))
     return HttpResponseRedirect('/gts/%s/' % ticket.id)
 
 @require_gradient
@@ -199,7 +199,11 @@ def config(request):
         extra_context={'type_list': type_list})
 
 
-def set_ticket_status(request, status):
+def add_ticket_status(request, status):
+    if (request.user.is_anonymous() or
+        request.user.profile is None or
+        request.user.profile.corp != 'Gradient'):
+        return
     numassigned = Ticket.objects.filter(assignedto=request.user,
                                         state__name='in-progress').count()
     numopen = Ticket.objects.filter(
@@ -211,5 +215,8 @@ def set_ticket_status(request, status):
     else:
         numopen = numopen.exclude(type__name='Waiting')
     numopen = numopen.count()
-    status['opentickets'] = numopen
-    status['assignedtickets'] = numassigned
+    status.append({'text': "%i open ticket%s" % (numopen, 
+                                                 "s" if numopen != 1 else ""),
+                   'url': 'http://gradient.electusmatari.com/gts/?state=open'})
+    status.append({'text': "%i assigned to you" % numassigned,
+                   'url': 'http://gradient.electusmatari.com/gts/?state=in-progress&type=all'})
