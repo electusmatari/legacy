@@ -64,7 +64,7 @@ class FileCache(object):
         except Exception:
             return None
         cached_until = int(f.readline())
-        if time.mktime(time.gmtime()) > cached_until:
+        if time.time() > cached_until:
             os.unlink(fname)
             return None
         else:
@@ -72,7 +72,10 @@ class FileCache(object):
 
     def store(self, host, path, params, doc, obj):
         f = file(self.get_file_name(host, path, params), "w")
-        f.write("%i\n" % obj.cachedUntil)
+        if hasattr(obj, 'cachedUntil'):
+            f.write("%i\n" % obj.cachedUntil)
+        else:
+            f.write("%i\n" % obj.result.cachedUntil)
         f.write(doc)
         f.close()
 

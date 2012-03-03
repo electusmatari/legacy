@@ -1,54 +1,57 @@
 #!/usr/bin/env python
 
-import sys
-sys.path.extend(["/home/forcer/Projects/twf/dev/",
-                 "/home/forcer/Projects/eveutil/2.0/lib"])
-
 import csv
-import ftplib
 import StringIO
 import sys
 
-from lib import evemetrics
-
-import evelib.api as api
 import twf.db as db
+import emcom.ftp as ftp
+import evelib.api as api
 import evelib.db.industry as industry
 
 from evelib.db import *
 
+LOCALFILE = "/home/forcer/public_html/eve/grd-pricelist.txt"
+
+# Add extra blueprints we can't find via assets
+EXTRABLUEPRINTS = []
+
 def main():
     products = getproduceable()
+    products.extend(getfactionammo())
     products.sort(lambda a, b: cmp(a.typename, b.typename))
-    prices = evemetrics.get_prices([product.typename for product in products],
-                                   ["Heimatar", "The Forge"])
+    # prices = evemetrics.get_prices([product.typename for product in products],
+    # ["Heimatar", "The Forge"])
 
     iconf = IndustryConfig()
     s = StringIO.StringIO()
     w = csv.writer(s)
-    c = db.cursor('dbccp')
+    c = db.cursor('dbeve')
     for product in products:
         try:
-            productioncost = industry.cost(product, iconf);
+            if hasattr(product, 'cost'):
+                productioncost = product.cost
+            else:
+                try:
+                    productioncost = industry.cost(product, iconf)
+                except:
+                    print "Can't get cost for %s" % product.typename
+                    productioncost = 0
         except RuntimeError:
             pass
         else:
-            p = prices[product.typename]
-            heim = p.index(regions=["Heimatar"])
-            heimmov = p.movement(regions=["Heimatar"])
-            jita = p.index(regions=["The Forge"])
-            last = p.last_upload()
+            # p = prices[product.typename]
+            heim = 0 # p.index(regions=["Heimatar"])
+            heimmov = 0 # p.movement(regions=["Heimatar"])
+            jita = 0 # p.index(regions=["The Forge"])
+            last = {} # p.last_upload()
             w.writerow([product.typename, productioncost,
-                        heim, heimmov, jita, last['Heimatar']])
+                        heim, heimmov, jita, last.get('Heimatar',
+                                                      '1970-01-01 00:00:00')])
+    #s.seek(0)
+    #ftp.upload("grd-pricelist.txt", s)
     s.seek(0)
-    f = file("/home/forcer/.private.txt")
-    lines = [line.strip().split(":") for line in f.readlines()]
-    pws = dict((s, (u, p)) for (s, u, p) in lines)
-    (u, p) = pws['ftp.forcer.de-deliveries']
-    ftp = ftplib.FTP('ftp.forcer.de')
-    ftp.login(u, p)
-    ftp.storbinary("STOR grd-pricelist.txt", s)
-    ftp.quit()
+    file(LOCALFILE, "w").write(s.read())
 
 def getproduceable():
     blueprints = getblueprints()
@@ -69,8 +72,7 @@ def getproduceable():
             continue
         # Special starbase modules, boosters and anchorable equipment
         # is also excluded.
-        if bp.producttype.group.category.categoryname in ('Structure',
-                                                          'Implant',
+        if bp.producttype.group.category.categoryname in ('Implant',
                                                           'Celestial'):
             continue
         # No COSMOS blueprints, either
@@ -85,6 +87,22 @@ def getblueprints():
     grd = api.corp()
     assets = grd.AssetList()
     getassetblueprints(blueprints, assets.assets)
+    c = db.cursor('dbeve')
+    c.execute("SELECT t.typename "
+              "FROM ccp.invtypes t "
+              "     INNER JOIN ccp.invgroups g "
+              "       ON t.groupid = g.groupid "
+              "     INNER JOIN ccp.invcategories c "
+              "       ON g.categoryid = c.categoryid "
+              "WHERE g.groupname IN ('Strategic Cruiser Blueprints', "
+              "                      'Subsystem Blueprints')"
+              "  AND t.typename NOT LIKE 'Legion%%'")
+    for name in EXTRABLUEPRINTS + [row[0] for row in c.fetchall()]:
+        t = invTypes.get(db.cursor('dbeve'), 'typename', name)
+        bp = invBlueprintTypes.get(db.cursor('dbeve'),
+                                   'blueprinttypeid',
+                                   t.typeid)
+        blueprints[bp.blueprinttypeid] = bp
     jobs = grd.IndustryJobs()
     getindustryblueprints(blueprints, jobs.jobs)
     getinventionblueprints(blueprints, blueprints.values())
@@ -94,7 +112,7 @@ def getassetblueprints(result, assets):
     for row in assets:
         if row.typeID not in result:
             try:
-                bptype = invBlueprintTypes.get(db.cursor('dbccp'),
+                bptype = invBlueprintTypes.get(db.cursor('dbeve'),
                                                'blueprinttypeid',
                                                row.typeID)
             except RowDoesNotExistError:
@@ -109,9 +127,12 @@ def getindustryblueprints(result, jobs):
     for row in jobs:
         typeid = row.installedItemTypeID
         if typeid not in result:
-            result[typeid] = invBlueprintTypes.get(db.cursor('dbccp'),
-                                                   'blueprinttypeid',
-                                                   typeid)
+            try:
+                result[typeid] = invBlueprintTypes.get(db.cursor('dbeve'),
+                                                       'blueprinttypeid',
+                                                       typeid)
+            except RowDoesNotExistError:
+                pass
 
 def getinventionblueprints(result, blueprints):
     for bp in blueprints:
@@ -119,6 +140,40 @@ def getinventionblueprints(result, blueprints):
             typeid = invbp.blueprinttypeid
             if typeid not in result:
                 result[typeid] = invbp
+
+def getfactionammo():
+    c = db.cursor('dbeve')
+    c.execute("SELECT t.typename, "
+              "       mt2.typename, "
+              "       COALESCE(ta.valuefloat, ta.valueint) "
+              "FROM ccp.invtypes t "
+              "     INNER JOIN ccp.invgroups g ON t.groupid = g.groupid "
+              "     INNER JOIN ccp.invmetatypes mt1 ON t.typeid = mt1.typeid "
+              "     INNER JOIN ccp.invtypes mt2 "
+              "       ON mt1.parenttypeid = mt2.typeid "
+              "     INNER JOIN ccp.dgmtypeattributes ta "
+              "       ON t.typeid = ta.typeid "
+              "     INNER JOIN ccp.dgmattributetypes at "
+              "       ON ta.attributeid = at.attributeid "
+              "WHERE g.groupname = 'Ammo' "
+              "  AND t.typename LIKE 'Republic Fleet %%' "
+              "  AND t.typename NOT LIKE '%% XL' "
+              "  AND at.attributename = 'chargeSize'")
+    iconf = IndustryConfig()
+    result = []
+    for ammotypename, basetypename, size in c.fetchall():
+        baseammo = invTypes.get(db.cursor('dbeve'), 'typename', basetypename)
+        productioncost = industry.cost(baseammo, iconf)
+        # size: 1 = S, 2 = M, 3 = L
+        sizeprice = [None, 480, 640, 960]
+        result.append(DirectProduct(ammotypename,
+                                    sizeprice[int(size)] + productioncost))
+    return result
+
+class DirectProduct(object):
+    def __init__(self, typename, cost):
+        self.typename = typename
+        self.cost = cost
 
 class IndustryConfig(object):
     def __init__(self, decryptor=None):
@@ -150,28 +205,42 @@ class IndustryConfig(object):
                                (tl, invtype.typename))
 
     def t1blueprint(self, invtype):
+        group = invtype.group.groupname
         cat = invtype.group.category.categoryname
-        if cat in ['Module', 'Charge', 'Drone', 'Commodity']:
+        if invtype.typename == 'Noctis':
+            return industry.Blueprint(me=1)
+        if group in ['Industrial Command Ship', 'Carrier', 'Dreadnought',
+                     'Capital Industrial Ship']:
+            return industry.Blueprint(me=2,
+                                      safetymargin=self.safetymargin(invtype))
+        elif cat in ['Module', 'Charge', 'Drone', 'Commodity']:
             return industry.Blueprint(me=40,
                                       safetymargin=self.safetymargin(invtype))
         elif cat in ['Ship', 'Deployable']:
             return industry.Blueprint(me=10,
                                       safetymargin=self.safetymargin(invtype))
+        elif cat in ['Structure']:
+            return industry.Blueprint(me=10, safetymargin=1.0)
         else:
             raise RuntimeError("No ME for category %s (%s)" %
                                (cat, invtype.typename))
 
-    t2bpos = {"Claymore": industry.Blueprint(me=5),
-              "Dual 180MM Autocannon II": industry.Blueprint(me=8),
-              "425MM Autocannon II": industry.Blueprint(me=90),
-              "1200MM Artillery Cannon II": industry.Blueprint(me=52),
-              "Aurora M": industry.Blueprint(me=3),
-              "Barrage S": industry.Blueprint(me=0),
-              "Barrage L": industry.Blueprint(me=0),
-              "Quake M": industry.Blueprint(me=0),
-              "Tremor S": industry.Blueprint(me=0),
-              "Tremor M": industry.Blueprint(me=1),
-              "Havoc Fury ": industry.Blueprint(me=0)}
+    t2bpos = {"Claymore":
+                  industry.Blueprint(me=5, safetymargin=1.1),
+              "Dual 180mm AutoCannon II":
+                  industry.Blueprint(me=8, safetymargin=1.2),
+              "425mm AutoCannon II":
+                  industry.Blueprint(me=90, safetymargin=1.2),
+              "1200mm Artillery Cannon II":
+                  industry.Blueprint(me=52, safetymargin=1.2),
+              "Aurora M": industry.Blueprint(me=3, safetymargin=1.5),
+              "Barrage S": industry.Blueprint(me=0, safetymargin=1.5),
+              "Barrage L": industry.Blueprint(me=0, safetymargin=1.5),
+              "Quake M": industry.Blueprint(me=0, safetymargin=1.5),
+              "Tremor S": industry.Blueprint(me=0, safetymargin=1.5),
+              "Tremor M": industry.Blueprint(me=1, safetymargin=1.5),
+              "Havoc Fury Heavy Missile":
+                  industry.Blueprint(me=0, safetymargin=1.5)}
     def t2blueprint(self, invtype):
         if invtype.typename in self.t2bpos:
             return self.t2bpos[invtype.typename]
@@ -180,7 +249,6 @@ class IndustryConfig(object):
                                           self.decryptor)
 
     def t3blueprint(self, invtype):
-        raise RuntimeError("T3 not supported yet")
         return industry.ReverseEngineeredBlueprint(invtype,
                                                    self.safetymargin(invtype))
 
@@ -192,18 +260,22 @@ class IndustryConfig(object):
                 return 1.2
             elif group in ['Dreadnought']:
                 return 1.1
+            elif group in ['Industrial Command Ship',
+                           'Capital Industrial Ship']:
+                return 1.11
             else:
                 return 1.0
         elif tl == 2:
             cat = invtype.group.category.categoryname
             if cat == 'Charge':
                 return 1.5
-            elif invtype.typename == 'Covert Ops Cloaking Device II':
+            elif invtype.typename in ['Covert Ops Cloaking Device II',
+                                      'Improved Cloaking Device II']:
                 return 2.5
             else:
                 return 1.2
         elif tl == 3:
-            return 2.0
+            return 1.15
         else:
             raise RuntimeError('Unknown tech level %s (%s)' %
                                (tl, invtype.typename))

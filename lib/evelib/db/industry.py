@@ -6,7 +6,7 @@ import twf.db as db
 from evelib.db import *
 
 def manufacturing(product, bp):
-    c = db.cursor('dbccp')
+    c = db.cursor('dbeve')
     # First, take the base materials
     base = Basket()
     for (invtype, qty) in product.materials:
@@ -108,7 +108,7 @@ class InventedBlueprint(Blueprint):
 
     @property
     def extra_items(self):
-        c = db.cursor('dbccp')
+        c = db.cursor('dbeve')
         t2product = self.product
         t1bp = t2product.parenttype.blueprint
         result = Basket()
@@ -125,12 +125,6 @@ class InventedBlueprint(Blueprint):
             result[self.decryptor.invtype] = (1.0/chance) * (1.0/runs)
         return result.items()
 
-class ReverseEngineeredBlueprint(Blueprint):
-    def __init__(self, product, safetymargin=1.0):
-        super(ReverseEngineeredBlueprint, self).__init__(product,
-                                                         0,
-                                                         safetymargin)
-        
 class Decryptor(object):
     def __init__(self, invtype, me_modifier, chance_modifier, run_modifier):
         self.invtype = invtype
@@ -150,6 +144,69 @@ class NoDecryptor(Decryptor):
 # Decryptor3 =  {'me': +3, 'chance': 1.1, 'runs': +0}
 # Decryptor4 =  {'me': +2, 'chance': 1.2, 'runs': +1}
 # Decryptor5 =  {'me': -1, 'chance': 1.8, 'runs': +4}
+
+### T3
+RELICS = {
+    'Strategic Cruiser': [('Intact Hull Section', 0.4, 10),
+                          ('Malfunctioning Hull Section', 0.3, 10),
+                          ('Wrecked Hull Section', 0.2, 3)],
+    'Offensive Systems': [('Intact Weapon Subroutines', 0.4, 20),
+                          ('Malfunctioning Weapon Subroutines', 0.3, 10),
+                          ('Wrecked Weapon Subroutines', 0.2, 3)],
+    'Defensive Systems': [('Intact Armor Nanobot', 0.4, 20),
+                          ('Malfunctioning Armor Nanobot', 0.3, 10),
+                          ('Wrecked Armor Nanobot', 0.2, 3)],
+    'Electronic Systems': [('Intact Electromechanical Component', 0.4, 20),
+                           ('Malfunctioning Electromechanical Component', 0.3, 10),
+                           ('Wrecked Electromechanical Component', 0.2, 3)],
+    'Engineering Systems': [('Intact Power Cores', 0.4, 20),
+                            ('Malfunctioning Power Cores', 0.3, 10),
+                            ('Wrecked Power Cores', 0.2, 3)],
+    'Propulsion Systems': [('Intact Thruster Sections', 0.4, 20),
+                           ('Malfunctioning Thruster Sections', 0.3, 10),
+                           ('Wrecked Thruster Sections', 0.2, 3)]
+    }
+
+DECRYPTORS = {
+    1: 'Caldari Hybrid Tech Decryptor',
+    2: 'Minmatar Hybrid Tech Decryptor',
+    4: 'Amarr Hybrid Tech Decryptor',
+    8: 'Gallente Hybrid Tech Decryptor'
+    }
+
+class ReverseEngineeredBlueprint(Blueprint):
+    def __init__(self, product, safetymargin=1.0):
+        super(ReverseEngineeredBlueprint, self).__init__(product,
+                                                         0,
+                                                         safetymargin)
+
+    @property
+    def extra_items(self):
+        c = db.cursor('dbeve')
+        t3product = self.product
+        relics = [(invTypes.get(c, 'typename', relic),
+                   Basket(), 
+                   chance * (1 + (0.01 * 4)) * (1 + (0.1 * (4 + 4))),
+                   runs)
+                  for (relic, chance, runs)
+                  in RELICS[t3product.group.groupname]]
+        for (relic, basket, chance, runs) in relics:
+            # Artifact
+            basket[relic] = 1 * (1.0/chance) * (1.0/runs)
+            # Decryptors
+            decryptor = invTypes.get(c, 'typename', 
+                                     DECRYPTORS[t3product.raceid])
+            basket[decryptor] = 1 * (1.0/chance) * (1.0/runs)
+            # Rest
+            for (reqtype, qty, dpj,
+                 recycle) in relic.typerequirements("Reverse Engineering"):
+                if dpj < 0.00001:
+                    continue
+                basket[reqtype] = qty * (1.0/chance) * (1.0/runs)
+        (intact, malfunctioning, wrecked) = relics
+        result = (wrecked[1] * 4 + malfunctioning[1]) * 0.2
+        return result.items()
+
 
 class Basket(object):
     def __init__(self):

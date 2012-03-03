@@ -15,7 +15,7 @@ class DBRow(futil.Row):
     @classmethod
     def _table(cls):
         if not hasattr(cls, '__table'):
-            cls.__table = cls.__name__.lower()
+            cls.__table = "ccp." + cls.__name__.lower()
         return cls.__table
 
     @classmethod
@@ -73,8 +73,8 @@ class invTypes(DBRow):
     @cached
     def metagroup(self):
         self._c.execute("SELECT mg.metagroupname "
-                        "FROM invmetatypes mt "
-                        "     INNER JOIN invmetagroups mg "
+                        "FROM ccp.invmetatypes mt "
+                        "     INNER JOIN ccp.invmetagroups mg "
                         "       ON mt.metagroupid = mg.metagroupid "
                         "WHERE mt.typeid = %s",
                         (self.typeid,))
@@ -86,8 +86,8 @@ class invTypes(DBRow):
     @cached
     def parenttype(self):
         self._c.execute("SELECT t.* "
-                        "FROM invtypes t "
-                        "     INNER JOIN invmetatypes mt "
+                        "FROM ccp.invtypes t "
+                        "     INNER JOIN ccp.invmetatypes mt "
                         "       ON mt.parenttypeid = t.typeid "
                         "WHERE mt.typeid = %s",
                         (self.typeid,))
@@ -98,8 +98,8 @@ class invTypes(DBRow):
 
     def attribute(self, name):
         self._c.execute("SELECT COALESCE(ta.valuefloat, ta.valueint) "
-                        "FROM dgmtypeattributes ta "
-                        "     INNER JOIN dgmattributetypes at "
+                        "FROM ccp.dgmtypeattributes ta "
+                        "     INNER JOIN ccp.dgmattributetypes at "
                         "       ON ta.attributeid = at.attributeid "
                         "WHERE at.attributename = %s "
                         "  AND ta.typeid = %s",
@@ -112,8 +112,8 @@ class invTypes(DBRow):
     @cached
     def materials(self):
         self._c.execute("SELECT tm.quantity, rt.* "
-                        "FROM invtypematerials tm "
-                        "     INNER JOIN invtypes rt "
+                        "FROM ccp.invtypematerials tm "
+                        "     INNER JOIN ccp.invtypes rt "
                         "       ON tm.materialtypeid = rt.typeid "
                         "WHERE tm.typeid = %s",
                         (self.typeid,))
@@ -136,6 +136,22 @@ class invTypes(DBRow):
             mg = mg.parentgroup
             groups.append(mg)
         return groups
+
+    def typerequirements(self, activity):
+        self._c.execute("SELECT tr.requiredtypeid, "
+                        "       tr.quantity, "
+                        "       tr.damageperjob, "
+                        "       tr.recycle "
+                        "FROM ccp.ramtyperequirements tr "
+                        "     INNER JOIN ccp.ramactivities act "
+                        "       ON tr.activityid = act.activityid "
+                        "WHERE tr.typeid = %s "
+                        "  AND act.activityname = %s",
+                        (self.typeid, activity))
+        return [(invTypes.get(self._c, 'typeid', reqtypeid),
+                 qty, dpj, recycle)
+                for (reqtypeid, qty, dpj, recycle) in self._c.fetchall()]
+
 
 class invGroups(DBRow):
     @cached
@@ -165,8 +181,8 @@ class invBlueprintTypes(DBRow):
                         "       tr.quantity, "
                         "       tr.damageperjob, "
                         "       tr.recycle "
-                        "FROM ramtyperequirements tr "
-                        "     INNER JOIN ramactivities act "
+                        "FROM ccp.ramtyperequirements tr "
+                        "     INNER JOIN ccp.ramactivities act "
                         "       ON tr.activityid = act.activityid "
                         "WHERE tr.typeid = %s "
                         "  AND act.activityname = %s",
@@ -185,10 +201,10 @@ class invBlueprintTypes(DBRow):
         invented.
         """
         self._c.execute("SELECT sbt.* "
-                        "FROM invmetatypes mt "
-                        "     INNER JOIN invblueprinttypes sbt "
+                        "FROM ccp.invmetatypes mt "
+                        "     INNER JOIN ccp.invblueprinttypes sbt "
                         "       ON mt.typeid = sbt.producttypeid "
-                        "     INNER JOIN invmetagroups mg "
+                        "     INNER JOIN ccp.invmetagroups mg "
                         "       ON mt.metagroupid = mg.metagroupid "
                         "WHERE mt.parenttypeid = %s "
                         "  AND mg.metagroupname = 'Tech II'",
