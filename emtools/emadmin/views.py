@@ -113,17 +113,3 @@ SELECT CASE WHEN nspname = 'public'
                                              'mysql_tables': mysql_tables,
                                              'postgresql_databases': postgresql_databases,
                                              'postgresql_tables': postgresql_tables})
-
-
-import sys
-sys.path.append("/home/forcer/Projects/gradient")
-import json
-from django.http import HttpResponse
-from gradient.gts.views import set_ticket_status
-from gradient.shop.views import set_shop_status
-def json_status(request):
-    status = {}
-    if request.user.is_authenticated():
-        set_ticket_status(request, status)
-        set_shop_status(request, status)
-    return HttpResponse(json.dumps(status), mimetype="text/javascript")

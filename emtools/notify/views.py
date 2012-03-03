@@ -4,8 +4,24 @@ import re
 import time
 
 from django.http import HttpResponse
+from django.views.generic.simple import direct_to_template
 
 from emtools.utils import connect
+
+import sys
+sys.path.append("/home/forcer/Projects/gradient")
+from gradient.gts.views import add_ticket_status
+from gradient.shop.views import add_shop_status
+
+from emtools.diplomacy.views import add_diplo_status
+
+def json_status(request):
+    status = []
+    if request.user.is_authenticated():
+        add_ticket_status(request, status)
+        add_shop_status(request, status)
+        add_diplo_status(request, status)
+    return HttpResponse(json.dumps(status), mimetype="text/javascript")
 
 OP_SUBJECT_RX = re.compile(
     r"^(\d+\.\d{2}\.\d{2}).*\| *(\d\d?:\d{2}) *\|(?: *([^|]*\S) *\|)? *(.*)"
@@ -15,10 +31,10 @@ FID_EM = 111
 FID_GRD = 144
 FID_LUTI = 145
 FID_ALLY = 149
-def json_notifications(request):
+def json_opnotify(request):
     if ((not request.user.is_authenticated() or 
          request.user.profile.characterid is None)):
-        return HttpResponse(json.dumps([]), mimetype="text/javascript")
+        return HttpResponse(json.dumps([]), mimetype="text/json")
     fid_list = []
     if 'Ally' in request.user.profile.mybb_groups:
         fid_list.append(FID_ALLY)
@@ -29,6 +45,8 @@ def json_notifications(request):
     if 'Electus Matari' in request.user.profile.mybb_groups:
         fid_list.append(FID_EM)
         fid_list.append(FID_ALLY)
+    if len(fid_list) == 0:
+        return HttpResponse(json.dumps([]), mimetype="text/json")
     now = datetime.datetime.utcnow()
     today = "%s.%02i.%02i" % (now.year - 1898, now.month, now.day)
     conn = connect('emforum')
@@ -61,20 +79,7 @@ def json_notifications(request):
     result.sort(key=lambda obj: obj['time'])
     return HttpResponse(json.dumps(result), mimetype="text/json")
 
-def test(request):
-    return HttpResponse("""
-<html>
- <body>
-<script type="text/javascript">
-  var cookieDomain = ".electusmatari.com";
-  var cookiePath = "/";
-  var cookiePrefix = "";
-</script>
-<script type="text/javascript" src="http://www.electusmatari.com/forums/jscripts/prototype.js?ver=1603"></script>
-<script type="text/javascript" src="http://www.electusmatari.com/forums/jscripts/general.js?ver=1603"></script>
-<script type="text/javascript" src="/media/js/notifications.js"></script>
- </body>
- <div id="debug"></div>
-</html>
-""",
-                        mimetype="text/html")
+
+
+def notsupported(request):
+    return direct_to_template(request, 'notify/notsupported.html')

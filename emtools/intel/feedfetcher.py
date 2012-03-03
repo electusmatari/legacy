@@ -34,10 +34,14 @@ def fetch_all_feeds():
     for feed in Feed.objects.exclude(disabled=True):
         stats.add_feed()
         feeds[feed.id] = feed
+        f = file("/tmp/foo.txt", "a")
+        f.write("%r +\n" % ((feed.id, feed.feedtype, feed.url, feed.state),))
+        f.close()
         feedq.put((feed.id, feed.feedtype, feed.url, feed.state))
     for url in get_evsco_feeds():
-        stats.add_feed()
-        evscofeedq.put((None, 'evsco', url, None))
+        #stats.add_feed()
+        #evscofeedq.put((None, 'evsco', url, None))
+        pass
 
     for ign in range(FETCH_THREAD_COUNT):
         t = FetcherThread(feedq, killq, stats)
@@ -181,6 +185,10 @@ class FetcherThread(threading.Thread):
                 self.killq.put(('feeddone', (feedid, state, error)))
             else:
                 self.killq.put(('feeddone', (feedid, state, None)))
+            f = file("/tmp/foo.txt", "a")
+            f.write("%r -\n" % ((feedid, feedtype, url, state),))
+            f.close()
+
             self.feedq.task_done()
 
 class EVSCOFetcherThread(threading.Thread):
@@ -194,7 +202,7 @@ class EVSCOFetcherThread(threading.Thread):
     def run(self):
         while True:
             (feedid, feedtype, url, state) = self.feedq.get()
-            for try_ in range(5):
+            for try_ in range(2):
                 try:
                     fetcher = FETCHERCLASS[feedtype](url)
                     for kill in fetcher.fetch(state):

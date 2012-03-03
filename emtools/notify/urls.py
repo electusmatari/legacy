@@ -1,6 +1,7 @@
 from django.conf.urls.defaults import *
 
-urlpatterns = patterns('emtools.operations.views',
-    ('^json/$', 'json_notifications'),
-    ('^$', 'test'),
+urlpatterns = patterns('emtools.notify.views',
+    ('^json/opnotify/$', 'json_opnotify'),
+    ('^json/status/$', 'json_status'),
+    ('^notsupported/$', 'notsupported'),
 )

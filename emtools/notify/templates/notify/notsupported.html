@@ -1,0 +1,27 @@
+{% extends "notify/base.html" %}
+
+{% block content %}
+<h1>Operation Notifications</h1>
+
+<p>ElectusMatari.com supported the notification of upcoming operations
+  using
+  the <a href="http://www.chromium.org/developers/design-documents/desktop-notifications/api-specification">JavaScript
+  Notifications API</a>. This is the same API that is used by Google
+  Mail for on-desktop notifications.</p>
+
+<p>This means that you will get on-screen announcements of upcoming
+  operations as long as you have any page on the EM forums open in a
+  browser window somewhere.</p>
+
+<p>You are likely reading this because your browser does not support
+  this API by default. Only Google Chrome does by default. Other
+  browsers need to install plugins.</p>
+
+<ul>
+  <li><a href="https://addons.mozilla.org/en-US/firefox/addon/html-notifications/">HTML
+  Desktop Notifications Plugin for Firefox</a></li>
+  <li>Chrome supports Web Notifications by default</li>
+  <li><a href="http://my.opera.com/community/forums/topic.dml?id=1140542&t=1320356948&page=1#comment10703402">Opera
+  does not as of yet support this</a></li>
+</ul>
+{% endblock %}

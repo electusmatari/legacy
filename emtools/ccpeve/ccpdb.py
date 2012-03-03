@@ -74,14 +74,11 @@ FROM ccp.agtAgents a
        ON a.locationID = st.stationID
      INNER JOIN ccp.mapSolarSystems sys
        ON st.solarSystemID = sys.solarSystemID
-     INNER JOIN ccp.agtConfig c
-       ON a.agentID = c.agentID
      INNER JOIN ccp.crpnpccorporations corp
        ON st.corporationid = corp.corporationid
      INNER JOIN ccp.chrfactions f
        ON corp.factionid = f.factionid
-WHERE c.k = 'agent.LocateCharacterService.enabled'
-  AND c.v = '1'
+WHERE a.islocator = 1
   AND sys.solarSystemName = %s
 """, (systemname,))
     for systemid, systemname, level, factionname, stationname, stationid in c.fetchall():

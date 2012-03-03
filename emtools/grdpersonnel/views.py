@@ -12,7 +12,7 @@ from collections import defaultdict
 def view_members(request):
     grd = APIKey.objects.get(name='Gradient').corp()
     ms = grd.MemberSecurity()
-    mt = grd.MemberTracking()
+    mt = grd.MemberTracking(extended=1)
     pilots = {}
     for member in ms.members:
         pilots.setdefault(member.name, defaultdict(lambda: ""))

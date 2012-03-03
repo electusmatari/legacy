@@ -97,6 +97,7 @@ INSTALLED_APPS = (
     'emtools.channels',
     'emtools.timezones',
     'emtools.fw',
+    'emtools.notify',
     'emtools.recruitment',
     'emtools.grdpersonnel',
 )

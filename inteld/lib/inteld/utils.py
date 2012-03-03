@@ -21,7 +21,7 @@ def find_type(typename):
 
 def get_itemname(itemid):
     c = connection.cursor()
-    c.execute("SELECT itemname FROM ccp.evenames WHERE itemid = %s",
+    c.execute("SELECT itemname FROM ccp.invnames WHERE itemid = %s",
               (itemid,))
     if c.rowcount < 1:
         raise RuntimeError("Item %s not found" % itemid)
@@ -30,7 +30,7 @@ def get_itemname(itemid):
 
 def get_itemid(itemname):
     c = connection.cursor()
-    c.execute("SELECT itemid FROM ccp.evenames "
+    c.execute("SELECT itemid FROM ccp.invuniquenames "
               "WHERE LOWER(itemname) = LOWER(%s)",
               (itemname,))
     if c.rowcount < 1:
@@ -77,6 +77,20 @@ def get_stationsystem(stationid):
     else:
         return c.fetchone()[0]
 
+def get_systemstations(systemid):
+    c = connection.cursor()
+    c.execute("SELECT stationid "
+              "FROM ccp.stastations st "
+              "     INNER JOIN ccp.mapdenormalize d "
+              "       ON st.stationid = d.itemid "
+              "WHERE st.solarsystemid = %s "
+              "ORDER BY d.orbitid ASC",
+              (systemid,))
+    if c.rowcount == 0:
+        raise RuntimeError("System %s not found" % (systemid,))
+    else:
+        return [stationid for (stationid,) in c.fetchall()]
+
 def floatcomma(num):
     s = "%.2f" % num
     pre, post = s.split(".")
@@ -89,6 +103,8 @@ def intcomma(s):
                     [s[-3:]])
 
 def get_ownerid(arg):
+    if '<' in arg or '>' in arg:
+        return None
     api = apiroot()
     try:
         charid = api.eve.CharacterID(names=arg).characters[0].characterID

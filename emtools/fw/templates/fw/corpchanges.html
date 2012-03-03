@@ -1,0 +1,63 @@
+{% extends "fw/base.html" %}
+{% load eve %}
+{% load em %}
+
+{% block content %}
+<h2>Corporation Faction Changes</h2>
+
+<p>Witnessed changes in corporate faction association. This is based
+  on killboard data and cache uploads, so can easily be inaccurate.
+  Especially the timestamps refer to the time when the faction
+  association was seen, not when the change actually happened. Also,
+  member counts are current, not from the time of the change.</p>
+
+{% include "paginate.html" %}
+
+<table class="data">
+  <thead>
+    <tr>
+      <th>Timestamp</th>
+      <th>Corporation</th>
+      <th>Members</th>
+      <th>Change</th>
+      <th>Faction</th>
+    </tr>
+  </thead>
+  <tbody>
+{% for change in change_list %}
+<tr class="{% cycle odd,even %}">
+  <td>{{change.timestamp|eve_time}}</td>
+  <td>{{change.corporation}}</td>
+  <td>{{change.corporation.members}}</td>
+  <td>
+    {% if change.oldfaction and change.newfaction %}
+    <span style="color: #00AF00">transfer</span>
+    {% else %}
+    {% if change.oldfaction %}
+    <span style="color: #FF0000">left</span>
+    {% else %}
+    <span style="color: #00AF00">joined</span>
+    {% endif %}
+    {% endif %}
+  </td>
+  <td>
+    {% if change.oldfaction and change.newfaction %}
+    {{change.oldfaction.html}}
+    to
+    {{change.newfaction.html}}
+    {% else %}
+    {% if change.oldfaction %}
+    {{change.oldfaction.html}}
+    {% else %}
+    {{change.newfaction.html}}
+    {% endif %}
+    {% endif %}
+  </td>
+</tr>
+{% endfor %}
+  </tbody>
+</table>
+
+{% include "paginate.html" %}
+
+{% endblock %}

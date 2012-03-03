@@ -245,7 +245,7 @@ def view_corp(request, name):
 @require_mybbgroup('Electus Matari')
 def view_alliance(request, name):
     try:
-        alliance = Alliance.objects.get(name=name)
+        alliance = Alliance.objects.get(name=name, active=True)
     except Alliance.DoesNotExist:
         raise Http404
     # FIXME! Top 10 systems

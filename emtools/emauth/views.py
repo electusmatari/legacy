@@ -100,10 +100,10 @@ def main_handle_apikey(request):
     selected_charid = request.POST.get('characterID', None)
     dorename = request.POST.get('dorename', False)
     api = apiroot()
-    if vcode is not None and not vcode.startswith("emforum"):
+    if vcode is not None and not 'emforum' in vcode:
         messages.add_message(request, messages.ERROR,
-                             "Please change your Verification Code to "
-                             "start with the string 'emforum'")
+                             "Please change your Verification Code so "
+                             "it contains the string 'emforum'")
         return HttpResponseRedirect('/auth/')
     try:
         chars = api.account.Characters(keyID=keyid, vCode=vcode)

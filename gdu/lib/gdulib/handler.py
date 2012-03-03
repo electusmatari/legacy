@@ -120,6 +120,11 @@ Upload current buy and sell orders when the market is viewed\
                                 "call typeID (%s)" % (order.orderID,
                                                       order.typeID,
                                                       typeid))
+            if not hasattr(order, 'issueDate'):
+                logging.warning("Order ID %s (typeID %s) has no issueDate, "
+                                "very old cache file?" % (order.orderID,
+                                                          order.typeID))
+                continue
             result.append(dict((name, getattr(order, name))
                                for name in [
                         'price', 'volRemaining', 'range', 'orderID',

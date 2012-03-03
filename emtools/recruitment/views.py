@@ -56,7 +56,7 @@ def view_single_audit(request, userid):
 
 def audit_apikey(request, userid, apikey, visibility):
     try:
-        api = apiroot(userid, apikey)
+        api = apiroot().auth(keyID=userid, vCode=apikey)
         characters = api.account.Characters()
     except Exception as e:
         messages.add_message(request, messages.ERROR,

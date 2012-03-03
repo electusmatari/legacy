@@ -135,13 +135,15 @@ class Attacker(Person):
 
 class Item(object):
     def __init__(self, typeid=None, typename=None, flag=None,
-                 location=None, qtydropped=None, qtydestroyed=None):
+                 location=None, qtydropped=None, qtydestroyed=None,
+                 singleton=None):
         self.typeid = typeid
         self.typename = typename
         self.flag = flag
         self.location = location
         self.qtydropped = qtydropped
-        self.qtydestroyed = None
+        self.qtydestroyed = qtydestroyed
+        self.singleton = singleton
 
 def strn(obj):
     if obj is None or obj == '':
@@ -220,11 +222,16 @@ def parse_api_page(xml):
             i.flag = intn(item.get('flag'))
             i.qtydropped = intn(item.get('qtyDropped'))
             i.qtydestroyed = intn(item.get('qtyDestroyed'))
+            i.singleton = item.get('singleton')
             ki.items.append(i)
         ki.fix()
         result.append(ki)
     return result
 
+# WARNING!
+# This assumes an eveapi.py kill object. But eveapi.py can not parse
+# EDK output, as EDK does not adhere to the broken XML semantics
+# eveapi.py assumes.
 def parse_eveapiinfo(kill):
     ki = Killinfo()
     ki.killid = intn(kill.killID)

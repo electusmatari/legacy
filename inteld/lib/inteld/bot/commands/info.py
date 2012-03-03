@@ -7,8 +7,8 @@ def info_npccorp(itemid):
     c = connection.cursor()
     c.execute("SELECT cn.itemname, fn.itemname "
               "FROM ccp.crpnpccorporations c "
-              "     INNER JOIN ccp.evenames cn ON c.corporationid = cn.itemid "
-              "     INNER JOIN ccp.evenames fn ON c.factionid = fn.itemid "
+              "     INNER JOIN ccp.invnames cn ON c.corporationid = cn.itemid "
+              "     INNER JOIN ccp.invnames fn ON c.factionid = fn.itemid "
               "WHERE c.corporationid = %s",
               (itemid,))
     if c.rowcount < 1:

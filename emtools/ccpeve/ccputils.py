@@ -91,3 +91,20 @@ class InvItem(object):
             return 'Fake Item'
         else:
             raise RuntimeError("Unknown locationID %s" % itemid)
+
+def is_valid_characterid(itemid):
+    return (3000000 <= itemid < 4000000 or # NPCs / agents
+            90000000 <= itemid < 98000000 or # Old player characters
+            100000000 <= itemid)
+
+def is_valid_corporationid(itemid):
+    return (1000000 <= itemid < 2000000 or # NPC corps
+            98000000 <= itemid < 99000000 or # Old player corps
+            100000000 <= itemid)
+
+def is_valid_allianceid(itemid):
+    return (99000000 <= itemid < 100000000 or # Old alliances
+            100000000 <= itemid)
+
+def is_valid_factionid(itemid):
+    return 500000 <= itemid < 1000000

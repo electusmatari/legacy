@@ -2,6 +2,8 @@ import logging
 import threading
 import time
 
+from django.db import connection
+
 from emtools.ccpeve.models import APIKey
 from inteld.utils import get_ownername
 
@@ -18,29 +20,35 @@ notificationTypeCorpWarInvalidatedMsg = 31
 class NotificationWatcher(threading.Thread):
     FORMATS = {
         notificationTypeAllWarDeclaredMsg:
-            "%(declaredByName)s has declared war on %(againstName)s",
+            "%(declaredByName)s has declared war on %(againstName)s.",
         notificationTypeCorpWarDeclaredMsg:
-            "%(declaredByName)s has declared war on %(againstName)s",
+            "%(declaredByName)s has declared war on %(againstName)s.",
         notificationTypeCorpWarFightingLegalMsg:
-            "%(declaredByName)s has declared war on %(againstName)s",
+            "%(declaredByName)s has declared war on %(againstName)s.",
         notificationTypeAllWarSurrenderMsg:
-            "%(againstName)s has surrendered to %(declaredByName)s",
+            "%(againstName)s has surrendered to %(declaredByName)s.",
         notificationTypeCorpWarSurrenderMsg:
-            "%(againstName)s has surrendered to %(declaredByName)s",
+            "%(againstName)s has surrendered to %(declaredByName)s.",
         notificationTypeAllWarRetractedMsg:
-            "%(declaredByName)s has retracted the war against %(againstName)s",
+            "%(declaredByName)s has retracted the war against %(againstName)s.",
         notificationTypeCorpWarRetractedMsg:
-            "%(declaredByName)s has retracted the war against %(againstName)s",
+            "%(declaredByName)s has retracted the war against %(againstName)s.",
         notificationTypeAllWarInvalidatedMsg:
-            "CONCORD invalidates the war declared by %(declaredByName)s against %(againstName)s because %(declaredByName)s forgot to pay the bribe",
+            ("CONCORD invalidates the war declared by %(declaredByName)s "
+             "against %(againstName)s because %(declaredByName)s forgot to "
+             "pay the bribe."),
         notificationTypeCorpWarInvalidatedMsg:
-            "CONCORD invalidates the war declared by %(declaredByName)s against %(againstName)s because %(declaredByName)s forgot to pay the bribe"
+            ("CONCORD invalidates the war declared by %(declaredByName)s "
+             "against %(againstName)s because %(declaredByName)s forgot to "
+             "pay the bribe."),
         }
 
     def __init__(self, bot):
         super(NotificationWatcher, self).__init__()
         self.daemon = True
+        self.status = "Starting up"
         self.key = APIKey.objects.get(name='Notifications').char()
+        connection._commit() # End transaction started by APIKey query
         self.bot = bot
         self.known = set()
         self.initialized = False
@@ -56,10 +64,15 @@ class NotificationWatcher(threading.Thread):
     def run2(self):
         while True:
             try:
+                self.status = "Retrieving notifications"
                 result = self.key.Notifications()
             except:
+                self.status = "API error, waiting"
                 time.sleep(600)
                 continue
+            else:
+                connection._commit() # End transaction started by API cache
+            self.status = "Checking new notifications"
             for notif in result.notifications:
                 if notif.notificationID in self.known:
                     continue
@@ -73,12 +86,13 @@ class NotificationWatcher(threading.Thread):
                                 parse_data(textresult.notifications[0].data))
                 self.known.add(notif.notificationID)
             self.initialized = True
+            self.status = "Waiting for cache to expire"
             time.sleep(result._meta.cachedUntil - time.time() + 1)
 
     def notify(self, typeid, argdict):
         fmt = self.FORMATS.get(typeid)
         if fmt is not None:
-            self.bot.broadcast(fmt % argdict)
+            self.bot.broadcast("[War] " + (fmt % argdict))
 
 def parse_data(data):
     """

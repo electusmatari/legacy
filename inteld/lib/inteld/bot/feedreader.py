@@ -8,6 +8,7 @@ class FeedReader(threading.Thread):
     def __init__(self, conf, bot):
         super(FeedReader, self).__init__()
         self.daemon = True
+        self.status = "Starting up"
         self.bot = bot
         self.feeds = []
         self.delay = conf.getint('feedfetcher', 'delay')
@@ -31,10 +32,12 @@ class FeedReader(threading.Thread):
         while True:
             for name, url, entry in self.get_news():
                 self.announce(name, url, entry)
+            self.status = "Waiting"
             time.sleep(self.delay)
 
     def get_news(self):
         for name, url in self.feeds:
+            self.status = "Checking %s" % name
             try:
                 feed = feedparser.parse(url)
             except Exception as e:
@@ -42,14 +45,14 @@ class FeedReader(threading.Thread):
                              (e.__class__.__name__, name, str(e)))
                 continue
             if url not in self.initialized:
+                if len(feed.entries) == 0:
+                    continue
                 for entry in feed.entries:
                     self.known.add(entry.link)
                 self.initialized.add(url)
                 continue
             for entry in feed.entries:
                 if entry.link not in self.known:
-                    logging.info("link %r - known %r" %
-                                 (entry.link, self.known))
                     self.known.add(entry.link)
                     yield (name, url, entry)
 

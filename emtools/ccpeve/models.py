@@ -40,6 +40,9 @@ class Cache(models.Model):
     params = models.TextField()
     doc = models.TextField()
 
+    class Meta:
+        unique_together = [("host", "path", "params")]
+
 def apiroot():
     return eveapi.EVEAPIConnection(cacheHandler=DBCache())
 
@@ -51,9 +54,6 @@ class DBCache(object):
                 ).get(host=host, path=path, params=repr(params))
         except Cache.DoesNotExist:
             return None
-        except Exception as e:
-            raise Exception("Error %s during cache call" %
-                            (e.__class__.__name__,))
         return cached.doc.encode("utf-8")
 
     def store(self, host, path, params, doc, obj):

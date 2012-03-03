@@ -11,6 +11,7 @@ class ChangeWatcher(threading.Thread):
     def __init__(self, bot):
         super(ChangeWatcher, self).__init__()
         self.daemon = True
+        self.bot = bot
 
     def run(self):
         while True:
@@ -30,7 +31,7 @@ class ChangeWatcher(threading.Thread):
             for change in Change.objects.filter(timestamp__gt=last
                                                 ).order_by("timestamp"):
                 if self.is_interesting(change):
-                    self.bot.broadcast(change.verbose())
+                    self.bot.broadcast("[Intel] " + change.verbose())
             time.sleep(30)
 
     def is_interesting(self, change):

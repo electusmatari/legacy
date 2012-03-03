@@ -12,6 +12,8 @@ TOOLS = [
     ('Public',
      [('/auth/', 'Authentication', '/media/img/tools/auth.png'),
       ('/standings/', 'Standings', '/media/img/tools/standings.png'),
+      ('http://gradient.electusmatari.com/index/', 'Material Index',
+       '/media/img/tools/gmi.png'),
       ])
     ]
 EMTOOLS = [
@@ -34,7 +36,8 @@ EMTOOLS = [
 
 GRDTOOLS = [
     ('Gradient',
-     [('/gradient/', 'Gradient', '/media/img/tools/gradient.png'),
+     [('http://gradient.electusmatari.com/', 'Gradient',
+       '/media/img/tools/gradient.png'),
       ])
     ]
 

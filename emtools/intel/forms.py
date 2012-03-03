@@ -35,3 +35,13 @@ TRACE_RX = re.compile("I found (?P<target>.*?) for you\n"
                       "The (?:sleazebag is currently|scumsucker is located) "
                       "(?:at (?P<station>.*?) station )?"
                       "in the (?P<system>.*?) system.*")
+
+TRACE_RX = re.compile("I found (?P<target>.*?) for you.\n"
+                      "From: *(?P<agent>.*?)\n"
+                      "Sent: *(?P<ts>[0-9][0-9][0-9][0-9]\\.[0-9][0-9]\\.[0-9][0-9](?: [0-9][0-9]:[0-9][0-9])?).*\n"
+                      "\n"
+                      "I've found your .*.\n"
+                      "\n"
+                      "(?:She|He) is "
+                      "(?:at (?P<station>.*?) station )?"
+                      "in the (?P<system>.*?) system.*")

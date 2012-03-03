@@ -367,7 +367,10 @@ def api_lastseen(corpname):
         key.save()
         return {}
     return dict((row.name,
-                 datetime.datetime.utcfromtimestamp(row.logoffDateTime))
+                 datetime.datetime.utcfromtimestamp(row.logoffDateTime)
+                 if hasattr(row, 'logoffDateTime')
+                 else None
+                 )
                 for row in cmt.members)
 
 def mybb_lastseen():

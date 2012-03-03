@@ -51,6 +51,7 @@ WHERE NOT bid
   AND mo.typeid = %%s
   AND mo.regionid IN (%s)
   AND s.security >= %%s
+  AND mo.cachetimestamp > NOW() - INTERVAL '3 days'
 ORDER BY price ASC
 LIMIT 1
 """ % (", ".join(["%s"] * len(regionids))),

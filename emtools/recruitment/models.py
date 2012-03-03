@@ -99,7 +99,7 @@ class Standing(models.Model):
             c.execute("SELECT an.itemname, d.divisionname, "
                       "       f.factionname, a.level "
                       "FROM ccp.agtagents a "
-                      "     INNER JOIN ccp.evenames an "
+                      "     INNER JOIN ccp.invnames an "
                       "       ON a.agentid = an.itemid "
                       "     INNER JOIN ccp.crpnpcdivisions d "
                       "       ON a.divisionid = d.divisionid "
