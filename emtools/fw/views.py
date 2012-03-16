@@ -151,7 +151,7 @@ def view_corps(request):
                                        float(all_members['Amarr Empire'])),
             'corp_lists': [(name, corp_lists[name], image,
                             known_members[name], all_members[name],
-                            100 * (known_members[name] / 
+                            100 * (known_members[name] /
                                    float(all_members[name])),
                             )
                            for (name, image) in
