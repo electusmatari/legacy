@@ -10,26 +10,27 @@
 
 <table class="data">
   <thead>
-    <tr><th>#</th><th>Name</th><th>Members</th></tr>
+    <tr><th>#</th><th>Name</th><th>Alliance</th><th>Members</th></tr>
   </thead>
   <tbody>
   {% for corp in corp_list %}
   <tr class="{% cycle odd,even %}">
     <td class="numeric">{{forloop.counter}}</td>
     <td>{{corp}}</td>
+    <td>{% if corp.alliance %}{{corp.alliance}}{% endif %}</td>
     <td class="numeric">{{corp.members|intcomma}}</td>
   </tr>
   {% endfor %}
   </tbody>
   <tfoot>
     <tr>
-      <th class="numeric" colspan="3">
+      <th class="numeric" colspan="4">
         Known: {{known|intcomma}} / {{all|intcomma}} ({{percentage|floatcomma}}%)
       </th>
     </tr>
 {% if factionname == 'Amarr Empire' %}
     <tr>
-      <th class="numeric" colspan="3">
+      <th class="numeric" colspan="4">
         With standings: {{amarr_standings|intcomma}} / {{all|intcomma}} ({{amarr_percentage|floatcomma}}%)
       </th>
     </tr>
