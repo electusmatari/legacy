@@ -81,7 +81,8 @@ class IRCConnection(object):
         """
         Send an IRCMessage object to the server.
         """
-        self.socket.send(message.to_string().encode(self.encoding) + "\r\n")
+        self.socket.send(message.to_string().encode(self.encoding)
+                         + "\r\n")
 
     def login(self, nick, user, realname, mode=DEFAULT_BITMODE, password=None):
         """
@@ -155,18 +156,18 @@ class IRCMessage(object):
         """
         result = []
         if self.prefix is not None:
-            result.append(":{prefix}".format(prefix=self.prefix.to_string()))
+            result.append(u":{prefix}".format(prefix=self.prefix.to_string()))
         result.append(self.command)
         if len(self.params) > 0:
             result.extend(self.params[:-1])
             if " " in self.params[-1]:
-                result.append(":{param}".format(param=self.params[-1]))
+                result.append(u":{param}".format(param=self.params[-1]))
             else:
                 result.append(self.params[-1])
         return " ".join(result)
 
     def __repr__(self):
-        return "<IRCMessage {0}>".format(repr(self.to_string()))
+        return u"<IRCMessage {0}>".format(repr(self.to_string()))
 
 
 class IRCUser(object):
@@ -610,8 +611,8 @@ class IRCBot(IRCClient):
         if channel is None:
             self.msg(sender.nick, text)
         else:
-            self.msg(channel, "{nick}: {text}".format(nick=sender.nick,
-                                                      text=text))
+            self.msg(channel, u"{nick}: {text}".format(nick=sender.nick,
+                                                       text=text))
 
     def handle_command(self, sender, channel, text):
         command_split = text.split(" ", 1)

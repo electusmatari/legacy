@@ -5,7 +5,7 @@
 import daemon
 import logging
 import ConfigParser
-import mrintel
+from mrintel import bot
 
 def main():
     ctx = daemon.DaemonContext()
@@ -21,7 +21,7 @@ def main():
         for sec in conf.sections():
             if not sec.startswith("network "):
                 continue
-            bot = mrintel.MrIntel(conf,
+            mrintel = bot.MrIntel(conf,
                                   conf.get(sec, 'server'),
                                   conf.getint(sec, 'port'),
                                   conf.get(sec, 'nick'),
@@ -31,9 +31,9 @@ def main():
                                    for channel
                                    in conf.get(sec, 'channels').split(",")]
                                   )
-            bot.daemon = True
-            bot.start()
-            threads.append(bot)
+            mrintel.daemon = True
+            mrintel.start()
+            threads.append(mrintel)
         while len(threads) > 0:
             threads[-1].join(60)
             if not threads[-1].is_alive():

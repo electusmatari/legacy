@@ -31,7 +31,8 @@ def format_reply(price, query):
                       .format(len(price['corporations'])))
         else:
             seller = ", ".join(sorted(price['corporations']))
-        return ("{typename} is sold by {seller} on the open market"
+        return ("{typename} is sold by {seller} on the open market "
+                "for {price:,.2f} ISK."
                 .format(seller=seller, **price))
     # Contracts
     if price['source'] == 'contracts':
@@ -47,8 +48,9 @@ def format_reply(price, query):
             return ("{typename} should be available on the open market, "
                     "but no prices have been reported.".format(**price))
         else:
-            return ("{typename} is sold for {price:,.2f} (for {quantity:,} "
-                    "units) in {system}, {region}.".format(**price))
+            return ("{typename} is sold for {price:,.2f} ISK "
+                    "(for {quantity:,} units) in {system}, {region}."
+                    .format(**price))
 
 
 def pricecheck(typename):
