@@ -450,7 +450,10 @@ WHERE LOWER(factionname) = LOWER(%s)
 
 def info_character(db, itemname):
     apiroot = api.root()
-    names = apiroot.eve.CharacterID(names=itemname).characters
+    try:
+        names = apiroot.eve.CharacterID(names=itemname).characters
+    except:
+        return None
     if len(names) == 0 or names[0].characterID == 0:
         return None
     #name = names[0].name
