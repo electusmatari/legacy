@@ -22,6 +22,10 @@ def apply_view(request):
     if (applicant.has_applied and
         mybb.get_tid(APPLICANT_FORUM,
                      applicant.charinfo.characterName) is not None):
+        if request.method == 'POST':
+            applicant.has_applied = False
+            applicant.save(request)
+            return HttpResponseRedirect('/recruitment/apply/')
         return direct_to_template(request, 'recruitment/already-applied.html',
                                   extra_context={'applicant': applicant})
     else:

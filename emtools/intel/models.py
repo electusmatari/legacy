@@ -79,7 +79,6 @@ class Alliance(models.Model):
 
     name = models.CharField(max_length=128, blank=True)
     allianceid = models.BigIntegerField(null=True)
-    active = models.BooleanField(default=True)
     ticker = models.CharField(max_length=12, null=True)
     members = models.IntegerField(null=True)
     standing = models.IntegerField(null=True)
@@ -109,13 +108,11 @@ class Alliance(models.Model):
                                   name=allyinfo.name,
                                   ticker=allyinfo.shortName,
                                   members=allyinfo.memberCount,
-                                  active=True,
                                   lastapi=lastapi,
                                   do_api_check=False)
                 return
         self.update_intel(lastapi,
                           members=0,
-                          active=False,
                           lastapi=lastapi,
                           do_api_check=False)
 
@@ -191,7 +188,6 @@ class Corporation(models.Model):
 
     name = models.CharField(max_length=128, blank=True)
     corporationid = models.BigIntegerField(null=True, default=None)
-    active = models.BooleanField(default=True)
     faction = models.ForeignKey(Faction, null=True, default=None)
     alliance = models.ForeignKey(Alliance, null=True, default=None)
     ticker = models.CharField(max_length=12, null=True, default=None)
@@ -238,7 +234,6 @@ class Corporation(models.Model):
             alliance=ally,
             ticker=corpinfo.ticker,
             members=corpinfo.memberCount,
-            active=True if corpinfo.memberCount > 0 else False,
             lastapi=lastapi,
             do_api_check=False
             )
@@ -331,7 +326,6 @@ class Pilot(models.Model):
 
     name = models.CharField(max_length=128, blank=True)
     characterid = models.BigIntegerField(null=True)
-    active = models.BooleanField(default=True)
     corporation = models.ForeignKey(Corporation, null=True)
     alliance = models.ForeignKey(Alliance, null=True)
     security = models.FloatField(null=True)

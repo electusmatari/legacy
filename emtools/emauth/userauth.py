@@ -16,7 +16,7 @@ GUARDED_GROUPS = ['Ally',
                   'Gradient Recruiter',
                   'Gradient Personnel Manager',
                   'Lutinari Syndicate',
-                  'Slecgwyrhta Industries']
+                  ]
 
 # Remove members of the former group if they lack the latter.
 SECURE_GROUPS = [('Council', 'Electus Matari'),
@@ -27,8 +27,6 @@ SECURE_GROUPS = [('Council', 'Electus Matari'),
                  ('Tournament', 'Electus Matari'),
                  ('Lutinari Directors', 'Lutinari Syndicate'),
                  ('Lutinari Recruiters', 'Lutinari Syndicate'),
-                 ('Slecgwyrhta Industries Directors',
-                  'Slecgwyrhta Industries'),
                  ]
 
 log = logging.getLogger('auth')
@@ -182,10 +180,6 @@ def update_single_user2(api, mybbuser, grddetails, allies):
     # LUTI members
     if profile.corp == 'Lutinari Syndicate':
         mybbuser.add_group('Lutinari Syndicate')
-
-    # SLECG members
-    if profile.corp == 'Slecgwyrhta Industries':
-        mybbuser.add_group('Slecgwyrhta Industries')
 
     return success_reason
 

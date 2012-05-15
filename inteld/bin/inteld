@@ -24,7 +24,7 @@ def main():
     conf = ConfigParser.SafeConfigParser()
     conf.read(["/home/forcer/.inteld.conf"])
     with ctx:
-        logging.basicConfig(filename="/tmp/inteld.log",
+        logging.basicConfig(filename=conf.get('log', 'logfile'),
                             format="%(asctime)s %(message)s",
                             level=logging.DEBUG)
         logging.info("inteld starting up")

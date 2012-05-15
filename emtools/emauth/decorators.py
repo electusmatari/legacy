@@ -26,6 +26,8 @@ def require_mybbgroup(groupname):
                 return orig_view(request, *args, **kwargs)
             if not hasattr(request.user, 'profile'):
                 raise PermissionDenied()
+            if 'Banned' in request.user.profile.mybb_groups:
+                raise PermissionDenied()
             for groupname in required_groups:
                 if groupname in request.user.profile.mybb_groups:
                     return orig_view(request, *args, **kwargs)

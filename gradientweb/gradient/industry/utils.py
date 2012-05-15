@@ -1051,3 +1051,46 @@ def get_competitionprice(ordertype, stationid, typeid, volremaining,
             else:
                 price = min(price, pmo.price)
     return price
+
+
+def redo_cache():
+    """
+    The models cache quite a few names for ids to make display faster.
+    Rebuild all of those.
+    """
+    for obj in BlueprintOriginal.objects.all():
+        obj.typename = get_typename(obj.typeid)
+        if obj.typename is None:
+            print "Bad typeID in BlueprintOriginal: %s" % obj.typeid
+        else:
+            obj.save()
+    for obj in TransactionInfo.objects.all():
+        obj.typename = get_typename(obj.transaction.typeid)
+        if obj.typename is None:
+            print "Bad typeID in TransactionInfo: %s" % obj.typeid
+        else:
+            obj.save()
+    for obj in PriceList.objects.all():
+        obj.typename = get_typename(obj.typeid)
+        if obj.typename is None:
+            print "Bad typeID in PriceList: %s" % obj.typeid
+        else:
+            obj.save()
+    for obj in WantedMarketOrder.objects.all():
+        obj.typename = get_typename(obj.typeid)
+        if obj.typename is None:
+            print "Bad typeID in WantedMarketOrder: %s" % obj.typeid
+        else:
+            obj.save()
+    for obj in StockLevel.objects.all():
+        obj.typename = get_typename(obj.typeid)
+        if obj.typename is None:
+            print "Bad typeID in StockLevel: %s" % obj.typeid
+        else:
+            obj.save()
+    for obj in Stock.objects.all():
+        obj.typename = get_typename(obj.typeid)
+        if obj.typename is None:
+            print "Bad typeID in Stock: %s" % obj.typeid
+        else:
+            obj.save()

@@ -162,7 +162,6 @@ class Sender(threading.Thread):
         self.irc = irc
         self.sendq = Queue.Queue()
         self.is_running = True
-        self.last_message = 0
 
     def run(self):
         """
