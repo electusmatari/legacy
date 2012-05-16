@@ -27,6 +27,8 @@ EMTOOLS = [
        '/media/img/tools/reimbursementfund.png'),
       ('/tools/timezones/', '(( Timezones ))',
        '/media/img/tools/timezones.png'),
+      ('/fw/', 'Factional Warfare',
+       '/media/img/tools/fw.png'),
       ]),
     ('Restricted',
      [('/corpadmin/', 'Corp Admin', '/media/img/tools/corpadmin.png'),
