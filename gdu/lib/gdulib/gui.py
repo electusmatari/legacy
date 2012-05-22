@@ -13,15 +13,16 @@ from gdulib import handler
 from gdulib import version
 
 class MainFrame(wx.Frame):
-    def __init__(self):
+    def __init__(self, appcontrol):
         wx.Frame.__init__(self, None,
                           title='Gradient Data Uploader',
                           size=(640, 480),
                           style=wx.ICONIZE | wx.DEFAULT_FRAME_STYLE)
+        self.appcontrol = appcontrol
         self.statusbar = self.CreateStatusBar()
 
         panel = wx.Panel(self)
-        self.notebook = Notebook(panel)
+        self.notebook = Notebook(panel, appcontrol)
         sizer = wx.BoxSizer(wx.VERTICAL)
         sizer.Add(self.notebook, 1, wx.ALL|wx.EXPAND, 5)
         panel.SetSizer(sizer)
@@ -50,10 +51,10 @@ class MainFrame(wx.Frame):
         sys.exit(0)
 
 class Notebook(wx.Notebook):
-    def __init__(self, parent):
+    def __init__(self, parent, appcontrol):
         wx.Notebook.__init__(self, parent, id=wx.ID_ANY, style=wx.BK_DEFAULT)
 
-        self.config = ConfigPanel(self)
+        self.config = ConfigPanel(self, appcontrol)
         # self.config.SetBackgroundColour("#DFDFDF")
         self.AddPage(self.config, "Configuration")
         
@@ -65,21 +66,57 @@ class Notebook(wx.Notebook):
         self.AddPage(self.about, "About")
 
 class ConfigPanel(wx.Panel):
-    def __init__(self, parent):
+    def __init__(self, parent, appcontrol):
         wx.Panel.__init__(self, parent=parent, id=wx.ID_ANY)
+        self.appcontrol = appcontrol
         self.config = wx.Config(version.APPLONGNAME, version.VENDORNAME)
 
         sizer = wx.BoxSizer(wx.VERTICAL)
         sizer.Add(self.init_auth_panel(), flag=wx.ALL | wx.EXPAND, border=5)
         sizer.Add(self.init_method_panel(), flag=wx.ALL | wx.EXPAND, border=5)
         sizer.Add(self.init_other_panel(), flag=wx.ALL | wx.EXPAND, border=5)
+        sizer.Add(self.init_actions_panel(), flag=wx.ALL | wx.EXPAND, border=5)
+        self.auth_lost_focus(None) # initialize color
         self.SetSizer(sizer)
 
     def init_auth_panel(self):
         panel = wx.Panel(self)
         sb = wx.StaticBox(panel, label="Authentication")
-        sizer = wx.StaticBoxSizer(sb, wx.HORIZONTAL)
+        sizer = wx.StaticBoxSizer(sb, wx.VERTICAL)
 
+        auth_panel_h = self.init_auth_panel_h(panel)
+        sizer.Add(auth_panel_h,
+                  flag=wx.ALL | wx.EXPAND | wx.ALIGN_CENTRE_VERTICAL,
+                  border=5)
+        user_panel = self.init_user_panel(panel)
+        sizer.Add(user_panel,
+                  flag=wx.ALL | wx.EXPAND | wx.ALIGN_CENTRE_VERTICAL,
+                  border=5)
+        panel.SetSizer(sizer)
+        return panel
+
+    def init_user_panel(self, auth_panel_v):
+        panel = wx.Panel(auth_panel_v)
+        sizer = wx.BoxSizer(wx.HORIZONTAL)
+
+        bitmap = wx.EmptyBitmap(32, 32)
+        image = wx.StaticBitmap(panel, bitmap=bitmap)
+        sizer.Add(image, flag=wx.LEFT | wx.RIGHT | wx.ALIGN_CENTRE_VERTICAL,
+                  border=5)
+        self.userimage = image
+
+        st = wx.StaticText(panel, label="Not authenticated",
+                           style=wx.TE_DONTWRAP)
+        sizer.Add(st, flag=wx.LEFT | wx.RIGHT | wx.ALIGN_CENTRE_VERTICAL,
+                  border=5, proportion=1)
+        self.usertext = st
+
+        panel.SetSizer(sizer)
+        return panel
+
+    def init_auth_panel_h(self, auth_panel_v):
+        panel = wx.Panel(auth_panel_v)
+        sizer = wx.BoxSizer(wx.HORIZONTAL)
         st = wx.StaticText(panel, label="Auth Token: ",
                            style=wx.TE_DONTWRAP)
         sizer.Add(st, flag=wx.LEFT | wx.RIGHT | wx.ALIGN_CENTRE_VERTICAL,
@@ -88,19 +125,19 @@ class ConfigPanel(wx.Panel):
         tc = wx.TextCtrl(panel, -1, self.config.Read("auth_token"))
         self.auth_token = tc
         self.auth_token_ok = False
-        self.auth_lost_focus(None) # initialize color
         tc.SetMaxLength(64)
         tc.Bind(wx.EVT_SET_FOCUS, self.auth_got_focus)
         tc.Bind(wx.EVT_KILL_FOCUS, self.auth_lost_focus)
-        sizer.Add(tc, flag=wx.ALL | wx.EXPAND, proportion=1)
+        sizer.Add(tc, flag=wx.LEFT | wx.RIGHT | wx.EXPAND, proportion=1,
+                  border=5)
 
         checkb = wx.Button(panel, label="Check")
         checkb.Bind(wx.EVT_BUTTON, self.on_check)
-        sizer.Add(checkb, flag=wx.ALL)
+        sizer.Add(checkb, flag=wx.LEFT | wx.RIGHT, border=5)
 
         getb = wx.Button(panel, label="Get Your Token")
         getb.Bind(wx.EVT_BUTTON, self.on_get)
-        sizer.Add(getb, flag=wx.ALL)
+        sizer.Add(getb, flag=wx.LEFT, border=5)
 
         panel.SetSizer(sizer)
         return panel
@@ -139,6 +176,22 @@ class ConfigPanel(wx.Panel):
         panel.SetSizer(sizer)
         return panel
 
+    def init_actions_panel(self):
+        panel = wx.Panel(self)
+        sb = wx.StaticBox(panel, label="Actions")
+        sizer = wx.StaticBoxSizer(sb, wx.HORIZONTAL)
+
+        uploadall = wx.Button(panel, label="Upload Old Cachefiles")
+        uploadall.Bind(wx.EVT_BUTTON, self.on_upload_all)
+        sizer.Add(uploadall, flag=wx.ALL, border=5)
+
+        cleancache = wx.Button(panel, label="Clean Cache Files")
+        cleancache.Bind(wx.EVT_BUTTON, self.on_clean_cache)
+        sizer.Add(cleancache, flag=wx.ALL, border=5)
+
+        panel.SetSizer(sizer)
+        return panel
+
     def auth_got_focus(self, event):
         if self.auth_token:
             self.auth_token.SetBackgroundColour("White")
@@ -148,12 +201,36 @@ class ConfigPanel(wx.Panel):
         if self.auth_token:
             auth_token = self.auth_token.GetValue()
             self.config.Write("auth_token", auth_token)
-            if rpc.check_auth_token(auth_token):
+            try:
+                userinfo = rpc.check_auth_token(auth_token)
+            except:
+                userinfo = None
+            if userinfo:
                 self.auth_token.SetBackgroundColour("#AFFFAF")
                 self.auth_token_ok = True
+                self.usertext.SetLabel("Uploading as %s" %
+                                       userinfo['username'])
+                self.set_userimage(userinfo['characterid'])
             else:
                 self.auth_token.SetBackgroundColour("#FFAFAF")
                 self.auth_token_ok = False
+                self.usertext.SetLabel("Authentication failed.")
+                self.set_userimage(1)
+
+    def set_userimage(self, characterid):
+        import threading, urllib, StringIO
+        url = "http://image.eveonline.com/Character/%s_32.jpg" % characterid
+        def set_userimage_thread():
+            try:
+                data = StringIO.StringIO(urllib.urlopen(url).read())
+                img = wx.ImageFromStream(data)
+            except Exception as e:
+                pass
+            else:
+                self.userimage.SetBitmap(wx.BitmapFromImage(img))
+        t = threading.Thread(target=set_userimage_thread)
+        t.daemon = True
+        t.start()
 
     def on_check(self, event):
         self.auth_lost_focus(event)
@@ -162,6 +239,12 @@ class ConfigPanel(wx.Panel):
         webbrowser.open(version.AUTH_TOKEN_URL,
                         new=2 # New Tab
                         )
+
+    def on_upload_all(self, event):
+        self.appcontrol.upload_existing()
+
+    def on_clean_cache(self, event):
+        self.appcontrol.clean_cache()
 
 
 class ConfigCheckBox(wx.CheckBox):

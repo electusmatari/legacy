@@ -43,10 +43,6 @@ class Watcher(threading.Thread):
                 t.daemon = True
                 t.start()
                 self.stats.numdirs += 1
-            for dirname in dir_list:
-                for basedir, subdirs, filenames in os.walk(dirname):
-                    for filename in filenames:
-                        self.fileq.put(os.path.join(basedir, filename))
         # FIXME! Watch the main cache directories <.<
         while True:
             time.sleep(60)

@@ -2,8 +2,7 @@ import logging
 import threading
 import time
 
-from gdulib.cacheutils import cache_load, make_methodcall, wintime_to_datetime
-from gdulib import rpc
+from gdulib.cacheutils import cache_load, make_methodcall
 
 class Handler(threading.Thread):
     def __init__(self, control, fileq, dataq):
@@ -48,7 +47,7 @@ class Handler(threading.Thread):
                 if key not in self.uploaded:
                     self.uploaded.add(key)
                     self.dataq.put(data)
-                
+
 def cache_dump(control, obj):
     method = make_methodcall(obj[0], False)
     if not control.handle_method(method):
@@ -120,11 +119,6 @@ Upload current buy and sell orders when the market is viewed\
                                 "call typeID (%s)" % (order.orderID,
                                                       order.typeID,
                                                       typeid))
-            if not hasattr(order, 'issueDate'):
-                logging.warning("Order ID %s (typeID %s) has no issueDate, "
-                                "very old cache file?" % (order.orderID,
-                                                          order.typeID))
-                continue
             result.append(dict((name, getattr(order, name))
                                for name in [
                         'price', 'volRemaining', 'range', 'orderID',
@@ -137,8 +131,8 @@ Upload current buy and sell orders when the market is viewed\
                 'typeid': typeid,
                 'orders': result}
 
-class VictoryPointsHandler(object):
-    method = 'map.GetVictoryPoints'
+class FacWarDataHandler(object):
+    method = 'map.GetFacWarData'
     display = "Victory points"
     description = """\
 Upload current victory points when the occupation map is viewed\
@@ -146,21 +140,35 @@ Upload current victory points when the occupation map is viewed\
 
     def handle(self, obj):
         result = []
-        for factionid, details in obj[1]['lret'].items():
-            for sysid, threshold, current in details['defending']:
-                result.append({'factionid': factionid,
-                               'systemid': sysid,
-                               'threshold': threshold,
-                               'current': current})
+        for (sysid, (threshold, current, factionid)) in obj[1]['lret'].items():
+            result.append({'factionid': factionid,
+                           'systemid': sysid,
+                           'threshold': threshold,
+                           'current': current})
         return {'method': self.method,
                 'map': result}
+
+class LookupCharacterHandler(object):
+    method = 'lookupSvc.LookupCharacters'
+    display = "Pilot IDs"
+    description = """\
+Upload character IDs you search for in people & places (for evewho.com)\
+"""
+
+    def handle(self, obj):
+        result = []
+        for row in obj[1]['lret']:
+            result.append(row.characterID)
+        return {'method': self.method,
+                'ids': result}
 
 
 FILE_HANDLER = dict((h.method, h)
                     for h in [
         CorpFactionHandler(),
-        VictoryPointsHandler(),
+        FacWarDataHandler(),
         MarketHistoryHandler(),
         MarketOrderHandler(),
+        LookupCharacterHandler(),
         ])
 

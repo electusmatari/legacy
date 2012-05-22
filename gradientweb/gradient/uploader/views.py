@@ -140,11 +140,11 @@ SELECT typeid,
         FROM uploader_marketorderlastupload h
         WHERE regionid = %s
           AND h.typeid = mo.typeid) AS age
-FROM industry_marketorder mo 
-     INNER JOIN ccp.stastations st 
-       ON mo.stationid = st.stationid 
-     INNER JOIN ccp.mapsolarsystems sys 
-       ON st.solarsystemid = sys.solarsystemid 
+FROM industry_marketorder mo
+     INNER JOIN ccp.stastations st
+       ON mo.stationid = st.stationid
+     INNER JOIN ccp.mapsolarsystems sys
+       ON st.solarsystemid = sys.solarsystemid
 WHERE sys.regionid = %s
 ORDER BY age DESC, typeid ASC
 """,
@@ -158,11 +158,11 @@ SELECT typeid,
         FROM uploader_marketorderlastupload h
         WHERE regionid = %s
           AND h.typeid = mo.typeid) AS age
-FROM industry_wantedmarketorder mo 
-     INNER JOIN ccp.stastations st 
-       ON mo.stationid = st.stationid 
-     INNER JOIN ccp.mapsolarsystems sys 
-       ON st.solarsystemid = sys.solarsystemid 
+FROM industry_wantedmarketorder mo
+     INNER JOIN ccp.stastations st
+       ON mo.stationid = st.stationid
+     INNER JOIN ccp.mapsolarsystems sys
+       ON st.solarsystemid = sys.solarsystemid
 WHERE sys.regionid = %s
 ORDER BY age DESC, typeid ASC
 """,
@@ -278,7 +278,7 @@ def jsonrpc(func):
                 token = None
                 user = None
             else:
-                if (token.user.profile and 
+                if (token.user.profile and
                     token.user.profile.characterid is not None):
                     # Authenticated!
                     user = token.user
@@ -307,7 +307,7 @@ def json_check_auth_token(user, args):
 @jsonrpc
 def json_submit_exception(user, args):
     mail_admins("[GDU] %s" % args['description'],
-                "User: %s\nDescription: %s\n\n%s" % 
+                "User: %s\nDescription: %s\n\n%s" %
                 (user.profile.name,
                  args['description'],
                  args['trace']))
@@ -440,11 +440,24 @@ def everpc_GetOrders(user, args):
             )
 
 def everpc_GetVictoryPoints(user, args):
+    pass
+
+def everpc_GetFacWarData(user, args):
     cachetimestamp = wintime_to_datetime(args['timestamp'])
     upload = Upload.objects.create(user=user,
                                    cachetimestamp=cachetimestamp,
                                    method='map.GetVictoryPoints')
     for row in args['map']:
+        if row['factionid'] is None:
+            c = connection.cursor()
+            c.execute("SELECT COALESCE(s.factionid, c.factionid, r.factionid) "
+                      "FROM ccp.mapsolarsystems s "
+                      "     INNER JOIN ccp.mapconstellations c "
+                      "       ON s.constellationid = c.constellationid "
+                      "     INNER JOIN ccp.mapregions r "
+                      "       ON c.regionid = r.regionid "
+                      "WHERE s.solarsystemid = %s", (row['systemid'],))
+            row['factionid'] = c.fetchone()[0]
         if not FacWarSystemHistory.objects.filter(
             cachetimestamp=cachetimestamp).exists():
             # Not known yet
@@ -493,6 +506,7 @@ EVERPC_METHODS = {
     'marketProxy.GetOldPriceHistory': everpc_GetOldPriceHistory,
     'marketProxy.GetOrders': everpc_GetOrders,
     'map.GetVictoryPoints': everpc_GetVictoryPoints,
+    'map.GetFacWarData': everpc_GetFacWarData,
     'lookupSvc.LookupCharacters': everpc_LookupCharacters,
 }
 

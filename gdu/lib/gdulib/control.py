@@ -1,5 +1,6 @@
 import datetime
 import logging
+import os
 import Queue
 import urllib
 import webbrowser
@@ -7,6 +8,7 @@ import webbrowser
 import wx
 
 from gdulib import rpc, version
+from gdulib.cacheutils import find_cache_directories
 
 from gdulib.status import Status
 from gdulib.watcher import Watcher
@@ -14,10 +16,9 @@ from gdulib.handler import Handler
 from gdulib.uploader import Uploader
 
 class AppControl(object):
-    def __init__(self, frame):
-        self.frame = frame
+    def __init__(self):
+        self.frame = None
         self.last_exception = None
-        self.initialize()
 
     @property
     def auth_token(self):
@@ -59,7 +60,8 @@ class AppControl(object):
         self.frame.notebook.ChangeSelection(0)
         return wx.MessageBox(message, title, style)
 
-    def initialize(self):
+    def initialize(self, frame):
+        self.frame = frame
         logging.info("%s %s starting." % (version.APPLONGNAME,
                                           version.VERSIONSTRING))
         logging.info("Freedom through strength. Strength through superior "
@@ -102,3 +104,14 @@ class AppControl(object):
         self.configuration_problem(message)
         return False
 
+    def upload_existing(self):
+        for dirname in find_cache_directories():
+            for basedir, subdirs, filenames in os.walk(dirname):
+                for filename in filenames:
+                    self.fileq.put(os.path.join(basedir, filename))
+
+    def clean_cache(self):
+        for dirname in find_cache_directories():
+            for basedir, subdirs, filenames in os.walk(dirname):
+                for filename in filenames:
+                    os.unlink(os.path.join(basedir, filename))

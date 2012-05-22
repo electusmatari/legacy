@@ -3,12 +3,16 @@ import json
 import traceback
 
 def rpc_call(method, args):
-    conn = httplib.HTTPConnection("gradient.electusmatari.com")
-    conn.request("POST", "/uploader/json/rpc/%s/" % method,
-                 json.dumps(args),
-                 {'Content-Type': 'text/json'})
-    response = conn.getresponse()
-    data = response.read()
+    try:
+        conn = httplib.HTTPConnection("gradient.electusmatari.com")
+        conn.request("POST", "/uploader/json/rpc/%s/" % method,
+                     json.dumps(args),
+                     {'Content-Type': 'text/json'})
+        response = conn.getresponse()
+        data = response.read()
+    except Exception as e:
+        raise RPCError("Error %s from RPC server: %s" %
+                       (e.__class__.__name__, str(e)))
     if response.status != 200:
         raise RPCError("Bad status from server: %s %s" %
                        (response.status, response.reason))
