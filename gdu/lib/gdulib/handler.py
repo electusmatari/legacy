@@ -119,6 +119,12 @@ Upload current buy and sell orders when the market is viewed\
                                 "call typeID (%s)" % (order.orderID,
                                                       order.typeID,
                                                       typeid))
+            if not hasattr(order, 'issueDate'):
+                logging.info("Order ID %s (typeID %s) is rather old, "
+                             "consider cleaning up your cache"
+                             % (order.orderID,
+                                order.typeID))
+                break
             result.append(dict((name, getattr(order, name))
                                for name in [
                         'price', 'volRemaining', 'range', 'orderID',
