@@ -27,9 +27,20 @@ def make_methodcall(meth, with_args=True):
                               ", ".join(str(x) for x in meth[2:]))
     else:
         return "%s.%s" % (meth[0], meth[1])
-        
+
 
 def find_cache_directories():
+    result = []
+    for macho in find_cache_machodirs():
+        protocol = max(int(name) for name in os.listdir(macho)
+                       if name.isdigit())
+        methoddir = os.path.join(macho, str(protocol), "CachedMethodCalls")
+        if os.path.isdir(methoddir):
+            result.append(os.path.normpath(methoddir))
+    return result
+
+
+def find_cache_machodirs():
     basedir = find_cache_basedir()
     if basedir is None:
         return []
@@ -39,11 +50,7 @@ def find_cache_directories():
                              TRANQUILITY)
         if not os.path.isdir(macho):
             continue
-        protocol = max(int(name) for name in os.listdir(macho)
-                       if name.isdigit())
-        methoddir = os.path.join(macho, str(protocol), "CachedMethodCalls")
-        if os.path.isdir(methoddir):
-            result.append(os.path.normpath(methoddir))
+        result.append(macho)
     return result
 
 def find_cache_basedir():

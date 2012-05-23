@@ -2,13 +2,14 @@ import datetime
 import logging
 import os
 import Queue
+import shutil
 import urllib
 import webbrowser
 
 import wx
 
 from gdulib import rpc, version
-from gdulib.cacheutils import find_cache_directories
+from gdulib.cacheutils import find_cache_directories, find_cache_machodirs
 
 from gdulib.status import Status
 from gdulib.watcher import Watcher
@@ -111,7 +112,5 @@ class AppControl(object):
                     self.fileq.put(os.path.join(basedir, filename))
 
     def clean_cache(self):
-        for dirname in find_cache_directories():
-            for basedir, subdirs, filenames in os.walk(dirname):
-                for filename in filenames:
-                    os.unlink(os.path.join(basedir, filename))
+        for dirname in find_cache_machodirs():
+            shutil.rmtree(dirname)

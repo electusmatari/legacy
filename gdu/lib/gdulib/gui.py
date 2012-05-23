@@ -244,7 +244,14 @@ class ConfigPanel(wx.Panel):
         self.appcontrol.upload_existing()
 
     def on_clean_cache(self, event):
-        self.appcontrol.clean_cache()
+        q = wx.MessageDialog(None,
+                             "Do you really want to delete all cache files?",
+                             "Delete Cache Files",
+                             wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION)
+        result = q.ShowModal()
+        q.Destroy()
+        if result == wx.ID_YES:
+            self.appcontrol.clean_cache()
 
 
 class ConfigCheckBox(wx.CheckBox):
