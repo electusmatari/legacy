@@ -446,16 +446,17 @@ def update_all():
             for corp in alliance.memberCorporations:
                 get_corp(corpid=corp.corporationID)
     # Alliance standings
-    for contact in apicorp.ContactList().allianceContactList:
-        try:
-            if contact.contactID in alliances:
-                entity = get_alliance(allianceid=contact.contactID)
-            else:
-                entity = get_corp(corpid=contact.contactID)
-        except UnknownEntityError:
-            continue
-        entity.standing = contact.standing
-        entity.save()
+    # Bugged: contact.contactID can be dead alliance
+    # for contact in apicorp.ContactList().allianceContactList:
+    #     try:
+    #         if contact.contactID in alliances:
+    #             entity = get_alliance(allianceid=contact.contactID)
+    #         else:
+    #             entity = get_corp(corpid=contact.contactID)
+    #     except UnknownEntityError:
+    #         continue
+    #     entity.standing = contact.standing
+    #     entity.save()
     # Tracked entities
     for tracked in TrackedEntity.objects.all():
         if tracked.corporation:
