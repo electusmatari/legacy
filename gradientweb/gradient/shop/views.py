@@ -362,10 +362,15 @@ def handle_finalize(request, orderid_list):
             return HttpResponseRedirect('/shop/handle/')
         name = order.name
         standing = order.standing_string()
-        product = ProductList.objects.get(typeid=order.typeid)
         customer_total += order.price_total
-        order.price = product.grdprice
-        order_list.append((order, product))
+        try:
+            product = ProductList.objects.get(typeid=order.typeid)
+        except ProductList.DoesNotExist:
+            order.price = order.price
+            order_list.append((order, None))
+        else:
+            order.price = product.grdprice
+            order_list.append((order, product))
         total += order.price_total
     return direct_to_template(request, 'shop/handle_finalize.html',
                               extra_context={'order_list': order_list,
