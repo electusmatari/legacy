@@ -1,0 +1,5 @@
+#!/bin/sh
+
+set -e
+
+~/Projects/eveutil/2.0/scripts/em-standings > ~/www/electusmatari.com/download/standings.html

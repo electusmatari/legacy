@@ -1,0 +1,19 @@
+As root:
+
+# mysql
+> create database inferno12;
+> grant all privileges on inferno12.* to 'forcer'@'localhost';
+
+As forcer:
+
+mysql inferno12 < mysql55-inferno12-structure.sql
+mysql inferno12 < mysql55-inferno12-data.sql
+
+mysqldump --add-drop-table --complete-insert --extended-insert \
+  > mysql-compat.sql
+
+$ perl ~/mysql2pgsql.pl mysql55-inferno12-extended.sql postgres.sql
+$ sed -e 's/"xmax"/"xMax"/g' -e 's/"xmin"/"xMin"/g' \
+  < postgres.sql > postgres2.sql
+$ psql inferno12 < postgres2.sql
+$ pg_dump inferno12 > /tmp/inf12.sql

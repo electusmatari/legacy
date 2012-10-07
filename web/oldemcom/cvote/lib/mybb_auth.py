@@ -3,10 +3,7 @@ import Cookie
 
 import MySQLdb
 
-db_host = "localhost"
-db_user = "emcom"
-db_pass = "ai5ahNgi"
-db_name = "emforum"
+execfile("/home/forcer/Projects/private/old_access.py")
 forum_name = "Internal"
 
 def mybb_auth():

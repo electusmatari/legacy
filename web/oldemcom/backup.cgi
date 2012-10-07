@@ -7,14 +7,14 @@ import datetime
 import os
 import subprocess
 
-BACKUPDIR = '/home/forcer/Projects/old-emcom/backup/'
+BACKUPDIR = '/home/forcer/Data/backup/mysql'
 
 def main():
     print "Content-Type: text/plain"
     print
     start = datetime.datetime.utcnow()
     cfg = ConfigParser.ConfigParser()
-    cfg.read(['/home/forcer/Projects/old-emcom/kgi.cfg'])
+    cfg.read(['/home/forcer/Projects/private/kgi.cfg'])
     for sec in cfg.sections():
         try:
             if cfg.get(sec, "dbapi") != 'MySQLdb':

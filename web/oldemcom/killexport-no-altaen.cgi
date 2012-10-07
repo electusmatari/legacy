@@ -10,10 +10,10 @@ import MySQLdb
 
 secret = "or else"
 
-db_host = "localhost"
-db_user = "emcom"
-db_pass = "ai5ahNgi"
-db_name = "emkillboard"
+db_host = "..."
+db_user = "..."
+db_pass = "..."
+db_name = "..."
 
 em_ally = 48
 

@@ -7,5 +7,5 @@ def config():
     global cfg
     if cfg is None:
         cfg = ConfigParser.ConfigParser()
-        cfg.read(['/home/forcer/Projects/old-emcom/kgi.cfg'])
+        cfg.read(['/home/forcer/Projects/private/kgi.cfg'])
     return cfg

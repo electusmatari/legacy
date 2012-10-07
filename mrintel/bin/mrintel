@@ -2,16 +2,20 @@
 
 # Copyright (C) 2012 Jorgen Schaefer
 
+import sys
+sys.path.append("/home/forcer/Projects/evecode/mrintel/lib/")
+
 import daemon
 import logging
 import ConfigParser
 from mrintel import bot
 
+
 def main():
     ctx = daemon.DaemonContext()
     ctx.umask = 0o122
     conf = ConfigParser.SafeConfigParser()
-    conf.read(["/home/forcer/.mrintel.conf"])
+    conf.read(["/home/forcer/Projects/private/mrintel.conf"])
     with ctx:
         logging.basicConfig(filename=conf.get('log', 'logfile'),
                             format="%(asctime)s %(message)s",
