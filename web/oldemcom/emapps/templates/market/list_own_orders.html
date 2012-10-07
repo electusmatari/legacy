@@ -1,0 +1,21 @@
+{{inherit "base.html"}}
+{{py:pagename = 'order'}}
+
+<h2>Your Orders</h2>
+
+<ul>
+{{for o in orders}}
+<li><a href="/market/order/{{o.id}}/">Order #{{o.id}} ({{o.source}}),
+created {{eve_time(o.created)}},
+status: {{o.state}}</a><br />
+{{if o.price}}Price: {{o.price}} ISK<br />{{endif}}
+{{if o.producer}}Producer: {{o.producer}}<br />{{endif}}
+{{o.ordertext|addbr}}
+{{if o.lastcomment}}
+<p><b>Last Comment:</b></p>
+{{o.lastcomment.comment|addbr}} <br />
+// {{o.lastcomment.author}}, {{o.lastcomment.created|eve_time}}
+{{endif}}
+</li>
+{{endfor}}
+</ul>

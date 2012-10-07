@@ -1,0 +1,15 @@
+{{inherit "../base.html"}}
+
+{{def title}}
+Electus Matari: Intel
+{{enddef}}
+
+{{def tabs}}
+<ul class="tabs">
+  <li {{if pagename == 'listing'}}class="active"{{endif}}><a href="/intel/">Traces</a></li>
+  <li {{if pagename == 'submit'}}class="active"{{endif}}><a href="/intel/submit/">Submit Trace</a></li>
+  <li {{if pagename == 'stats'}}class="active"{{endif}}><a href="/intel/stats/">Stats</a></li>
+</ul>
+{{enddef}}
+
+{{self.body|html}}

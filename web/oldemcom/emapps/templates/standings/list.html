@@ -1,0 +1,78 @@
+{{py:pagename = 'list'}}
+{{inherit "base.html"}}
+
+{{py:
+if user.has_permission('em'):
+  emuser = True
+else:
+  emuser = False
+}}
+
+<h2>Standings with Electus Matari</h2>
+
+<p>Electus Matari does follow "not red, don't shoot" (NRDS) rules of engagement (ROE). This means that pilots neutral to us will not be shot at. Please note that pilots commiting criminal acts, incurring a global criminal flag, or being an outlaw (security status below -5) are automatically considered "red" for these purposes.</p>
+
+<p>You can get set to hostile standings to Electus Matari if any of the following reasons apply to you:</p>
+
+<ol>
+  <li>Criminal activities as defined by our <a href="http://www.electusmatari.com/standings/crimes/">crime list</a> in the Republic (Heimatar, Metropolis and Molden Heath)</li>
+  <li>Support of the Amarr Militia or other slaver organizations (e.g. CVA) anywhere</li>
+  <li>Aggression against Electus Matari anywhere</li>
+</ol>
+
+<p>If these do not apply to you, we might be able to negotiate mutual blue standings. Blue standings with Electus Matari do only mean that we will not fire on your pilots even if they have a global criminal flag or are outlaws. They do not necessarily mean that we offer any kind of cooperation, mutual help, or sharing of intel.</p>
+
+<p>Please do note that while Electus Matari is NRDS everywhere, not all of our blues are. Do not assume that someone will not shoot at you just because they are blue to Electus Matari. If you want to be sure, negotiate blue standings independently.</p>
+
+<p>If you wish to negotiate standings with Electus Matari, contact one of our diplomats. You can find a list in our public channel <em>Public&nbsp;-&nbsp;EM.</em></p>
+
+<h2>Standings List</h2>
+
+<table class="standings" style="float: left; margin-right: 2em; width: 45%">
+<tr class="even"><th>Hostile Entity</th><th>Reason</th></tr>
+{{for loop, st in looper(negative)}}
+<tr {{if loop.odd}}class="odd"{{endif}}
+    {{if loop.even}}class="even"{{endif}}
+>
+  <td>
+    {{if emuser}}<a href="http://www.electusmatari.com/forums/showthread.php?tid={{st.tid}}">{{endif}}
+      {{st.entity}} {{st.ticker}}
+    {{if emuser}}</a>{{endif}}
+  </td>
+  <td
+    {{if st.standing == -5}}class="competitor"{{endif}}
+    {{if st.standing == -10}}class="enemy"{{endif}}
+    {{if st.standing > 0}}class="blue"{{endif}}
+  >
+    {{st.comments}}
+  </td>
+</tr>
+{{endfor}}
+</table>
+
+<table class="standings" style="width: 45%">
+<tr><th>Friendly Entity</th><th>Reason</th></tr>
+{{for loop, st in looper(positive)}}
+<tr {{if loop.odd}}class="odd"{{endif}}
+    {{if loop.even}}class="even"{{endif}}
+>
+  <td>
+    {{if emuser}}<a href="http://www.electusmatari.com/forums/showthread.php?tid={{st.tid}}">{{endif}}
+      {{st.entity}} {{st.ticker}}
+    {{if emuser}}</a>{{endif}}
+  </td>
+  <td
+    {{if st.standing == -5}}class="competitor"{{endif}}
+    {{if st.standing == -10}}class="enemy"{{endif}}
+    {{if st.standing > 0}}class="blue"{{endif}}
+  >
+    {{st.comments}}
+  </td>
+</tr>
+{{endfor}}
+</table>
+
+<div style="clear: both"></div>
+
+<small>{{len(positive) + len(negative)}} standings, {{positive|len}}
+  positive and {{negative|len}} negative.</small>

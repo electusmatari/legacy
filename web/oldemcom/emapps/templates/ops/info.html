@@ -1,0 +1,15 @@
+{{inherit "base.html"}}
+{{py:pagename = 'info'}}
+
+<p><a href="/ops/window/"
+      onclick="window.open('/ops/window/', 'popup',
+                           'width=200,height=100,status=0,toolbar=0,location=0,menubar=0,directories=0');return false">
+   Open the operation announcement window.
+</a></p>
+
+<h2>Announce an Operation</h2>
+
+<p><form method="post" action="">
+<input type="text" name="title" />
+<input type="submit" value="Announce Operation" />
+</form></p>

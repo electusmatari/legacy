@@ -1,0 +1,18 @@
+{{inherit "../base.html"}}
+
+{{def title}}
+Electus Matari: Standings
+{{enddef}}
+
+{{def tabs}}
+<ul class="tabs">
+  <li {{if pagename == 'list'}}class="active"{{endif}}><a href="/standings/">Standings</a></li>
+  <li {{if pagename == 'rc'}}class="active"{{endif}}><a href="/standings/rc/">Recent Changes</a></li>
+  <li {{if pagename == 'crimes'}}class="active"{{endif}}><a href="/standings/crimes/">Crimes</a></li>
+{{if user.has_permission('em')}}
+  <li {{if pagename == 'check'}}class="active"{{endif}}><a href="/standings/check/">Check</a></li>
+{{endif}}
+</ul>
+{{enddef}}
+
+{{self.body|html}}

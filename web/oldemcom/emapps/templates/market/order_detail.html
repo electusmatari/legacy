@@ -1,0 +1,39 @@
+{{inherit "base.html"}}
+{{py:pagename = 'order'}}
+
+{{if user.has_permission('producer')}}
+<form method="get" action="edit/">
+<input type="submit" value="Edit this order" />
+</form>
+{{endif}}
+
+<h2>Order #{{order.id}}, {{eve_time(order.created)}}</h2>
+<table>
+<tr><td>Customer:</td><td>{{order.customer}}</td></tr>
+<tr><td>Source:</td><td>{{order.source}}</td></tr>
+<tr><td>Status:</td><td>{{order.state}}</td></tr>
+<tr><td>Producer:</td><td>{{order.producer}}</td></tr>
+<tr><td>Price:</td><td>{{order.price|humane}}</td></tr>
+</table>
+
+<p><b>Order text:</b></p>
+
+{{order.ordertext|addbr}}
+
+<p><b>Comments:</b></p>
+
+{{for c in comments}}
+<p>
+<blockquote><cite><span> ({{c.created|eve_time}})</span>{{c.author}} Wrote:</cite>
+{{c.comment|addbr}}
+</blockquote>
+</p>
+{{endfor}}
+
+<p><b>Add Comment:</b></p>
+
+<form method="post" action="">
+<textarea name="comment" cols="60" rows="10">
+</textarea><br />
+<input type="submit" value="Add Comment" />
+</form>

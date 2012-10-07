@@ -1,0 +1,51 @@
+{{py:pagename = 'check'}}
+{{inherit "base.html"}}
+
+{{if len(bogus) > 0}}
+<h2>Bogus Thread Titles ({{len(bogus)}})</h2>
+<ul>
+{{for subject, tid in bogus}}
+<li><a href="http://www.electusmatari.com/forums/showthread.php?tid={{tid}}">{{subject}}</a></li>
+{{endfor}}
+</ul>
+{{endif}}
+
+{{if len(dups) > 0}}
+<h2>Duplicate Threads ({{len(dups)}})</h2>
+
+<ul>
+{{for entity, threads in dups}}
+<li>{{entity}}:
+<ul>
+{{for subject, tid in threads}}
+<li><a href="http://www.electusmatari.com/forums/showthread.php?tid={{tid}}">{{subject}}</a></li>
+{{endfor}}
+</ul>
+</li>
+{{endfor}}
+</ul>
+{{endif}}
+
+<h2>Standing Requests ({{len(to_set)}})</h2>
+<ul>
+{{for subject, tid, days in to_set}}
+<li><a {{if days > 7}} style="color: #FF0000"{{endif}} href="http://www.electusmatari.com/forums/showthread.php?tid={{tid}}">{{subject}}</a></li>
+{{endfor}}
+</ul>
+
+<h2>Needs Diplomat's Attention ({{len(to_diplo)}})</h2>
+<ul>
+{{for subject, tid, days in to_diplo}}
+<li><a {{if days > 7}} style="color: #FF0000"{{endif}} href="http://www.electusmatari.com/forums/showthread.php?tid={{tid}}">{{subject}}</a></li>
+{{endfor}}
+</ul>
+
+<h2>In Action ({{sum([len(x[1]) for x in to_act])}})</h2>
+{{for diplomat, threads in to_act}}
+<h3>{{diplomat}} ({{len(threads)}})</h3>
+<ul>
+{{for subject, tid, days in threads}}
+<li><a {{if days > 7}} style="color: #FF0000"{{endif}} href="http://www.electusmatari.com/forums/showthread.php?tid={{tid}}">{{subject}}</a></li>
+{{endfor}}
+</ul>
+{{endfor}}

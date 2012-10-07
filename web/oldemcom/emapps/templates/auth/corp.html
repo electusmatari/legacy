@@ -1,0 +1,35 @@
+{{inherit "base.html"}}
+{{py:pagename = 'corp'}}
+
+{{if error}}
+<b>{{error}}</b>
+{{else}}
+<h2>Forum Users of {{corp}} ({{len(users)}})</h2>
+
+<p>Orange means the user hasn't read the forums in over a week, while
+  red means the user hasn't read the forums in over a month. "Tinfoil
+  users" are those that have requested access without API - if one of
+  them is not in your corp anymore, please do notify Arkady.</p>
+
+<ul>
+{{for username, active, is_tinfoil in users}}
+{{py:
+days = (now - active).days
+if days < 1:
+    since = "today at"
+else:
+    since = "%i days ago on" % days
+
+if days > 30:
+    color = "#FF0000"
+elif days > 7:
+    color = "#FF7F00"
+else:
+    color = "#000000"
+}}
+<li style="color: {{color}}">{{username}} ({{since}} {{active|eve_time}}{{if is_tinfoil}} - TINFOIL USER{{endif}})</li>
+{{endfor}}
+</ul>
+
+
+{{endif}}

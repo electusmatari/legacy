@@ -1,0 +1,34 @@
+{{py:pagename = 'index'}}
+{{inherit "base.html"}}
+
+<h2>{{imagename}}</h2>
+
+<p>
+{{if prev}}
+<a href="{{prev}}">&lt;&lt;</a>
+{{else}}
+&lt;&lt;
+{{endif}}
+{{if next}}
+<a href="{{next}}">&gt;&gt;</a>
+{{else}}
+&gt;&gt;
+{{endif}}
+</p>
+
+<a href="{{imagefile}}"><img border="0" src="{{imagepreviewfile}}" /></a>
+
+<h2>Comments</h2>
+
+<dl>
+{{for date, author, comment in comments}}
+<dt>{{author}} ({{date.strftime("%Y-%m-%d %H:%M:%S")}})</dt>
+<dd>{{comment}}</dd>
+{{endfor}}
+</dl>
+
+<form method="post" action="">
+<textarea name="comment" cols="40" rows="5">
+</textarea><br />
+<input type="submit" value="Add Comment" />
+</form>

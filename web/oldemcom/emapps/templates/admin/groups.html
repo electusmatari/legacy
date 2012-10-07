@@ -1,0 +1,55 @@
+{{py:admin_page = 'groups'}}
+{{def scriptheader}}
+<script type="text/javascript" src="/js/jquery.js"></script>
+<script type="text/javascript" src="/js/separators.js"></script>
+<script type="text/javascript">
+$(document).ready(function() {
+  $("#jsexplanation").html("<p>Click on the group names to show members.</p> <p><span id=\"hideall\">Hide all</span> / <span id=\"showall\">Show all</span></p>");
+  $(".shelement").hide();
+  $(".showhide > .shclick").click(function() {
+    $(this).next(".shelement").toggle();
+  });
+  $("#hideall").click(function() {
+    $(".shelement").hide();
+  });
+  $("#showall").click(function() {
+    $(".shelement").show();
+  });
+});
+</script>
+{{enddef}}
+
+{{inherit "base.html"}}
+
+{{if badgroups}}
+<h2>Unauthorized Members in Internal Groups</h2>
+
+<ul>
+{{for group, members in badgroups}}
+{{for member in members}}
+<li>{{group}}: {{member}}</li>
+{{endfor}}
+{{endfor}}
+</ul>
+{{endif}}
+
+<h2>Group Memberships</h2>
+<div id="jsexplanation"></div>
+
+{{for group, users in groups}}
+<div class="showhide">
+<h3 class="shclick">{{group}} ({{len(users)}})</h3>
+<ul class="shelement">
+{{for member in users}}
+{{py:
+days = (now - active[member]).days
+if days < 1:
+    since = "today at"
+else:
+    since = "%i days ago on" % days
+}}
+<li>{{member}} ({{since}} {{active[member]|eve_time}})</li>
+{{endfor}}
+</ul>
+</div>
+{{endfor}}

@@ -1,0 +1,8 @@
+{{inherit "base.html"}}
+{{py:pagename = 'voters'}}
+
+<h2>Gradient Voter List</h2>
+
+<p>All non-prospect members of Gradient.</p>
+
+<textarea cols="80" rows="25">{{"\n".join(voters)}}</textarea>

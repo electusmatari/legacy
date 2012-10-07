@@ -1,0 +1,84 @@
+{{inherit "base.html"}}
+{{py:pagename = 'pricelist'}}
+
+{{def scriptheader}}
+<script type="text/javascript" src="/js/jquery.js"></script>
+<script type="text/javascript" src="/js/calc.js"></script>
+<script type="text/javascript">
+$(function () {
+     calculator($("#result"), $("#search"), $("#data"), {{data|html}});
+});
+</script>
+
+<style type="text/css">
+body {
+    font-family: sans-serif;
+}
+
+#searchdiv span {
+    border: 2px solid black;
+    padding: 0.5em 1em;
+}
+#searchdiv {
+    margin: 1em 0;
+}
+
+.data, .result {
+    border-collapse: collapse;
+    border: 1px solid #AFAFAF;
+}
+
+.data th, .result th {
+    background: #CFCFCF;
+    border: #AFAFAF;
+}
+.totalprice {
+    background: #CFCFCF;
+}
+
+.data td, .result td {
+    padding: 0 0.5em;
+}
+
+.odd {
+    background: #EFEFEF;
+}
+
+.qty, .price, .quantity, .singleprice, .sumprice, .totalprice {
+    text-align: right;
+}
+
+.total th {
+    text-align: left;
+}
+
+.modifier {
+    margin-bottom: 1em;
+}
+</style>
+{{enddef}}
+
+<h2>Gradient Price List</h2>
+
+<p>This price list is for internal use only. The prices are
+  automatically calculated based on the mineral index, and for some
+  items, this can give a skewed result. We also do not really produce
+  everything in this list. Please use common sense when using these
+  prices.</p>
+
+<div id="result"></div>
+
+<div class="modifier">
+  <input type="checkbox" id="calcmod" class="calcmod" name="HQ modifier"
+         value="1.02" />HQ Modifier (2%)<br />
+  <input type="checkbox" class="calcmod" name="Ally price"
+         value="1.05" />Ally price (5%)
+</div>
+
+<div id="searchdiv"><span>Search:
+<input type="text" id="search"></input>
+</span></div>
+
+<div id="data"></div>
+
+</body> </html>
