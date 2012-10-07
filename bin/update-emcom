@@ -1,5 +1,4 @@
 #!/bin/sh
 
-rsync -r --delete /home/forcer/Projects/evecode/web/emcom/ emcom:Projects/emtools/emtools/
-rsync -r --delete /home/forcer/Projects/evecode/web/media emcom:www/electusmatari.com/
+rsync -lr --delete ~/Projects/evecode emcom:Projects/
 ssh emcom sudo /etc/init.d/apache2 restart
