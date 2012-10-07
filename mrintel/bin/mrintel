@@ -2,10 +2,14 @@
 
 # Copyright (C) 2012 Jorgen Schaefer
 
+import sys
+sys.path.append("/home/forcer/Projects/evecode/mrintel/lib/")
+
 import daemon
 import logging
 import ConfigParser
 from mrintel import bot
+
 
 def main():
     ctx = daemon.DaemonContext()
