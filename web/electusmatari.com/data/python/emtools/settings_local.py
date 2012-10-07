@@ -1,1 +1,1 @@
-../private/settings_local.py
+/home/forcer/Projects/private/settings_local.py
