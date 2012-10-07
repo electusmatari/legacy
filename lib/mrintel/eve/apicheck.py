@@ -60,7 +60,11 @@ class APICheck(threading.Thread):
                 charids.add(row.characterID)
             for row in getattr(fwts.corporations, list_):
                 corpids.add(row.corporationID)
+        for charid in charids:
+            self.conn.ensure_character_exists(charid)
         self.conn.mark_chars_for_api(charids)
+        for corpid in corpids:
+            self.conn.ensure_corporation_exists(corpid)
         self.conn.mark_corps_for_api(corpids)
         self.conn.mark_corps_for_cache(corpids)
 
@@ -97,7 +101,11 @@ class APICheck(threading.Thread):
             self.update_alliance(allyid)
 
     def update_character(self, charid):
-        charinfo = self.api.eve.CharacterInfo(characterID=charid)
+        try:
+            charinfo = self.api.eve.CharacterInfo(characterID=charid)
+        except:
+            logging.error("Error updating character {0}".format(charid))
+            raise
         self.conn.update_character(charid,
                                    name=charinfo.characterName,
                                    corporationid=charinfo.corporationID,
@@ -109,7 +117,28 @@ class APICheck(threading.Thread):
                                    lastapi=datetime.datetime.utcnow())
 
     def update_corporation(self, corpid):
-        corpinfo = self.api.corp.CorporationSheet(corporationID=corpid)
+        try:
+            corpinfo = self.api.corp.CorporationSheet(corporationID=corpid)
+        except api.eveapi.Error as e:
+            if e.code == 523:
+                # Failed to get corp info. No idea where those are
+                # coming from.
+                self.conn.update_corporation(
+                    corpid,
+                    name="*Invalid*",
+                    allianceid=None,
+                    ticker="",
+                    members=0,
+                    do_api_check=False,
+                    lastseen=datetime.datetime.utcnow(),
+                    lastapi=datetime.datetime.utcnow())
+                return
+            else:
+                logging.error("Error updating corporation {0}".format(corpid))
+                raise
+        except:
+            logging.error("Error updating corporation {0}".format(corpid))
+            raise
         self.conn.update_corporation(corpid,
                                      name=corpinfo.corporationName,
                                      allianceid=corpinfo.allianceID or None,
@@ -129,3 +158,8 @@ class APICheck(threading.Thread):
                                           do_api_check=False,
                                           lastseen=datetime.datetime.utcnow(),
                                           lastapi=datetime.datetime.utcnow())
+                return
+        self.conn.update_alliance(allyid,
+                                  members=0,
+                                  do_api_check=False,
+                                  lastapi=datetime.datetime.utcnow())

@@ -23,7 +23,7 @@ class DBConnection(object):
     def find_type(self, needle):
         c = self.conn.cursor()
         c.execute("SELECT typename, typeid FROM ccp.invtypes "
-                  "WHERE typename = %s", (needle,))
+                  "WHERE LOWER(typename) = LOWER(%s)", (needle,))
         if c.rowcount == 1:
             return c.fetchone()
         c.execute("SELECT typename, typeid FROM ccp.invtypes "
@@ -49,6 +49,7 @@ class DBConnection(object):
                   "WHERE itemid = %s", (itemid,))
         if c.rowcount > 0:
             return c.fetchone()[0]
+        apiroot = api.root()
         try:
             names = apiroot.eve.CharacterName(ids=itemid)
         except api.eveapi.Error as e:
@@ -57,7 +58,7 @@ class DBConnection(object):
             else:
                 return "<itemID {0}>".format(itemid)
         else:
-            return names[0].name
+            return names.characters[0].name
 
     def sold_by_npccorps(self, typeid):
         c = self.conn.cursor()
@@ -75,7 +76,7 @@ class DBConnection(object):
                   "FROM ccp.invtypes "
                   "WHERE typeid = %s",
                   (typeid,))
-        return c.fetchone()[0]
+        return float(c.fetchone()[0])
 
     def marketgroup(self, typeid):
         c = self.conn.cursor()

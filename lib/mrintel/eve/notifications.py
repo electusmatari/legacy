@@ -5,6 +5,8 @@ import time
 
 from mrintel.eve import dbutils
 
+NOTIFICATION_CACHE_TIME = datetime.timedelta(days=7)
+
 ##################################################################
 # Calendar events
 
@@ -92,17 +94,23 @@ class NotificationWatcher(threading.Thread):
 
     def run2(self):
         while True:
+            if self.known is None:
+                first_run = True
+                self.known = {}
+            else:
+                first_run = False
             nlist = self.api.char.Notifications()
-            new = set()
             for row in nlist.notifications:
-                new.add(row.notificationID)
-                if (self.known is not None and
-                    row.notificationID not in self.known
-                    ):
+                if row.notificationID not in self.known:
                     timestamp = datetime.datetime.utcfromtimestamp(
                         row.sentDate)
-                    self.notify(timestamp, row.typeID, row.notificationID)
-            self.known = new
+                    if not first_run:
+                        self.notify(timestamp, row.typeID, row.notificationID)
+                    self.known[row.notificationID] = timestamp
+            for notificationID, timestamp in self.known.items():
+                delta = timestamp - datetime.datetime.utcnow()
+                if delta > NOTIFICATION_CACHE_TIME:
+                    del self.known[notificationID]
             time.sleep(nlist._meta.cachedUntil - nlist._meta.currentTime)
 
     def notify(self, timestamp, typeid, notificationid):
@@ -154,11 +162,11 @@ class NotificationWatcher(threading.Thread):
         s += " aggressed {type} on {moon}.".format(**fields)
         self.notify_channel("#em-private", s)
 
-    def notify_76(self, fields):
+    def notify_76(self, timestamp, fields):
         # 76: Tower Resource Alert
         pass
 
-    def notify_93(self, fields):
+    def notify_93(self, timestamp, fields):
         # 93: Customs office has been attacked
         # aggressorAllianceID: 491350469
         # aggressorCorpID: 1884902606
@@ -177,7 +185,7 @@ class NotificationWatcher(threading.Thread):
         s += " aggressed {type} on {planet}.".format(**fields)
         self.notify_channel("#em-private", s)
 
-    def notify_94(self, fields):
+    def notify_94(self, timestamp, fields):
         # 94: Customs Office has entered reinforced
         # aggressorAllianceID: 491350469
         # aggressorCorpID: 1323105611
@@ -194,54 +202,64 @@ class NotificationWatcher(threading.Thread):
             ):
             s += ", {aggressorAlliance}".format(**fields)
         s += " reinforced {type} on {planet}.".format(**fields)
-        reinf = wintime_to_datetime(fields['reinforceExitTime'])
+        reinf = wintime_to_datetime(long(fields['reinforceExitTime']))
         s += (" Will come out of reinforce on {0}."
               .format(reinf.strftime("%Y-%m-%d %H:%M:%S")))
         self.notify_channel("#em-private", s)
 
-    def notify_5(self, fields):
+    def notify_5(self, timestamp, fields):
         # 5: notificationTypeAllWarDeclaredMsg
+        # againstID: 1700517403
+        # cost: 100000000
+        # declaredByID: 701459600
+        # delayHours: 24
+        # hostileState: 0
         s = ("[War] {declaredBy} has declared war on {against}."
              .format(**fields))
         self.notify_channel("#em-private", s)
 
-    def notify_27(self, fields):
+    def notify_27(self, timestamp, fields):
         # 27: notificationTypeCorpWarDeclaredMsg
         s = ("[War] {declaredBy} has declared war on {against}."
              .format(**fields))
         self.notify_channel("#em-private", s)
 
-    def notify_28(self, fields):
+    def notify_28(self, timestamp, fields):
         # 28: notificationTypeCorpWarFightingLegalMsg
         s = ("[War] {declaredBy} has declared war on {against}."
              .format(**fields))
         self.notify_channel("#em-private", s)
 
-    def notify_6(self, fields):
+    def notify_6(self, timestamp, fields):
         # 6: notificationTypeAllWarSurrenderMsg
+        # againstID: 98079470
+        # cost: 100000000
+        # declaredByID: 701459600
+        # delayHours: -53
+        # hostileState: 1
         s = ("[War] {against} has surrendered to {declaredBy}."
              .format(**fields))
         self.notify_channel("#em-private", s)
 
-    def notify_29(self, fields):
+    def notify_29(self, timestamp, fields):
         # 29: notificationTypeCorpWarSurrenderMsg
         s = ("[War] {against} has surrendered to {declaredBy}."
              .format(**fields))
         self.notify_channel("#em-private", s)
 
-    def notify_7(self, fields):
+    def notify_7(self, timestamp, fields):
         # 7: notificationTypeAllWarRetractedMsg
         s = ("[War] {declaredBy} has retracted the war against {against}."
              .format(**fields))
         self.notify_channel("#em-private", s)
 
-    def notify_30(self, fields):
+    def notify_30(self, timestamp, fields):
         # 30: notificationTypeCorpWarRetractedMsg
         s = ("[War] {declaredBy} has retracted the war against {against}."
              .format(**fields))
         self.notify_channel("#em-private", s)
 
-    def notify_8(self, fields):
+    def notify_8(self, timestamp, fields):
         # 8: notificationTypeAllWarInvalidatedMsg
         s = ("[War] CONCORD invalidates the war declared by {declaredBy} "
              "against {against} because {declaredBy} forgot to "
@@ -249,13 +267,23 @@ class NotificationWatcher(threading.Thread):
              .format(**fields))
         self.notify_channel("#em-private", s)
 
-    def notify_31(self, fields):
+    def notify_31(self, timestamp, fields):
         # 31: notificationTypeCorpWarInvalidatedMsg
         s = ("[War] CONCORD invalidates the war declared by {declaredBy} "
              "against {againstName} because {declaredBy} forgot to "
              "pay the bribe."
              .format(**fields))
         self.notify_channel("#em-private", s)
+
+    def notify_11(self, timestamp, fields):
+        # 11: Bill not paid because there's not enough ISK available
+        bill_typeid = fields['billTypeID']
+        due_date = wintime_to_datetime(long(fields['dueDate']))
+        s = ("[Bill] Gradient can't pay a bill (typeID {bill_typeid}), "
+             "due at {due}, because the relevant wallet balance is too low."
+             .format(bill_typeid=bill_typeid,
+                     due=due_date.strftime("%Y-%m-%d %H:%M:%S")))
+        self.notify_channel("#grd", s)
 
 
 def wintime_to_datetime(timestamp):

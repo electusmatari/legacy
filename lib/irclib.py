@@ -519,7 +519,7 @@ class IRCClient(threading.Thread):
             if "=" in token:
                 parameter, value = token.split("=", 1)
             else:
-                paramter, value = token, None
+                parameter, value = token, None
             handler = getattr(self,
                               "on_isupport_{0}".format(parameter.upper()),
                               None)
