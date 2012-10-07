@@ -133,9 +133,7 @@ import urllib, urllib2, cookielib, csv
 
 def get_coastandings():
     username = 'COAstandings'
-    # Congratulations, you found a secret password! This doesn't work anymore,
-    # though. Pity.
-    password = '1standingsCOA'
+    password = '...'
 
     cj = cookielib.CookieJar()
     opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(cj))
