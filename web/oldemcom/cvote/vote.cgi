@@ -14,9 +14,7 @@ from lib.schulze import Schulze
 
 # Configuration
 
-db_host = "localhost"
-db_user = "emcom"
-db_pass = "ai5ahNgi"
+execfile("/home/forcer/Projects/private/old_access.py")
 db_name = "emmisc"
 
 urlconf = [
