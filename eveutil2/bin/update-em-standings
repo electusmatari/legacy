@@ -2,5 +2,4 @@
 
 set -e
 
-~/Projects/eveutil/2.0/scripts/em-standings > ~/public_html/standings.html
-scp ~/public_html/standings.html emcom:www/electusmatari.com/download/standings.html
+~/Projects/eveutil/2.0/scripts/em-standings > ~/www/electusmatari.com/download/standings.html
