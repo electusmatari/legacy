@@ -1,0 +1,54 @@
+{% extends "intel/base.html" %}
+{% load eve %}
+
+{% block morescript %}
+$("#trackingsearch").autocomplete({
+    minLength: 3,
+    source: "http://www.electusmatari.com/intel/search/ajax/",
+    focus: function( event, ui) {
+       $("#trackingsearch").val(ui.item.value);
+       return false;
+    },
+    select: function( event, ui) {
+       $("#trackingsearch").closest("form").submit();
+       return false;
+    }
+});
+{% endblock %}
+
+{% block content %}
+<h2>Tracked Entities</h2>
+
+<p>An entity listed here will be regularly updated with data from the
+  API. Additionally, all members of these entities will be regularly
+  checked to see if they have left this entity.</p>
+
+<form method="post" action="">
+<p>Add tracking:
+<input type="hidden" name="action" value="add" />
+<input id="trackingsearch" type="text" name="name" value="" />
+</p>
+</form>
+
+<h3>List</h3>
+
+<ul>
+{% for entity in track_list %}
+<li>
+  {% if entity.corporation %}
+  {{entity.corporation}}
+  ({{entity.corporation.pilot_set.count}} / {{entity.corporation.members}})
+  {% endif %}
+  {% if entity.alliance %}
+  {{entity.alliance}}
+  ({{entity.alliance.pilot_set.count}} / {{entity.alliance.members}})
+  {% endif %}
+  <form method="post" action="">
+    <input type="hidden" name="action" value="remove" />
+    <input type="hidden" name="id" value="{{entity.id}}" />
+    <input type="submit" value="Remove" />
+  </form>
+</li>
+{% endfor %}
+</ul>
+{% endblock %}

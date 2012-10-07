@@ -1,0 +1,12 @@
+{% extends "corpreport/base.html" %}
+
+{% block content %}
+<h2>Report Categories</h2>
+
+<ul>
+  <li><a href="Not Reported">Not Reported</a> ({{not_reported_count}})</li>
+  {% for cat, count in category_list %}
+  <li><a href="{{cat}}/">{{cat}}</a> ({{count}})</li>
+  {% endfor %}
+</ul>
+{% endblock %}

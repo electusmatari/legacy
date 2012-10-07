@@ -1,0 +1,31 @@
+{% extends "uploader/base.html" %}
+
+{% block appcontent %}
+{% include "ooc.html" %}
+
+<h1>Authentication Token</h1>
+
+<p>To minimize abuse, we need to associate every upload with your
+forum account. To allow GDU to identify the uploads as coming from
+you, it needs to know an <em>authentication token.</em> Simply copy it
+into the text field of the uploader.</p>
+
+{% if user.profile.characterid %}
+<p>You current authentication token is:</p>
+
+<pre>{{auth_token}}</pre>
+
+<form method="post" action="">
+<input type="submit" value="Invalidate and Generate New Token" />
+</form>
+{% else %}
+
+<p>You currently are not authenticated on our forums. Please register
+an account and authenticate it using the "Auth" link in the top-right
+corner.</p>
+
+<form method="get" action="http://www.electusmatari.com/forums/">
+<input type="submit" value="Forum Account Registration" />
+</form>
+{% endif %}
+{% endblock %}

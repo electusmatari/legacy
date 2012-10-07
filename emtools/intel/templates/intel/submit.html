@@ -1,0 +1,45 @@
+{% extends "intel/base.html" %}
+{% load eve %}
+
+{% block content %}
+<h2>Submit Locator Trace</h2>
+
+<form action="" method="post">
+<table>
+{{form}}
+</table>
+<input type="submit" value="Submit" />
+</form>
+
+<h3>Recent Traces</h3>
+
+{% include "paginate.html" %}
+<table class="data">
+<thead>
+<tr><th>Timestamp</th><th>Pilot</th><th>Location</th><th>On&nbsp;Comms?</th><th>Submitter</th></tr>
+</thead>
+<tbody>
+{% for trace in trace_list %}
+<tr class="{% cycle even,odd %}">
+  <td class="nobreak">{{trace.timestamp|eve_time}}</td>
+  <td>{{trace.pilot}}<br />
+      {{trace.corporation}} {% if trace.corporation != trace.pilot.corporation %}(left){% endif %}{% if trace.alliance %}<br />
+      {{trace.alliance}} {% if trace.alliance != trace.pilot.alliance %}(left){% endif %}{% endif %}
+  </td>
+  <td>
+    {{trace.get_system_display}}{% if trace.station %}<br />
+    {{trace.get_station_display}}{% endif %}
+  </td>
+  <td>
+    {{trace.get_online_display}}
+  </td>
+  <td>
+    {{trace.submitter.profile.mybb_username}}
+  </td>
+</tr>
+{% endfor %}
+</tbody>
+</table>
+
+{% include "paginate.html" %}
+{% endblock %}

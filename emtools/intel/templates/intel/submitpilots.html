@@ -1,0 +1,13 @@
+{% extends "intel/base.html" %}
+
+{% block content %}
+<h2>Submit Pilot Names</h2>
+
+<p>One pilot name per line. This will add the named pilots to the
+  system, with their current corp and alliance.</p>
+
+<form method="post" action="">
+  <textarea cols="30" rows="5" name="names"></textarea><br />
+  <input type="submit" value="Submit" />
+</form>
+{% endblock %}

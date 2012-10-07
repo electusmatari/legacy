@@ -1,0 +1,101 @@
+{% extends "shop/base.html" %}
+
+{% block appheader %}
+<style type="text/css">
+.error {
+  color: #FF0000;
+  font-weight: bold;
+}
+
+.character {
+  margin: 1em 0;
+}
+
+.character img {
+  margin-right: 0.5em;
+}
+
+.sideimage {
+  clear: right;
+  float: right;
+  margin: 0 0 1em 1em;
+  text-align: center;
+}
+</style>
+{% endblock %}
+
+{% block appcontent %}
+<h1>Authentication</h1>
+
+<div class="sideimage" style="width: 567px">
+<img src="/media/img/shop/api_key_result.png" /><br />
+Finished API key with key ID and Verification Code (abbreviated).
+</div>
+
+<p>To ensure quality prices and uninterrupted service, Gradient
+  requires customers to authenticate themselves via standardized API
+  keys.</p>
+
+<p><a target="_blank"
+      href="https://support.eveonline.com/api/Key/Create">Create API
+      Key</a></p>
+
+<ul>
+  <li>You should create a NEW key for this. No need to change any
+    existing keys.</li>
+  <li>Once authenticated, you can DELETE this key again. It's used
+    exactly once.</li>
+  <li>NO permissions required. We only need the character name.</li>
+  <li>The Verification Code NEEDS to contain the string "grdshop" to
+    ensure that no one can use a different API key to authenticate as
+    you. Delete a few characters from the pre-generated code to be be
+    able to add this.</li>
+</ul>
+
+{% if error %}
+{% if error == 'bad-vcode' %}
+<p class="error">Please ensure that the
+  verification code contains the string "grdshop". This prevents
+  others from using API keys you passed to them to authenticate here
+  as yourself.</p>
+{% endif %}
+{% if error == 'api-error' %}
+<p class="error">An error occured accessing the API server:
+  {{message}}. Please try again later.</p>
+{% endif %}
+{% endif %}
+
+{% if not characters %}
+<form method="post" action="">
+  <input type="hidden" name="next" value="{{next_url}}" />
+<table>
+  <tr>
+    <td><label for="keyid">Key ID:</label></td>
+    <td><input id="keyid" name="keyid" value="{% if keyid %}{{keyid}}{% endif %}" /></td>
+  </tr>
+  <tr>
+    <td><label for="vcode">Verification Code:</label></td>
+    <td><input id="vcode" name="vcode" value="{% if vcode %}{{vcode}}{% endif %}" /></td>
+  </tr>
+  <tr>
+    <td></td>
+    <td>
+      <input type="submit" value="Authenticate" />
+    </td>
+  </tr>
+</table>
+</form>
+
+{% else %}
+
+<p>Your API key lists multiple pilots. Please select the one you wish
+  to authenticate as.</p>
+
+{% for char in characters %}
+{% include "shop/auth_char.html" %}
+{% endfor %}
+
+{% endif %}
+
+<div style="clear: both"></div>
+{% endblock %}

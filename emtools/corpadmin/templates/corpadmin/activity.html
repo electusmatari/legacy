@@ -1,0 +1,79 @@
+{% extends "corpadmin/base.html" %}
+
+{% block scriptheader %}
+<link type="text/css" rel="stylesheet" href="/media/css/jquery-ui.css"></style>
+<script type="text/javascript" src="/media/js/jquery.js"></script>
+<script type="text/javascript" src="/media/js/jquery.flot.js"></script>
+<script type="text/javascript" src="/media/js/jquery.ui.js"></script>
+<script type="text/javascript">
+$(function() {
+    $(".datepicker").datepicker({dateFormat: "yy-mm-dd"});
+    $.plot($("#killboardactivity"), [
+        {
+            data: {{killboarddata}},
+            label: "Killboard"
+        },
+        {
+            data: {{forumdata}},
+            label: "Forum"
+        }
+    ], { series: { bars: { show: true,
+                           barWidth: 0.5
+                         } },
+         legend: { position: "nw" },
+         xaxis: { min: 0, max: 24,
+                  ticks: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12,
+                          13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23]
+                },
+         yaxis: { min: 0,
+                  tickDecimals: 0
+                },
+         grid: { markings: [ { xaxis: { from: 6, to: 6 }, color: "#CFCFCF" },
+                             { xaxis: { from: 14, to: 14 }, color: "#CFCFCF" },
+                             { xaxis: { from: 22, to: 22 }, color: "#CFCFCF" }
+                           ]
+               }
+       });
+    $("#corpname").autocomplete({
+        minLength: 3,
+        source: "http://www.electusmatari.com/corpadmin/ajax/",
+        focus: function( event, ui) {
+            $("#corpname").val(ui.item.value);
+            return false;
+        },
+        select: function( event, ui) {
+            $("#corpname").closest("form").submit();
+            return false;
+        }
+    });
+});
+</script>
+{% endblock %}
+
+{% block content %}
+<h2>Active Pilots Per Hour of {{corpname}}</h2>
+
+<div id="killboardactivity" style="width: 600px; height: 400px; float: left"></div>
+
+<form action="" method="get">
+<table>
+{% if is_staff %}
+  <tr>
+    <th><label for="#corpname">Corp/Alliance:</label></th>
+    <td><input id="corpname" name="corpname" type="text" value="{{corpname}}" /></td>
+  </tr>
+{% endif %}
+  <tr>
+    <th><label for="#fromdate">From&nbsp;(including):</label></th>
+    <td><input id="fromdate" name="fromdate" class="datepicker" type="text" value="{{fromdate}}" /></td>
+  </tr>
+  <tr>
+    <th><label for="#todate">To&nbsp;(excluding):</label></th>
+    <td><input id="todate" name="todate" class="datepicker" type="text" value="{{todate}}" /></td>
+  </tr>
+  <tr><td colspan="2"><input type="submit" value="Update" /></td></tr>
+</table>
+</form>
+
+<div style="clear: both"></div>
+{% endblock %}

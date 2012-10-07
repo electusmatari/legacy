@@ -1,0 +1,51 @@
+{% extends "corpreport/base.html" %}
+
+{% block content %}
+<h2>Corporate Report Configuration for {{corpname}}</h2>
+
+<h3>Last Data Retrieval</h3>
+
+<table class="data">
+  <thead>
+    <tr><th>Method Name</th><th>Last Updated</th></tr>
+  </thead>
+  <tbody>
+{% for row in last_updated %}
+    <tr class="{% cycle 'odd' 'even' %}">
+      <th>{{row.methodname}}</th>
+      <td>{{row.apitimestamp}}</td>
+    </tr>
+{% endfor %}
+  </tbody>
+</table>
+
+<h3>Division Configuration</h3>
+
+<form method="post" action="">
+<table class="data">
+  <thead>
+    <tr>
+      <th>Wallet Division</th>
+      <th>Hangar Division</th>
+    </tr>
+  </thead>
+  <tbody>
+{% for division in division_config %}
+<tr class="{% cycle 'odd' 'even' %}">
+  <td>
+    <input type="checkbox" name="wallet{{division.division.accountKey}}" value="yes"{% if division.usewallet %}checked="checked"{% endif %} />
+    {{division.division.walletname}}</td>
+  </td>
+  <td>
+    <input type="checkbox" name="hangar{{division.division.accountKey}}" value="yes"{% if division.usehangar %}checked="checked"{% endif %} />
+    {{division.division.hangarname}}
+  </td>
+</tr>
+{% endfor %}
+  </tbody>
+</table>
+<input type="submit" value="Save" />
+</form>
+
+
+{% endblock %}

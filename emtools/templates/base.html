@@ -1,0 +1,59 @@
+{% load eve %}
+<?xml version="1.0"e encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+                      "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<link type="text/css" rel="stylesheet" href="http://www.electusmatari.com/forums/cache/themes/theme2/global.css" />
+<link type="text/css" rel="stylesheet" href="/media/css/emtools.css" />
+
+{% if not igb %}
+<style type="text/css">
+.igb {
+    display: none;
+}
+</style>
+{% endif %}
+
+<title>{% block title %}{% endblock %}</title>
+{% block scriptheader %}{% endblock %}
+{% if rss %}
+<link rel="alternate" type="application/rss+xml" title="RSS" href="{{rss}}" />
+{% endif %}
+</head>
+
+<body>
+<div id="container">
+  <a name="top" id="top"></a>
+
+  <div id="header">
+    <div class="logo"><a href="http://www.electusmatari.com/forums/index.php"><img src="http://www.electusmatari.com/forums/images/logo.gif" alt="Electus Matari Forums" title="Electus Matari Forums" /></a></div>
+    <div class="menu">
+      <ul>
+        <li><a href="http://www.electusmatari.com/forums/search.php"><img src="http://www.electusmatari.com/forums/images/toplinks/search.gif" alt="" title="" />Search</a></li>
+        <li><a href="/standings/"><img src="http://www.electusmatari.com/forums/images/toplinks/standings.png" alt="" />Standings</a></li>
+        <li><a href="/killboard/index.php"><img src="http://www.electusmatari.com/forums/images/toplinks/killboard.png" alt="" />Killboard</a></li>
+        <li><a href="/wiki/"><img src="http://www.electusmatari.com//forums/images/toplinks/wiki.png" alt="" />Wiki</a></li>
+        <li><a href="/tools/"><img src="http://www.electusmatari.com/forums/images/toplinks/tools.png" alt="" />Tools</a></li>
+        <li><a href="/auth/"><img src="http://www.electusmatari.com/forums/images/toplinks/auth.png" alt="" />Auth</a></li>
+        <li><a href="http://www.electusmatari.com/forums/misc.php?action=help"><img src="http://www.electusmatari.com/forums/images/toplinks/help.gif" alt="" title="" />Help</a></li>
+      </ul>
+    </div>
+    <div id="panel">
+      <span style="float:right;"><strong>Current time:</strong> {{None|eve_time}}</span>
+      <strong>Welcome, {{user.profile.mybb_username}}</strong>.
+    </div>
+
+{% if messages %}
+<ul class="messages">
+{% for message in messages %}
+<li{% if message.tags %} class="{{message.tags}}"{% endif %}>{{ message }}</li>
+{% endfor %}
+</ul>
+{% endif %}
+
+{% block tabs %}{% endblock %}</div><div id="content">
+{% block body %}{% endblock %}
+</div></div>
+</body> </html>

@@ -1,0 +1,56 @@
+{% extends "index/base.html" %}
+{% load formatting %}
+
+{% block indexcontent %}
+<h1>Gradient Material Index</h1>
+
+<table class="gmi">
+{% for row in index_list %}
+{% ifchanged row.category %}
+<tr class="groupheader">
+  <th colspan="8"><div class="header">{{row.category}}</div></th>
+</tr>
+<tr class="columnheader">
+  <th>Typename</th><th>Index</th><th>Change</th><th>Volume</th>
+  <th>Heimatar</th><th>Metropolis</th><th>Molden Heath</th><th>Jita</th>
+</tr>
+{% endifchanged %}
+<tr class="{% cycle 'odd' 'even' %}">
+  <td>{{row.typename}}</td>
+  <td class="numeric">{{row.republic|floatcomma}}</td>
+  <td class="numeric">{{row.republicchange|format:"%+.2f"}}</td>
+  <td class="numeric">
+    {% if row.republicvolume == 0 %}
+    -
+    {% else %}
+    {{row.republicvolume|intcomma}}
+    {% endif %}
+  </td>
+  <td class="numeric">
+    {% with row.heimatarage as age %}
+    {% include "index/ageinfo.html" %}
+    {% endwith %}
+    {{row.heimatar|floatcomma}}
+  </td>
+  <td class="numeric">
+    {% with row.metropolisage as age %}
+    {% include "index/ageinfo.html" %}
+    {% endwith %}
+    {{row.metropolis|floatcomma}}
+  </td>
+  <td class="numeric">
+    {% with row.moldenheathage as age %}
+    {% include "index/ageinfo.html" %}
+    {% endwith %}
+    {{row.moldenheath|floatcomma}}
+  </td>
+  <td class="numeric">
+    {% with row.jitaage as age %}
+    {% include "index/ageinfo.html" %}
+    {% endwith %}
+    {{row.jita|floatcomma}}
+  </td>
+</tr>
+{% endfor %}
+</table>
+{% endblock %}

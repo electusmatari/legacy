@@ -1,0 +1,15 @@
+{% extends "tools/base.html" %}
+
+{% block content %}
+<h1>Tools</h1>
+{% for header, entries in tools %}
+<h2 style="clear: both; padding: 1em;">{{header}}</h2>
+{% for link, name, img in entries %}
+<div class="toolbutton" onclick="window.location='{{link}}'">
+<a href="{{link}}"><img src="{{img}}" style="border: 0" /><br />
+<span style="font-weight: bold">{{name}}</span></a>
+</div>
+{% endfor %}
+{% endfor %}
+<div style="clear: both"></div>
+{% endblock %}

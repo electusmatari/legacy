@@ -1,0 +1,26 @@
+{% extends "channels/base.html" %}
+{% load eve %}
+
+{% block content %}
+
+{% include "paginate.html" %}
+
+<table class="data">
+<thead>
+<tr><th>Timestamp</th><th>User</th><th>Action</th><th>Channel</th>
+</thead>
+<tbody>
+{% for log in log_list %}
+<tr class="{% cycle odd,even %}">
+<td>{{log.timestamp|eve_time}}</td>
+<td>{{log.user.profile.mybb_username}}</td>
+<td>{{log.action}}</td>
+<td>{{log.channel}}</td>
+</tr>
+{% endfor %}
+</tbody>
+</table>
+
+{% include "paginate.html" %}
+
+{% endblock %}

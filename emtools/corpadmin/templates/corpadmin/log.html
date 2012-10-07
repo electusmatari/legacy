@@ -1,0 +1,24 @@
+{% extends "corpadmin/base.html" %}
+
+{% block content %}
+<h2>Authentication Log</h2>
+
+{% include "paginate.html" %}
+
+<table class="data">
+<thead>
+<tr><th>Timestamp</th><th>Corp</th><th>Message</th></tr>
+</thead>
+<tbody>
+{% for log in log_list %}
+<tr class="{% cycle 'even' 'odd' %}">
+  <td class="nobreak">{{log.timestamp|date:"Y-m-d H:i:s"}}</td>
+  <td>{{log.corp}}</td>
+  <td>{{log.message}}</td>
+</tr>
+{% endfor %}
+</tbody>
+</table>
+
+{% include "paginate.html" %}
+{% endblock %}

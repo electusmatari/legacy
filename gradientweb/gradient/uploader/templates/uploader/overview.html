@@ -1,0 +1,76 @@
+{% extends "uploader/base.html" %}
+
+{% block appcontent %}
+{% include "ooc.html" %}
+
+<h1>Gradient Data Uploader</h1>
+
+<p>The Gradient Data Uploader is a client program that monitors your
+EVE client's cache files for interesting game data, and uploads this
+data to the server. This information includes for example the market
+orders you are currently viewing. The client is fully customizeable so
+you have full control over which information you share and which you
+don't.</p>
+
+<p>And yes&mdash;this is absolutely legal according to CCP.</p>
+
+<h2>Uploading Data in 3 Simple Steps</h2>
+
+<h3>Step 1: Install the Uploader</h3>
+
+<p>Download the installer and execute it. It will automatically
+install itself on your computer.</p>
+
+<form method="get" action="/uploader/files/gdu.exe">
+<input type="submit" value="Download the Installer" />
+</form>
+
+<h3>Step 2: Get Your Authentication Token</h3>
+
+<p>To minimize abuse, we need to associate every upload with your
+forum account. To allow GDU to identify the uploads as coming from
+you, it needs to know an <em>authentication token.</em> Simply copy it
+into the text field of the uploader.</p>
+
+{% if auth_token %}
+<p>Your authentication token is:</p>
+
+<pre>{{auth_token}}</pre>
+
+<p>Should you accidentally share your authentication token with a
+third party, don't worry, you can easily change it.</p>
+
+<form method="get" action="/uploader/token/">
+<input type="submit" value="Change Your Authentication Token" />
+</form>
+{% else %}
+<form method="get" action="/uploader/token/">
+<input type="submit" value="Get Your Authentication Token" />
+</form>
+{% endif %}
+
+<h3>Step 3: Upload Away!</h3>
+
+<p>Once the uploader is configured with your authentication token and
+running, you just play the game - it will do its work in the
+background. You can even configure it to <b>auto-start</b> in the
+configuration panel, so you don't even have to remember to start it
+before you play EVE. It should not interfere with other games or
+programs in any way.</p>
+
+<p>If you would like to spend some dedicated time uploading data, you
+can visit our auto-upload page with the In-Game Browser. The page will
+use the In-Game Browser's JavaScript methods to open market windows
+etc. to check for information. And if you "trust" the auto-uploader
+page with your In-Game Browser, it will be able to dedicatedly figure
+out what it needs to see.</p>
+
+{% if isigb %}
+<form method="get" action="/uploader/auto/">
+<input type="submit" value="Upload Suggestions" />
+</form>
+{% else %}
+<p>Copy and open in your In-Game Browser:<br />
+<a href="http://gradient.electusmatari.com/uploader/auto/">http://gradient.electusmatari.com/uploader/auto/</a></p>
+{% endif %}
+{% endblock %}

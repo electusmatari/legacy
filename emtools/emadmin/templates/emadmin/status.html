@@ -1,0 +1,27 @@
+{% extends "emadmin/base.html" %}
+
+{% block content %}
+<h2>Schedule</h2>
+<table class="data">
+<thead>
+<tr><th>Status</th><th>Name</th><th>Last Run</th><th>Next Run</th></tr>
+</thead>
+<tbody>
+{% for schedule in schedule_list %}
+<tr class="{% cycle odd,even %}">
+  <td style="font-weight: bold">
+    {% if schedule.is_late %}
+    <span style="color: #FF0000">LATE</span>
+    {% else %}
+    <span style="color: #00AF00">OK</span>
+    {% endif %}
+  </td>
+  <td>{{schedule.name}}</td>
+  <td>{{schedule.last_run|date:"Y.m.d H:i"}}</td>
+  <td>{{schedule.next_run|date:"Y.m.d H:i"}}</td>
+</tr>
+{% endfor %}
+</tbody>
+</table>
+
+{% endblock %}

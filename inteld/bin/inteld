@@ -1,0 +1,43 @@
+#!/usr/bin/env python
+
+import daemon
+import logging
+import ConfigParser
+
+import sys
+sys.path.append("/home/forcer/Projects/inteld/lib")
+sys.path.append("/home/forcer/Projects/emtools")
+sys.path.append("/home/forcer/Projects/gradient")
+
+from inteld import djangolight
+djangolight.setup("/home/forcer/.inteld.conf")
+
+from inteld import control
+from inteld import bot
+from inteld import apicheck
+from inteld import killfeed
+from inteld import evewholib
+
+def main():
+    ctx = daemon.DaemonContext()
+    ctx.umask = 0o122
+    conf = ConfigParser.SafeConfigParser()
+    conf.read(["/home/forcer/.inteld.conf"])
+    with ctx:
+        logging.basicConfig(filename=conf.get('log', 'logfile'),
+                            format="%(asctime)s %(message)s",
+                            level=logging.DEBUG)
+        logging.info("inteld starting up")
+        ctrl = control.Control(conf)
+        t1 = apicheck.APICheck(ctrl)
+        t1.start()
+        t2 = evewholib.EVEWho(ctrl)
+        t2.start()
+        # t3 = killfeed.KillFeedFetcher(ctrl)
+        # t3.start() # Terminates immediately
+        t4 = bot.MrIntel(ctrl, t1, t2)
+        t4.start()
+        while t1.is_alive():
+            t1.join(60)
+
+main()

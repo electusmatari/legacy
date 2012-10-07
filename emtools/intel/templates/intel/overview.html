@@ -1,0 +1,24 @@
+{% extends "intel/base.html" %}
+{% load eve %}
+
+{% block content %}
+<h2>Electus Matari Intelligence Department</h2>
+
+{% include "paginate.html" %}
+<table class="data">
+<thead>
+<tr><th>Timestamp</th><th>Pilot</th><th>Old&nbsp;Corp</th><th>New&nbsp;Corp</th></tr>
+</thead>
+<tbody>
+{% for log in changelog_list %}
+<tr class="{% cycle even,odd %}">
+  <td>{{log.timestamp|eve_time}}</td>
+  <td>{{log.pilot}}</td>
+  <td>{{log.oldcorp}}{% if log.oldalliance %}<br />{{log.oldalliance}}{% endif %}</td>
+  <td>{{log.newcorp}}{% if log.newalliance %}<br />{{log.newalliance}}{% endif %}</td>
+</tr>
+{% endfor %}
+</tbody>
+</table>
+{% include "paginate.html" %}
+{% endblock %}

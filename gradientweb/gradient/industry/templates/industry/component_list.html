@@ -1,0 +1,56 @@
+{% extends "industry/base.html" %}
+{% load formatting %}
+
+{% block scriptheader %}
+<style type="text/css">
+table.data {
+  margin: 1em 0;
+}
+</style>
+{% endblock %}
+
+{% block appcontent %}
+<h1>Production Components for {{typename}}</h1>
+
+{% for component in component_list %}
+<table class="data">
+  <thead>
+    <tr>
+      <th>Typename</th>
+      <th>Quantity</th>
+      <th>Price p.u.</th>
+      <th>Price</th>
+    </tr>
+  </thead>
+  <tbody>
+{% for section, entries in component.sections %}
+<tr>
+  <th colspan="4">{{section}}</th>
+</tr>
+{% for typename, qty, price_pu, price_total in entries %}
+<tr class="{% cycle odd,even %}">
+  <td><a href="/industry/build/{{typename}}/">{{typename}}</a></td>
+  <td class="numeric">{{qty|floatcomma}}</td>
+  <td class="numeric">{{price_pu|floatcomma}}</td>
+  <td class="numeric">{{price_total|floatcomma}}</td>
+</tr>
+{% endfor %}
+{% endfor %}
+  </tbody>
+  <tfoot>
+    <tr>
+      <th colspan="3">Safetymargin:</th>
+      <td class="numeric">{{component.safetymargin|floatcomma}}</td>
+    </tr>
+    <tr>
+      <th colspan="3">Portion size:</th>
+      <td class="numeric">{{component.portionsize|intcomma}}</td>
+    </tr>
+    <tr>
+      <th colspan="3">Total:</th>
+      <td class="numeric">{{component.total|floatcomma}}</td>
+    </tr>
+  </tfoot>
+</table>
+{% endfor %}
+{% endblock %}

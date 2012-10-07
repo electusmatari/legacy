@@ -1,0 +1,68 @@
+{% extends "intel/base.html" %}
+{% load eve %}
+
+{% block content %}
+<h2>Alliance {{alliance.name}}</h2>
+
+<table>
+  <tr><th>Alliance:</th><td>{{alliance}}</td></tr>
+  <tr><th>Members:</th><td>{{alliance.members}}</td></tr>
+  <tr><th>Standing:</th><td>{{alliance.standing}}</td></tr>
+  <tr><th>Last&nbsp;check:</th><td>{{alliance.lastseen|eve_time}}</td></tr>
+</table>
+
+<h3>Member Corporations</h3>
+
+<ul>
+{% for corp in alliance.corporation_set.all %}
+  <li>{{corp}} ({{corp.pilot_set.count}}{% if corp.members %} / {{corp.members}}{% endif %} members known)</li>
+{% endfor %}
+</ul>
+
+<h3>Member Pilots ({{alliance.pilot_set.count}}{% if alliance.members %}/{{alliance.members}}{% endif %})</h3>
+
+{% if not tracked %}
+<p>Members of this alliance are not tracked. This means the following
+  list might be outdated.</p>
+{% endif %}
+
+<ul>
+{% for pilot in alliance.pilot_set.all %}
+  <li>{{pilot}}</li>
+{% endfor %}
+</ul>
+
+<h3>Recent Changes</h3>
+
+{% include "paginate.html" %}
+<table class="data">
+<thead>
+<tr><th>Timestamp</th><th colspan="2">Pilot</th><th>Old</th><th>New</th></tr>
+</thead>
+<tbody>
+{% for log in changelog_list %}
+<tr class="{% cycle even,odd %}">
+  <td>{{log.timestamp|eve_time}}</td>
+  <td>{{log.pilot}}</td>
+  <td>
+    {% if log.oldalliance == alliance and log.alliance != alliance %}
+    <span style="color: #FF0000; font-weight: bold">Left</span>
+    {% else %}
+    <span style="color: #00AF00; font-weight: bold">Joined</span>
+    {% endif %}
+  </td>
+  <td>
+    {{log.oldcorp}}{% if log.oldalliance %}<br />
+    {{log.oldalliance}}{% endif %}
+  </td>
+  <td>
+    {{log.newcorp}}{% if log.newalliance %}<br />
+    {{log.newalliance}}{% endif %}
+  </td>
+</tr>
+{% endfor %}
+</tbody>
+</table>
+{% include "paginate.html" %}
+
+{% endblock %}

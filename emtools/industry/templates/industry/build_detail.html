@@ -1,0 +1,42 @@
+{% extends "industry/base.html" %}
+{% load em %}
+
+{% block content %}
+<h2>Build Requirements for {{typename}} via {{source}}</h2>
+
+<table class="data">
+  <thead>
+    <tr>
+      <th>Component</th>
+      <th>Quantity</th>
+      <th>Cost p.u. (ISK)</th>
+      <th>Cost (ISK)</th>
+      <th>Source</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for component, quantity, pucost, cost in component_list %}
+    <tr class="{% cycle 'odd' 'even' %}">
+      <td>
+        {% if component.typeName == 'ISK' %}
+        ISK
+        {% else %}
+        <a href="{% url industry-build component.typeName %}">{{component.typeName}}</a>
+        {% endif %}
+      </td>
+      <td class="numeric">{{quantity|floatcomma}}</td>
+      <td class="numeric">{{pucost|floatcomma}}</td>
+      <td class="numeric">{{cost|floatcomma}}</td>
+      <td>{{pucost.note}}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+  <tfoot>
+    <tr>
+      <th colspan="3">Total</th>
+      <td class="numeric">{{totalcost|floatcomma}}</td>
+      <td></td>
+    </tr>
+  </tfoot>
+</table>
+{% endblock %}

@@ -1,0 +1,59 @@
+{% extends "emadmin/base.html" %}
+{% load humanize %}
+
+{% block content %}
+<h2>Statistics</h2>
+
+<h3>PostgreSQL Database</h3>
+
+<table class="data">
+<thead>
+<tr><th>Database</th><th>Rows</th><th>Size</th></tr>
+</thead>
+<tbody>
+{% for name, rows, size in postgresql_databases %}
+<tr class="{% cycle 'odd' 'even' %}"><td>{{name}}</td><td class="numeric">{{rows|intcomma}}</td><td class="numeric">{{size|filesizeformat}}</td></tr>
+{% endfor %}
+</tbody>
+</table>
+
+<h3>MySQL Databases</h3>
+
+<table class="data">
+<thead>
+<tr><th>Database</th><th>Rows</th><th>Size</th></tr>
+</thead>
+<tbody>
+{% for name, rows, size in mysql_databases %}
+<tr class="{% cycle 'odd' 'even' %}"><td>{{name}}</td><td class="numeric">{{rows|intcomma}}</td><td class="numeric">{{size|filesizeformat}}</td></tr>
+{% endfor %}
+</tbody>
+</table>
+
+<h3>PostgreSQL Tables</h3>
+
+<table class="data">
+<thead>
+<tr><th>Table</th><th>Rows</th><th>Size</th></tr>
+</thead>
+<tbody>
+{% for name, rows, size in postgresql_tables %}
+<tr class="{% cycle 'odd' 'even' %}"><td>{{name}}</td><td class="numeric">{{rows|intcomma}}</td><td class="numeric">{{size|filesizeformat}}</td></tr>
+{% endfor %}
+</tbody>
+</table>
+
+<h3>MySQL Tables</h3>
+
+<table class="data">
+<thead>
+<tr><th>Table</th><th>Rows</th><th>Size</th></tr>
+</thead>
+<tbody>
+{% for name, rows, size in mysql_tables %}
+<tr class="{% cycle 'odd' 'even' %}"><td>{{name}}</td><td class="numeric">{{rows|intcomma}}</td><td class="numeric">{{size|filesizeformat}}</td></tr>
+{% endfor %}
+</tbody>
+</table>
+
+{% endblock %}

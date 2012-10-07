@@ -1,0 +1,117 @@
+{% extends "emauth/base.html" %}
+
+{% block content %}
+<h1>Authentication</h1>
+
+{% if state == 'api_key_form' %}
+<p>You are not authenticated. To gain access to internal areas of the
+  forums, you need to authenticate yourself as a capsuleer pilot. To
+  do so, you need to supply a minimum-access <i>API key.</i></p>
+
+<p><strong><a href="https://support.eveonline.com/api/Key/Create"
+    target="_blank">Create an API key</a></strong> (new window)</p>
+
+<ul style="width: 66ex">
+  <li>Pick a <b>Name</b> of your own choosing. It's only for
+    yourself.</li>
+  <li>Change the <b>Verification Code</b> to start with the string
+    "emforum". This ensures that no other key of yours can be used to
+    authenticate here. <b>THIS IS IMPORTANT.</b> You have to <b>edit
+    the verification code on the CCP site</b> to include that string.
+    To do so, you have to <b>remove some characters</b> from the
+    pre-filled string to make room for the "emforum".</li>
+  <li>Select your name as the <b>Character</b>.</li>
+  <li>The <b>Type</b> should be "Character".</li>
+  <li>Leave the <b>Access Mask</b> at 0 (no accesses).</li>
+  <li>Set <b>Expires</b> to tomorrow if you like, or delete the key
+    once your are authenticated. We will not store the key and will
+    not use it anymore after you have authenticated.</li>
+</ul>
+
+<form method="post" action="">
+  <fieldset style="width: 66ex">
+    <legend>API key</legend>
+    <table>
+      <tr>
+        <td><label for="keyID">ID:</label></td>
+        <td><input id="keyID" name="keyID" type="text" size="5" /></td>
+      </tr>
+      <tr>
+        <td><label for="vCode" style="width: 5em; white-space: nowrap">Verification Code:</label></td>
+        <td><input id="vCode" name="vCode" type="text" size="83" autocomplete="off" /></td>
+      </tr>
+    </table>
+  </fieldset>
+  <input type="submit" value="Authenticate" />
+</form>
+{% endif %}
+
+{% if state == 'select_character' %}
+<p>This API key is associated with multiple pilots. Please select the
+  pilot you would like to authenticate as.</p>
+<form method="post" action="">
+  <input type="hidden" name="keyID" value="{{keyID}}" />
+  <input type="hidden" name="vCode" value="{{vCode}}" />
+  <fieldset style="width: 66ex">
+    <legend>Select pilot</legend>
+    <select name="characterID">
+{% for charname, charid in character_list %}
+      <option value="{{charid}}">{{charname}}</option>
+{% endfor %}
+    </select>
+  </fieldset>
+  <input type="submit" value="Select pilot" />
+</form>
+{% endif %}
+
+{% if state == 'ask_rename' %}
+<p>Your forum account name <em>{{forum_name}}</em> differs from your
+  pilot name <em>{{char_name}},</em> but we require them to be the
+  same. If you proceed, your forum account name will be changed to
+  your pilot name.</p>
+
+<form method="post" action="">
+  <input type="hidden" name="keyID" value="{{keyID}}" />
+  <input type="hidden" name="vCode" value="{{vCode}}" />
+  <input type="hidden" name="characterID" value="{{characterID}}" />
+  <input type="hidden" name="dorename" value="yes" />
+  <input type="submit" value="Rename forum account" />
+</form>
+{% endif %}
+
+{% if state == 'reactivate_form' %}
+<table>
+<tr><th>Name:</th><td>{{user.profile.name}}</td></tr>
+<tr><th>Corp:</th><td>{{user.profile.corp}}</td></tr>
+<tr><th>Alliance:</th><td>{{user.profile.alliance}}</td></tr>
+<tr><th>Last&nbsp;check:</th><td>{{user.profile.last_check|date:"Y-m-d H:i:s"}}</td></tr>
+</table>
+
+<p>Your forum account is correctly authenticated, but the
+  authentication is inactive. <strong>This usually means that you do
+  not have any special accesses.</strong> If you believe that you
+  should have accesses, you can re-authenticate below.</p>
+
+<form method="post" action="">
+  <input type="submit" value="Re-authenticate this account" />
+</form>
+{% endif %}
+
+{% if state == 'reauth_form' %}
+<table>
+<tr><th>Name:</th><td>{{user.profile.name}}</td></tr>
+<tr><th>Corp:</th><td>{{user.profile.corp}}</td></tr>
+<tr><th>Alliance:</th><td>{{user.profile.alliance}}</td></tr>
+<tr><th>Last&nbsp;check:</th><td>{{user.profile.last_check|date:"Y-m-d H:i:s"}}</td></tr>
+</table>
+
+<p>You are correctly authenticated. If your accesses changed and you
+  would like to get them re-checked before the next schedule
+  authentication run, you can use the button below to force an
+  immediate check.</p>
+
+<form method="post" action="">
+  <input type="submit" value="Re-authenticate this account" />
+</form>
+{% endif %}
+{% endblock %}

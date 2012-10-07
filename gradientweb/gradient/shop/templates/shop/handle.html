@@ -1,0 +1,83 @@
+{% extends "shop/base-handle.html" %}
+
+{% block appheader %}
+<script type="text/javascript" src="/media/js/jquery.js"></script>
+<script type="text/javascript">
+$(function () {
+  $(".ordersplit").each(function () {
+    var orderid = $(this).attr('id').substring(6);
+    $(this).click(function () {
+      var quantity = $("#orderqty" + orderid).val();
+      if (quantity == "") {
+          alert("Please enter a number.");
+          return false;
+      }
+      $.post("/shop/json/split/",
+             {orderid: orderid,
+              quantity: quantity},
+             function (data) {
+               if (data.success) {
+                 window.location.reload();
+               } else {
+                 alert("Error during split: " + data.error);
+               }
+             });
+      return false;
+    });
+  });
+});
+</script>
+{% endblock %}
+
+{% block appcontent %}
+<h1>Handle Shop Orders</h1>
+
+{% for customer, characterid, standing, message, order_list in customer_list %}
+<h2>Customer: {{customer}} ({{standing}})</h2>
+
+{% if message %}
+<p>Last message on {{message.created|date:"Y-m-d H:i"}} by {{message.authorname}}: <em>{{message.text}}.</em></p>
+
+<p><a href="/shop/handle/messages/{{characterid}}/">All
+    messages</a></p>
+{% else %}
+<p>No messages from this user.</p>
+<p><a href="/shop/handle/messages/{{characterid}}/">Write a message</a>.</p>
+{% endif %}
+
+<form method="get" action="">
+<table class="data">
+  <thead>
+    <tr>
+      <th></th>
+      <th>Date</th>
+      <th>Quantity</th>
+      <th>Product</th>
+      <th>Office</th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+{% for order in order_list %}
+    <tr class="{% cycle odd,even %}">
+      <td>
+        <input type="checkbox" name="orderid" value="{{order.id}}" />
+      </td>
+      <td>{{order.created|date:"Y-m-d H:i"}}</td>
+      <td class="numeric">{{order.quantity}}</td>
+      <td>{{order.typename}}</td>
+      <td>{{order.office.name}}</td>
+      <td>
+        <input type="text" id="orderqty{{order.id}}" size="2" />
+        <button class="ordersplit" id="button{{order.id}}">Split</button>
+      </td>
+    </tr>
+{% endfor %}
+  </tbody>
+</table>
+<input type="submit" value="Handle marked orders" />
+</form>
+{% endfor %}
+
+
+{% endblock %}

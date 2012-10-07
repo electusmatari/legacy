@@ -1,0 +1,70 @@
+{% extends "corpreport/base.html" %}
+
+{% block scriptheader %}
+<link type="text/css" rel="stylesheet" href="/media/css/jquery-ui.css"></style>
+<script type="text/javascript" src="/media/js/jquery.js"></script>
+<script type="text/javascript" src="/media/js/jquery.flot.js"></script>
+<script type="text/javascript" src="/media/js/jquery.ui.js"></script>
+<script type="text/javascript">
+function iskFormatter (v, axis) {
+  var isk = v.toFixed(2);
+  if (isk >= 1000000000) {
+    return (isk / 1000000000).toFixed(2) + " B";
+  } else if (isk >= 1000000) {
+    return (isk / 1000000).toFixed(2) + " M";
+  } else {
+    return isk;
+  }
+}
+
+function showTooltip(x, y, contents) {
+  $('<div id="tooltip">' + contents + '</div>').css ( {
+    position: 'absolute', display: 'none', top: y + 5, left: x + 5,
+    border: '1px solid #dfd', padding: '2px',
+    'background-color': '#efe', opacity: 0.80,
+  }).appendTo("body").fadeIn(200);
+}
+
+$(function () {
+  $.plot($("#balances"), {{plotdata|safe}},
+         { xaxes: [ { mode: "time" } ],
+           yaxes: [ { tickFormatter: iskFormatter },
+                    { tickFormatter: iskFormatter,
+                      alignTicksWithAxis: 'right',
+                      position: 'right',
+                    } ],
+           legend: { position: "nw" },
+           grid: { hoverable: true },
+           series: {
+             lines: { show: true },
+             points: { show: true },
+           }
+          });
+  var previousPoint = null;
+  $("#balances").bind("plothover", function (event, pos, item) {
+    if (item) {
+      if (previousPoint != item.dataIndex) {
+        previousPoint = item.dataIndex;
+        $("#tooltip").remove()
+        var ts = item.datapoint[0],
+            balance = item.datapoint[1];
+        showTooltip(item.pageX, item.pageY,
+                    item.series.label + " balance on "
+                    + (new Date(ts).toUTCString()) + " was "
+                    + iskFormatter(balance));
+      }
+    } else {
+      $("#tooltip").remove();
+      previousPoint = null;
+    }
+  });
+});
+</script>
+{% endblock %}
+
+{% block content %}
+<h2>Wallet Balances for {{corpname}}</h2>
+
+<div id="balances" style="width: 600px; height: 400px"></div>
+
+{% endblock %}

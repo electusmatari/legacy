@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+{% block pagetitle %}Gradient{% endblock %}
+{% block title %}Gradient{% endblock %}
+{% block subtitle %}<h2>Freedom Through Strength. Strength Through Industry.</h2>{% endblock %}
+{% block employeesclass %} class="selected"{% endblock %}
+
+{% block header %}
+<style type="text/css">
+div.tool {
+  float: left;
+  text-align: center;
+  padding: 0.5em 1em;
+}
+
+div.tool img {
+  border: 0;
+}
+
+div.tool a, div.tool a:visited {
+  text-decoration: none;
+  color: black;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<h1>Gradient Intranet</h1>
+
+<p>This is the internal area of the Gradient website. Only corp
+  members (both prospects and employees) have access here. This page
+  serves as a central bookmark for Gradient-specific tools and
+  sites.</p>
+
+<div class="tool">
+  <a href="http://www.electusmatari.com/forums/forumdisplay.php?fid=119">
+    <img src="/media/img/tools/forums.png" /><br />
+    Forums
+  </a>
+</div>
+
+<div class="tool">
+  <a href="http://gradient.orava.org/wiki/">
+    <img src="/media/img/tools/wiki.jpg" /><br />
+    Wiki
+  </a>
+</div>
+
+<div class="tool">
+  <a href="http://gradient.electusmatari.com/shop/handle/">
+    <img src="/media/img/tools/orders.png" /><br />
+    Handle Shop Orders
+  </a>
+</div>
+
+<div class="tool">
+  <a href="/industry/">
+    <img src="/media/img/tools/industry.png" /><br />
+    Industry
+  </a>
+</div>
+
+<div class="tool">
+  <a href="/gts/">
+    <img src="/media/img/tools/tickets.png" /><br />
+    Ticket System
+  </a>
+</div>
+{% endblock %}

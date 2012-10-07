@@ -1,0 +1,47 @@
+{% extends "recruitment/base.html" %}
+
+{% block content %}
+<h2>Submit Audit Information</h2>
+
+<p>If you were sent here, your corporation requires you to submit
+  your <i>limited</i> API key for audit information. Please ask them
+  for details. In the form below, you will need to select the correct
+  corporation to make your audit information visible to them.</p>
+
+<p>You can get your limited API key on
+  the <a href="https://www.eveonline.com/api/">official EVE site</a>.
+  Please make sure that you use the <em>limited</em> API key only.
+  This audit application will <em>not</em> store your API key. You can
+  invalidate it after the audit has completed successfully.</p>
+
+<ul>
+<li><a href="https://www.eveonline.com/api/">Get your API key</a></li>
+<li><a href="https://www.eveonline.com/api/log.asp">API log</a></li>
+</ul>
+
+<p>Please note that this is fully independent of
+  the <a href="/auth/">authentication process</a> for the forums. You
+  will need to submit your API key there as well.</p>
+
+<form method="post" action="">
+<table>
+<tbody>
+<tr><th><label for="id_userid">User ID:</label></th>
+<td>{{form.userid.errors}}
+{{form.userid}}
+<em>Looks like this: 2372646 (NOT your account name!)</em>
+</td></tr>
+<tr><th><label for="id_apikey">API Key:</label></th>
+<td>{{form.apikey.errors}}
+{{form.apikey}}
+<em>Looks like this: qSSRCN6te6VljblrHW3Shqj2VqmJXajuySJHVTk1j4rCspqJodncgI4EBr6To21H</em>
+</td></tr>
+<tr><th><label for="id_visibility">Visible to:</label></th>
+<td>{{form.visibility.errors}}
+{{form.visibility}}
+</td></tr>
+<tr><td colspan="2"><input type="submit" value="Submit my API details" /></td></tr>
+</tbody>
+</table>
+</form>
+{% endblock %}

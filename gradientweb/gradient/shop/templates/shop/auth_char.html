@@ -1,0 +1,15 @@
+<div class="character">
+  <form method="post" action="">
+    <input type="hidden" name="next" value="{{next}}" />
+    <input type="hidden" name="keyid" value="{{keyid}}" />
+    <input type="hidden" name="vcode" value="{{vcode}}" />
+    <input type="hidden" name="characterid" value="{{char.characterID}}" />
+
+  <img src="http://image.eveonline.com/Character/{{char.characterID}}_64.jpg"
+       style="float: left" />
+  {{char.characterName}}<br />
+  {{char.corporationName}}<br />
+  <input type="submit" value="Select" />
+  </form>
+  <div style="clear: left"></div>
+</div>

@@ -1,0 +1,52 @@
+{% extends "industry/base.html" %}
+
+{% block scriptheader %}
+<style type="text/css">
+#content table.data {
+  margin: 1em 0;
+}
+</style>
+{% endblock %}
+
+{% block appcontent %}
+<h2>Market Order Configuration</h2>
+
+<p>Here you can configure orders you would like to have in your Market
+  Orders table even if you have none of them active at the moment.
+  This is useful to be reminded about orders that ran out but you
+  would like to keep active.</p>
+
+<table class="data">
+  <thead>
+    <tr>
+      <th>Stationname</th>
+      <th>Typename</th>
+      <th>Order Type</th>
+      <th>Quantity</th>
+      <th>Comment</th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for order in wanted_list %}
+    <tr class="{% cycle odd,even %}">
+      <td>{{order.stationname}}</td>
+      <td>{{order.typename}}</td>
+      <td>{{order.ordertype}}</td>
+      <td>{{order.quantity}}</td>
+      <td>{{order.comment}}</td>
+      <td>
+        <form method="get" action="/industry/marketorders/{{order.id}}/edit/">
+          <input type="submit" value="Edit" />
+        </form>
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+<form method="get" action="/industry/marketorders/create/">
+  <input type="submit" value="Add" />
+</form>
+
+{% endblock %}

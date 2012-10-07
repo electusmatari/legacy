@@ -1,0 +1,59 @@
+﻿<?xml version="1.0"?>
+<doc>
+<assembly>
+<name>
+CacheUploaderCore
+</name>
+</assembly>
+<members>
+<member name="P:CacheUploaderCore.My.Resources.Resources.ResourceManager">
+	<summary>
+  Returns the cached ResourceManager instance used by this class.
+</summary>
+</member><member name="P:CacheUploaderCore.My.Resources.Resources.Culture">
+	<summary>
+  Overrides the current thread's CurrentUICulture property for all
+  resource lookups using this strongly typed resource class.
+</summary>
+</member><member name="T:CacheUploaderCore.My.Resources.Resources">
+	<summary>
+  A strongly-typed resource class, for looking up localized strings, etc.
+</summary>
+</member><member name="M:CacheUploaderCore.FileHasher.SHA1StringHash(System.String)">
+	<summary>
+ Calculate Hash for a file
+ </summary>
+	<param name="filePath"></param>
+	<returns></returns>
+	<remarks></remarks>
+</member><member name="M:CacheUploaderCore.FileHasher.VerifySignature">
+	<summary>
+ Checks the signature of the hashes
+ </summary>
+	<returns></returns>
+	<remarks></remarks>
+</member><member name="M:CacheUploaderCore.FileHasher.Sign(System.String,System.String)">
+	<summary>
+ Calculates the signature of a text
+ </summary>
+	<param name="textToSign"></param>
+	<param name="privateKey"></param>
+	<returns></returns>
+	<remarks></remarks>
+</member><member name="M:CacheUploaderCore.FileHasher.createHashFile(System.String,System.String)">
+	<summary>
+ Calculates the hashes for all monitored Files (m_file =&gt; Constructor) and writes them into a file
+ </summary>
+	<param name="filesPath"></param>
+	<param name="privateKey"></param>
+	<remarks></remarks>
+</member><member name="M:CacheUploaderCore.FileHasher.getFilesToUpdate(System.String)">
+	<summary>
+ Checks for all monitored files if the hashes changed and collects those with new hashes
+ </summary>
+	<param name="hashFilePath"></param>
+	<returns></returns>
+	<remarks></remarks>
+</member>
+</members>
+</doc>

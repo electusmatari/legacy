@@ -1,0 +1,107 @@
+{% extends "corpadmin/base.html" %}
+
+{% block scriptheader %}
+<script type="text/javascript" src="/media/js/jquery.js"></script>
+<script type="text/javascript" src="/media/js/jquery.tablesorter.js"></script>
+<script type="text/javascript">
+$(function() {
+    $('.memberlist').tablesorter({
+        widgets: ['zebra'],
+        headers: {2: { sorter: 'digit', },
+                  4: { sorter: 'digit', },
+                  6: { sorter: 'digit', },
+                  }
+    });
+    $('.corplist').tablesorter({
+        widgets: ['zebra'],
+    });
+});
+</script>
+{% endblock %}
+
+{% block content %}
+<table class="data corplist">
+<thead>
+<tr>
+  <th>Name</th>
+  <th>Size</th>
+  <th>Forum</th>
+  <th></th>
+  <th>Active</th>
+  <th></th>
+  <th>Killboard</th>
+  <th></th>
+  <th>Active</th>
+  <th></th>
+  <th>Login</th>
+  <th></th>
+</tr>
+</thead>
+<tbody>
+{% for corp in corp_list %}
+<tr>
+  <td class="nobreak">{{corp.name}}</td>
+  <td class="numeric">{{corp.size}}</td>
+  <td class="numeric">{{corp.forum}}</td>
+  <td class="numeric">{{corp.forum_p}}%</td>
+  <td class="numeric">{{corp.forum_active}}</td>
+  <td class="numeric">{{corp.forum_active_p}}%</td>
+  <td class="numeric">{{corp.killboard}}</td>
+  <td class="numeric">{{corp.killboard_p}}%</td>
+  <td class="numeric">{{corp.killboard_active}}</td>
+  <td class="numeric">{{corp.killboard_active_p}}%</td>
+  <td class="numeric">{{corp.api_active}}</td>
+  <td class="numeric">{{corp.api_active_p}}%</td>
+</tr>
+{% endfor %}
+</tbody>
+<tfoot>
+<tr>
+  <th>Total</th>
+  <td class="numeric">{{corp_list.size}}</td>
+  <td class="numeric">{{corp_list.forum}}</td>
+  <td class="numeric">{{corp_list.forum_p}}%</td>
+  <td class="numeric">{{corp_list.forum_active}}</td>
+  <td class="numeric">{{corp_list.forum_active_p}}%</td>
+  <td class="numeric">{{corp_list.killboard}}</td>
+  <td class="numeric">{{corp_list.killboard_p}}%</td>
+  <td class="numeric">{{corp_list.killboard_active}}</td>
+  <td class="numeric">{{corp_list.killboard_active_p}}%</td>
+  <td class="numeric">{{corp_list.api_active}}</td>
+  <td class="numeric">{{corp_list.api_active_p}}%</td>
+</tr>
+</tfoot>
+</table>
+
+
+{% for corp in corp_list %}
+<h2>Members of {{corp.name}}{% if corp.alliance %}, {{corp.alliance}}{% endif %}</h2>
+
+<table class="data memberlist">
+<thead>
+<tr>
+  <th>Username</th>
+  <th>Forum</th>
+  <th>In&nbsp;Days</th>
+  <th>Killboard</th>
+  <th>In&nbsp;Days</th>
+  <th>Login</th>
+  <th>In&nbsp;Days</th>
+</tr>
+</thead>
+<tbody>
+{% for member in corp.members %}
+<tr>
+  <td>{{member.name}}</td>
+  <td class="{{member.forumcssclass}}">{% if member.forum_lastseen %}{{member.forum_lastseen}}{% endif %}</td>
+  <td class="{{member.forumcssclass}} numeric">{{member.forum_delta.days}}</td>
+  <td class="{{member.kbcssclass}}">{% if member.kb_lastseen %}{{member.kb_lastseen}}{% endif %}</td>
+  <td class="{{member.kbcssclass}} numeric">{{member.kb_delta.days}}</td>
+  <td class="{{member.apicssclass}}">{% if member.api_lastseen %}{{member.api_lastseen}}{% endif %}</td>
+  <td class="{{member.apicssclass}} numeric">{{member.api_delta.days}}</td>
+</tr>
+{% endfor %}
+</tbody>
+</table>
+{% endfor %}
+{% endblock %}

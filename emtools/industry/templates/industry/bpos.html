@@ -1,0 +1,19 @@
+{% extends "industry/base.html" %}
+
+{% block content %}
+<h2>Blueprint Originals for {{corpname}}</h2>
+
+<table class="data">
+  <thead>
+    <tr><th>Blueprint</th><th>Material Level</th></tr>
+  </thead>
+  <tbody>
+    {% for bp in blueprint_list %}
+    <tr class="{% cycle 'odd' 'even' %}">
+      <td><a href="{% url industry-build bp.blueprint.blueprintType.productType.typeName %}">{{bp.blueprint.typeName}}</a></td>
+      <td class="numeric">{{bp.me}}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

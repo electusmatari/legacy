@@ -1,0 +1,12 @@
+{% extends "industry/base.html" %}
+
+{% block appcontent %}
+<h2>Really delete?</h2>
+
+<p>Really delete the stock level request for {{instance.typename}} at
+{{instance.stationname}}?</p>
+
+<form method="post" action="">
+  <input type="submit" value="Really delete" />
+</form>
+{% endblock %}

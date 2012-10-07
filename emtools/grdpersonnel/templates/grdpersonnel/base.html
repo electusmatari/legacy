@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+
+{% block title %}Gradient Member List{% endblock %}
+
+{% block tabs %}
+<ul class="tabs">
+<li {% ifequal tab 'members' %}class="active"{% endifequal %}><a href="{% url emtools.grdpersonnel.views.view_members %}">Members</a></li>
+</ul>
+{% endblock %}
+
+{% block body %}
+{% block content %}
+{% endblock %}
+{% endblock %}

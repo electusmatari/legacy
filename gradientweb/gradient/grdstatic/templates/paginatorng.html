@@ -1,0 +1,16 @@
+{% load formatting %}
+{% if is_paginated %}
+<div class="pagination" style="margin: 0.5em 0">
+  <span class="step-links">
+    {% if page_obj.has_previous %}
+    <a href="?{{page_obj.previous_page_number|setpage:request}}">previous</a>
+    {% endif %}
+    <span class="current">
+      Page {{page_obj.number}} of {{page_obj.paginator.num_pages}}
+    </span>
+    {% if page_obj.has_next %}
+    <a href="?{{page_obj.next_page_number|setpage:request}}">next</a>
+    {% endif %}
+  </span>
+</div>
+{% endif %}

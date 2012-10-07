@@ -1,0 +1,65 @@
+{% extends "fw/base.html" %}
+{% load eve %}
+{% load em %}
+
+{% block content %}
+<h2>Top Victory Points Last Week</h2>
+
+<p>Data cached until {{cacheduntil|eve_time}}</p>
+
+<h3>Factions</h3>
+
+<table class="data">
+<thead>
+<tr><th>Rank</th><th>VP</th><th></th><th>Name</th></tr>
+</thead>
+<tbody>
+{% for entry in vplastweek.factions %}
+<tr class="{% cycle odd,even %}">
+  <td class="numeric">{{entry.rank}}</td>
+  <td class="numeric">{{entry.points|intcomma}}</td>
+  <td>{% if entry.faction %}<img src="{{entry.faction}}" />{% endif %}</td>
+  <td>{{entry.name}} {{entry.igb}}</td>
+</tr>
+{% endfor %}
+</tbody>
+</table>
+
+<h3>Corporations</h3>
+
+<table class="data">
+<thead>
+<tr><th>Rank</th><th>VP</th><th></th><th>Name</th></tr>
+</thead>
+<tbody>
+{% for entry in vplastweek.corporations %}
+<tr class="{% cycle odd,even %}">
+  <td class="numeric">{{entry.rank}}</td>
+  <td class="numeric">{{entry.points|intcomma}}</td>
+  <td>{% if entry.faction %}<img src="{{entry.faction}}" />{% endif %}</td>
+  <td>{{entry.name}} {{entry.igb}}</td>
+</tr>
+{% endfor %}
+</tbody>
+</table>
+
+<h3>Pilots</h3>
+
+<table class="data">
+<thead>
+<tr><th>Rank</th><th>VP</th><th></th><th>Name</th><th>Corporation</th></tr>
+</thead>
+<tbody>
+{% for char in vplastweek.characters %}
+<tr class="{% cycle odd,even %}">
+  <td class="numeric">{{char.rank}}</td>
+  <td class="numeric">{{char.points|intcomma}}</td>
+  <td>{% if char.faction %}<img src="{{char.faction}}" />{% endif %}</td>
+  <td>{{char.name}} {{char.igb}}</td>
+  <td>{{char.corp}} {{char.corpigb}}</td>
+</tr>
+{% endfor %}
+</tbody>
+</table>
+
+{% endblock %}

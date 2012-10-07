@@ -1,0 +1,34 @@
+{% extends "industry/base.html" %}
+
+{% block appcontent %}
+<h2>Gradient Blueprint Originals</h2>
+
+<p>The list of BPOs Gradient owns, used to calculate production cost
+  and the list of items we can produce. Please don't edit this unless
+  you know what you're doing.</p>
+
+<table class="data">
+  <thead>
+    <tr><th>Name</th><th>ME</th><th>PE</th><th></th></tr>
+  </thead>
+  <tbody>
+    {% for bpo in bpo_list %}
+    <tr class="{% cycle odd,even %}">
+      <td>{{bpo.typename}}</td>
+      <td class="numeric">{{bpo.me}}</td>
+      <td class="numeric">{{bpo.pe}}</td>
+      <td>
+        <form method="get" action="/industry/bpos/{{bpo.id}}/edit/">
+          <input type="submit" value="Edit" />
+        </form>
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+<form method="get" action="/industry/bpos/create/">
+<input type="submit" value="Add" />
+</form>
+
+{% endblock %}

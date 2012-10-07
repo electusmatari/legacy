@@ -1,0 +1,43 @@
+{% extends "shop/base-handle.html" %}
+{% load formatting %}
+
+{% block appcontent %}
+<h1>Closed Orders</h1>
+
+{% include "paginator.html" %}
+
+<table class="data">
+  <thead>
+    <tr>
+      <th>Timestamp</th>
+      <th>Customer</th>
+      <th>Product</th>
+      <th>Quantity</th>
+      <th>Salespoint</th>
+      <th>Status</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for order in order_list %}
+    <tr class="{% cycle odd,even %}">
+      <td>{{order.closed|date:"Y-m-d H:i"}}</td>
+      <td>
+        <a href="/shop/handle/messages/{{order.characterid}}/">
+          {{order.name}}
+        </a>
+      </td>
+      <td>{{order.typename}}</td>
+      <td class="numeric">{{order.quantity|intcomma}}</td>
+      <td>{{order.office.name}}</td>
+      <td>
+        {% if order.cancelled %}
+        Cancelled on user request
+        {% else %}
+        Closed by {{order.handler.profile.name}}
+        {% endif %}
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

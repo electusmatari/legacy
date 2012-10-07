@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+
+{% block title %}Authentication{% endblock %}
+
+{% block tabs %}
+<ul class="tabs">
+<li {% ifequal tab 'auth' %}class="active"{% endifequal %}><a href="/auth/">Authentication</a></li>
+{% if user.profile.active %}
+<li {% ifequal tab 'avatar' %}class="active"{% endifequal %}><a href="/auth/avatar/">Avatar</a></li>
+<li {% ifequal tab 'token' %}class="active"{% endifequal %}><a href="/auth/token/">Authentication Token</a></li>
+{% endif %}
+</ul>
+{% endblock %}
+
+{% block body %}
+{% block content %}
+{% endblock %}
+{% endblock %}

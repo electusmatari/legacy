@@ -1,0 +1,105 @@
+{% extends "gts/base.html" %}
+
+{% block gtscontent %}
+<div class="ticket">
+  <h1>Ticket #{{ticket.id}}</h1>
+  <table>
+    <tr>
+      <th>Created by:</th>
+      <td>
+        {{ticket.createdby.profile.name}}
+        on
+        {{ticket.created|date:"Y-m-d H:i"}}
+      </td>
+    </tr>
+{% if ticket.editedby %}
+    <tr>
+      <th>Edited by:</th>
+      <td>
+        {{ticket.editedby.profile.name}}
+        on
+        {{ticket.edited|date:"Y-m-d H:i"}}
+      </td>
+    </tr>
+{% endif %}
+    <tr>
+      <th>Type:</th><td>{{ticket.type.name}}</td>
+    </tr>
+    <tr>
+      <th>State:</th>
+      <td>{{ticket.state.displayname}}</td>
+    </tr>
+{% if ticket.state.name == 'in-progress' %}
+    <tr>
+      <th>Being handled by:</th>
+      <td>
+        {{ticket.assignedto.profile.name}}
+        since
+        {{ticket.assigned}}
+      </td>
+    </tr>
+{% endif %}
+{% if ticket.state.name == 'closed' %}
+    <tr>
+      <th>Was closed by:</th>
+      <td>
+        {{ticket.assignedto.profile.name}}
+        since
+        {{ticket.assigned}}
+      </td>
+    </tr>
+{% endif %}
+  </table>
+  <div class="tickettext">
+    {{ticket.text|urlize|linebreaks}}
+  </div>
+  <div class="ticketactions">
+    <form action="/gts/{{ticket.id}}/edit/" method="get">
+      <input type="submit" value="Edit" />
+    </form>
+    {% if ticket.state.name == 'open' %}
+    <form action="/gts/{{ticket.id}}/accept/" method="post">
+      <input type="submit" value="Accept" />
+    </form>
+    {% endif %}
+    {% if ticket.state.name == 'in-progress' %}
+    {% if ticket.assignedto == user %}
+    <form action="/gts/{{ticket.id}}/close/" method="post">
+      <input type="submit" value="Close" />
+    </form>
+    {% else %}
+    <form action="/gts/{{ticket.id}}/accept/" method="post">
+      <input type="submit" value="Change owner from {{ticket.assignedto.profile.name}} to me" />
+    </form>
+    {% endif %}
+    {% endif %}
+    {% if ticket.state.name == 'closed' %}
+    <form action="/gts/{{ticket.id}}/accept/" method="post">
+      <input type="submit" value="Reopen and accept ticket" />
+    </form>
+    {% endif %}
+    {% if ticket.state.name != 'open' %}
+    <form action="/gts/{{ticket.id}}/reopen/" method="post">
+      <input type="submit" value="Open and un-assign ticket" />
+    </form>
+    {% endif %}
+  </div>
+</div>
+
+<h2>Comments</h2>
+
+{% for comment in ticket.comment_set.all %}
+<div class="comment">
+  <div class="author">{{comment.author.profile.name}} on {{comment.created|date:"Y-m-d H:i"}}:</div>
+  <div class="text">
+    {{comment.text|urlize|linebreaks}}
+  </div>
+</div>
+{% endfor %}
+
+<form action="/gts/{{ticket.id}}/comment/" method="post">
+  <textarea name="text" cols="25" rows="5"></textarea><br />
+  <input type="submit" value="Add Comment" />
+</form>
+
+{% endblock %}

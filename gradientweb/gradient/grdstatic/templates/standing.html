@@ -1,0 +1,19 @@
+{% if standing != None %}
+{% if standing > 5 %}
+<img src="/media/img/icons/darkblue.png" />
+{% else %}
+{% if standing > 0 %}
+<img src="/media/img/icons/blue.png" />
+{% endif %}
+{% endif %}
+{% if standing == 0 %}
+<img src="/media/img/icons/neutral.png" />
+{% endif %}
+{% if standing < -5 %}
+<img src="/media/img/icons/red.png" />
+{% else %}
+{% if standing < 0 %}
+<img src="/media/img/icons/orange.png" />
+{% endif %}
+{% endif %}
+{% endif %}

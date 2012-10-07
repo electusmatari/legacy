@@ -1,0 +1,49 @@
+{% extends "recruitment/base.html" %}
+
+{% block appcontent %}
+<h1>Application</h1>
+
+{% include "recruitment/agent.html" %}
+
+<p>Greetings, {{applicant.address}}. We thank you for your interest in
+  our corporation. I assume you have <b>read
+  our <a href="/recruitment/">public information</a>.</b></p>
+
+{% if applicant.charinfo.race == 'Amarr' %}
+
+<p>For security reasons, Gradient does not hire pilots trained by
+  Amarr academies. Have a nice day.</p>
+
+{% else %}
+
+<p>If you wish to submit an application to join us, could you please
+  <b>answer a few questions?</b> Our recruitment officers will read
+  your answers and schedule an interview with you based on these
+  answers. Please try to stay short and succint, but do not skip
+  important details&mdash;<b>about one paragraph per answer</b> is
+  perfectly fine.</p>
+
+<p>((</p>
+
+<p><b>Out of character note:</b><br />
+
+  Gradient is an <b>immersive roleplaying corporation.</b> Like all
+  our chat channels and all corp decisions, this interview is
+  fully <em>in-character</em>, unless specifically noted otherwise.
+  Take your time with the answers&mdash;we do not care about "flavor
+  language", but instead prefer <b>believable characters in the
+  universe of EVE.</b> This also means we can not hire you if it is
+  not believable for a corporation loyal to a nation at war to hire
+  your character. Thieves and scoundrels usually aren't the top
+  priority for hiring.
+
+</p>
+
+<p> )) </p>
+
+<form method="get" action="/recruitment/apply/1/">
+  <input type="submit" value="Start Interview" />
+</form>
+
+{% endif %}
+{% endblock %}

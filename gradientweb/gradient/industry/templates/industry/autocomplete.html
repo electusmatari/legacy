@@ -1,0 +1,27 @@
+<link rel="stylesheet" href="/media/css/jquery-ui.css" type="text/css" />
+<script type="text/javascript" src="/media/js/jquery.js"></script>
+<script type="text/javascript" src="/media/js/jquery-ui.js"></script>
+<script type="text/javascript">
+$(function () {
+  $(".typeinput").autocomplete({
+    source: "/industry/json/invtypes/",
+    minLength: 3,
+  });
+  $(".stationinput").autocomplete({
+    source: "/industry/json/stations/",
+    minLength: 3,
+  });
+  $(".bpinput").autocomplete({
+    source: "/industry/json/blueprints/",
+    minLength: 3,
+  });
+});
+</script>
+
+<style type="text/css">
+ul.ui-autocomplete {
+  height: 5em;
+  overflow-y: scroll;
+  overflow-x: hidden
+}
+</style>

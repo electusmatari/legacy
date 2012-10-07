@@ -1,0 +1,28 @@
+{% extends "rc/base.html" %}
+
+{% block appcontent %}
+<h1>Recent Changes</h1>
+
+{% include "paginator.html" %}
+
+<table class="data">
+  <thead>
+    <tr>
+      <th>Timestamp</th>
+      <th>App</th>
+      <th>Category</th>
+      <th>Entry</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for change in change_list %}
+    <tr class="{% cycle odd,even %}">
+      <td>{{change.timestamp}}</td>
+      <td>{{change.app}}</td>
+      <td>{{change.category}}</td>
+      <td>{{change.text}}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

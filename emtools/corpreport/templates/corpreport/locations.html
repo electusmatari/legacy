@@ -1,0 +1,48 @@
+{% extends "corpreport/base.html" %}
+
+{% block content %}
+<h2>Industry Locations for {{corpname}}</h2>
+
+<h3>Sales Center</h3>
+
+<ul>
+  {% for station in sales_center %}
+  <li>{{station.stationName}}</li>
+  {% endfor %}
+</ul>
+
+<h3>Logistics Center</h3>
+
+<ul>
+  {% for station in logistics_center %}
+  <li>{{station.stationName}}</li>
+  {% endfor %}
+</ul>
+
+<h3>Sales Points</h3>
+
+<ul>
+  {% for station in sales_points %}
+  <li>{{station.stationName}}</li>
+  {% endfor %}
+</ul>
+
+<h3>Purchase Points</h3>
+
+<ul>
+  {% for station in purchase_points %}
+  <li>{{station.stationName}}</li>
+  {% endfor %}
+</ul>
+
+<h3>Other Offices</h3>
+
+<ul>
+  {% for station in offices %}
+  <li>{{station.stationName}}</li>
+  {% endfor %}
+</ul>
+
+
+
+{% endblock %}

@@ -1,0 +1,113 @@
+{% extends "recruitment/base.html" %}
+{% load em %}
+
+{% block scriptheader %}
+<script type="text/javascript" src="/media/js/jquery.js"></script>
+<script type="text/javascript" src="/media/js/jquery.tablesorter.js"></script>
+<script type="text/javascript">
+$(function() {
+    $('.collapsable').click(function () {
+      $(this).next().toggle();
+    }).each(function () {
+      $(this).attr("style", "cursor: pointer").next().hide();
+    });
+});
+</script>
+{% endblock %}
+
+{% block content %}
+<h1>User Information</h1>
+
+<p>UserID {{audituser.userid}} submitted on {{audituser.submitted}} for
+  {{audituser.visibility}}.</p>
+
+{% for char in audituser.character_set.all %}
+<h2>{{char.name}}</h2>
+
+<table>
+<tbody>
+<tr><th>Race:</th><td>{{char.race}}</td></tr>
+<tr><th>Bloodline:</th><td>{{char.bloodline}}</td></tr>
+<tr><th>Gender:</th><td>{{char.gender}}</td></tr>
+<tr><th>Security:</th><td>{{char.security}}</td></tr>
+<tr><th>Graduation:</th><td>{{char.graduation}}</td></tr>
+<tr><th>Skillpoints:</th><td>{{char.skillpoints|intcomma}} ({{char.sppm|floatcomma}} SP/m)</td></tr>
+<tr><th>Wallet Balance:</th><td>{{char.wallet|floatcomma}}</td></tr>
+<tr><th>Corp:</th><td>{{char.corpname}} since {{char.corpjoin}}</td></tr>
+{% if char.allianceid %}
+<tr><th>Alliance:</th><td>{{char.alliancename}} since {{char.alliancejoin}}</td></tr>
+{% endif %}
+</tbody>
+</table>
+
+<h3 class="collapsable">Standings</h3>
+
+<table class="data">
+<thead>
+<tr><th>Type</th><th>Name</th><th>Standing</th></tr>
+</thead>
+<tbody>
+{% for st in char.standing_set.all %}
+<tr class="{% cycle 'even' 'odd' %}">
+  <td>{{st.entitytype}}</td>
+  <td>{{st.expandedname}}</td>
+  <td class="numeric">{{st.standing|floatcomma}}</td>
+</tr>
+{% endfor %}
+</tbody>
+</table>
+
+<h3 class="collapsable">Skill Groups</h3>
+
+<table class="data">
+<thead>
+<tr><th>Skill Group</th><th>SP</th></tr>
+</thead>
+<tbody>
+{% for group, sp in char.skillgroups %}
+<tr class="{% cycle 'even' 'odd' %}">
+  <td>{{group}}</td>
+  <td class="numeric">{{sp|intcomma}}</td>
+</tr>
+{% endfor %}
+</tbody>
+</table>
+
+{% comment %}
+<h3 class="collapsable">Skills</h3>
+
+<table class="data">
+<thead>
+<tr><th>Skill</th><th>Level</th><th>SP</th></tr>
+</thead>
+<tbody>
+{% for skill in char.skill_set.all %}
+<tr class="{% cycle 'even' 'odd' %}">
+  <td>{{skill.typename}}</td>
+  <td>{{skill.level}}</td>
+  <td>{{skill.skillpoints}}</td>
+</tr>
+{% endfor %}
+</tbody>
+</table>
+{% endcomment %}
+
+<h3 class="collapsable">Attribute Augmentors</h3>
+
+<table class="data">
+<thead>
+<tr><th>Attribute</th><th>Implant</th><th>Bonus</th></tr>
+</thead>
+<tbody>
+{% for implant in char.implant_set.all %}
+<tr class="{% cycle 'even' 'odd' %}">
+  <td>{{implant.attribute}}</td>
+  <td>{{implant.augmentor}}</td>
+  <td>{{implant.value}}</td>
+</tr>
+{% endfor %}
+</tbody>
+</table>
+
+{% endfor %}
+{% endblock %}

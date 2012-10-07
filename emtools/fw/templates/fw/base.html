@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+
+{% block title %}Electus Matari Warzone Information{% endblock %}
+
+{% block tabs %}
+<ul class="tabs">
+<li {% ifequal tab 'topstats' %}class="active"{% endifequal %}><a href="{% url emtools.fw.views.view_topstats %}">Top Stats</a></li>
+<li {% ifequal tab 'map' %}class="active"{% endifequal %}><a href="{% url emtools.fw.views.view_map %}">Map</a></li>
+<li {% ifequal tab 'corps' %}class="active"{% endifequal %}><a href="{% url emtools.fw.views.view_corps %}">Corporations</a></li>
+<li {% ifequal tab 'corpchanges' %}class="active"{% endifequal %}><a href="{% url emtools.fw.views.view_corpchanges %}">Changes</a></li>
+</ul>
+{% endblock %}
+
+{% block body %}
+{% block content %}
+{% endblock %}
+{% endblock %}

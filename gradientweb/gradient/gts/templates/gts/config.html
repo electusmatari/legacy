@@ -1,0 +1,19 @@
+{% extends "gts/base.html" %}
+
+{% block gtscontent %}
+<h1>Configuration</h1>
+
+<p>The following ticket types will be displayed as "open" on the forum
+  front page. This allows you to be notified only of tickets you are
+  interested in.</p>
+
+<form method="post" action="">
+{% for tickettype, checked in type_list %}
+<input type="checkbox" id="tt{{tickettype.id}}"
+       {% if checked %}checked="1"{% endif %}
+       name="type" value="{{tickettype.id}}" />
+<label for="tt{{tickettype.id}}">{{tickettype.name}}</label><br />
+{% endfor %}
+<input type="submit" value="Save" />
+</form>
+{% endblock %}

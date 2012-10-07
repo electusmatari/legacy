@@ -1,0 +1,31 @@
+{% extends "industry/base.html" %}
+
+{% block scriptheader %}
+{% include "industry/autocomplete.html" %}
+{% endblock %}
+
+{% block appcontent %}
+{% if instance %}
+<h2>Edit {{instance.typename}}</h2>
+{% else %}
+<h2>Add new Blueprint Original</h2>
+{% endif %}
+
+<table>
+  <tbody>
+<form method="post" action="">
+  {{form}}
+  {% if instance %}
+  <tr><td></td><td><input type="submit" value="Save" /></td></tr>
+  {% else %}
+  <tr><td></td><td><input type="submit" value="Create" /></td></tr>
+  {% endif %}
+</form>
+{% if instance %}
+<form method="get" action="/industry/bpos/{{instance.id}}/delete/">
+  <tr><td></td><td><input type="submit" value="Delete" /></td></tr>
+</form>
+{% endif %}
+  </tbody>
+</table>
+{% endblock %}

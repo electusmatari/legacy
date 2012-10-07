@@ -1,0 +1,10 @@
+d:\Dirk\Documents\Visual Studio 2010\Projects\CacheUploader\CacheUploaderUpdate\bin\Debug\CacheUploaderUpdate.exe
+d:\Dirk\Documents\Visual Studio 2010\Projects\CacheUploader\CacheUploaderUpdate\bin\Debug\CacheUploaderUpdate.pdb
+d:\Dirk\Documents\Visual Studio 2010\Projects\CacheUploader\CacheUploaderUpdate\bin\Debug\CacheUploaderUpdate.xml
+d:\Dirk\Documents\Visual Studio 2010\Projects\CacheUploader\CacheUploaderUpdate\obj\x86\Debug\ResolveAssemblyReference.cache
+d:\Dirk\Documents\Visual Studio 2010\Projects\CacheUploader\CacheUploaderUpdate\obj\x86\Debug\CacheUploaderUpdate.Resources.resources
+d:\Dirk\Documents\Visual Studio 2010\Projects\CacheUploader\CacheUploaderUpdate\obj\x86\Debug\GenerateResource.read.1.tlog
+d:\Dirk\Documents\Visual Studio 2010\Projects\CacheUploader\CacheUploaderUpdate\obj\x86\Debug\GenerateResource.write.1.tlog
+d:\Dirk\Documents\Visual Studio 2010\Projects\CacheUploader\CacheUploaderUpdate\obj\x86\Debug\CacheUploaderUpdate.exe
+d:\Dirk\Documents\Visual Studio 2010\Projects\CacheUploader\CacheUploaderUpdate\obj\x86\Debug\CacheUploaderUpdate.xml
+d:\Dirk\Documents\Visual Studio 2010\Projects\CacheUploader\CacheUploaderUpdate\obj\x86\Debug\CacheUploaderUpdate.pdb

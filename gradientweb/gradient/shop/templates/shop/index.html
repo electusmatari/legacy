@@ -1,0 +1,82 @@
+{% extends "shop/base-rhs.html" %}
+
+{% block appheader %}
+<style type="text/css">
+.product {
+  width: 70%;
+  border: 1px solid #c0c0c0;
+  margin: 1em 0;
+  padding: 0.5em;
+}
+
+.product img.icon {
+  float: left;
+  background: #808080;
+  border-top: 1px solid #C0C0C0;
+  border-right: 1px solid #C0C0C0;
+  border-bottom: 1px solid #000000;
+  border-left: 1px solid #000000;
+  margin: 0 0.5em 0.5em 0;
+}
+
+.product .productname {
+  font-weight: bold;
+  font-size: 110%;
+}
+
+.product .priceinfo {
+  clear: left;
+}
+
+.orderlink {
+  text-align: right;
+}
+</style>
+{% endblock %}
+
+{% block appcontent %}
+
+{% if page.has_other_pages %}
+<div class="paginator">
+  <span class="step-links">
+    {% if page.has_previous %}
+    <a href="?search={{needle}}&amp;page={{page.previous_page_number}}">previous</a>
+    {% endif %}
+    <span class="current">
+      Page {{page.number}} of {{page.paginator.num_pages}}
+    </span>
+    {% if page.has_next %}
+    <a href="?search={{needle}}&amp;page={{page.next_page_number}}">next</a>
+    {% endif %}
+  </span>
+</div>
+{% endif %}
+
+{% if indexpage %}
+<h2>Special Offers</h2>
+{% endif %}
+
+{% for product in product_list %}
+{% include "shop/product.html" %}
+{% empty %}
+<p>We are afraid we were not able to find any products matching your
+  query, "{{needle}}". Please try a different search term.</p>
+{% endfor %}
+
+{% if page.has_other_pages %}
+<div class="paginator">
+  <span class="step-links">
+    {% if page.has_previous %}
+    <a href="?search={{needle}}&amp;page={{page.previous_page_number}}">previous</a>
+    {% endif %}
+    <span class="current">
+      Page {{page.number}} of {{page.paginator.num_pages}}
+    </span>
+    {% if page.has_next %}
+    <a href="?search={{needle}}&amp;page={{page.next_page_number}}">next</a>
+    {% endif %}
+  </span>
+</div>
+{% endif %}
+
+{% endblock %}

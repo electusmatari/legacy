@@ -1,0 +1,247 @@
+{% extends "industry/base.html" %}
+
+{% block scriptheader %}
+{% include "tablesorter.html" %}
+<script type="text/javascript" src="/media/js/jquery.cookie.js"></script>
+<script type="text/javascript">
+$(function () {
+  var hidden = $.cookie('grdindustry_marketorders_hiddencolumns');
+  if (hidden == null) {
+    hidden = [];
+  } else {
+    hidden = hidden.split(",");
+  }
+  $(".hider").each(function () {
+    var cls = $(this).attr("name");
+    if (hidden.indexOf(cls) >= 0) {
+      $(this).removeAttr("checked");
+      $("." + cls).hide();
+    } else {
+      $(this).attr("checked", "true");
+      $("." + cls).show();
+    }
+  });
+  $(".hider").click(function () {
+    var hidden = $.cookie('grdindustry_marketorders_hiddencolumns');
+    if (hidden == null) {
+      hidden = [];
+    } else {
+      hidden = hidden.split(",");
+    }
+    var cls = $(this).attr("name");
+    var idx = hidden.indexOf(cls);
+    if (idx >= 0) {
+      delete hidden[idx];
+    } else {
+      hidden.push(cls);
+    }
+    $.cookie('grdindustry_marketorders_hiddencolumns', hidden,
+             {'expires': 365});
+    $("." + cls).toggle();
+  });
+});
+</script>
+
+<style type="text/css">
+#content h3 {
+  padding: 0;
+  margin: 0;
+}
+
+#content h4 {
+  padding: 0;
+  margin: 0;
+}
+
+#content table.data {
+  margin: 1em 0;
+}
+
+table.data tbody tr.unprofitable {
+  background: #FF9F9F;
+}
+
+table.data tbody tr.lowprofit {
+  background: #FFFF9F;
+}
+
+.selectors {
+  margin-bottom: 1em;
+  margin-right: 
+  border: 1px solid #C0C0C0;
+}
+
+.selectors .selector {
+  display: block;
+  float: left;
+  width: 11em;
+}
+</style>
+{% endblock %}
+
+{% block appcontent %}
+<h2>Market Orders{% if pilot_name %} of {{pilot_name}}{% endif %}</h2>
+<p>Last updated: {{lastupdate|date:"Y-m-d H:i"}}</p>
+
+<p>Your market orders for the corp. <span class="lowprofit">Yellow
+  entries</span> are within 10% of production cost&mdash;such low
+  profit margins can mean a lot of effort for little
+  benefit. <span class="unprofitable">Red entries</span> are below
+  (above) production cost. Unless you have a very good reason for
+  this, they should be adjusted as they cause a loss for the corp.</p>
+
+<div class="selectors">
+  <strong>Show Columns</strong><br />
+  <div class="selector">
+    <input type="checkbox" class="hider" checked="true"
+           id="expire_days" name="expire_days" />
+    <label for="expire_days">
+      <span class="tooltipped">Expires (days)
+        <span class="tooltip">The expiry date of the market
+          order</span>
+      </span>
+    </label>
+  </div>
+  <div class="selector">
+    <input type="checkbox" class="hider" checked="true"
+           id="vol_remaining" name="vol_remaining" />
+    <label for="vol_remaining">
+      <span class="tooltipped">Vol. remaining
+        <span class="tooltip">The remaining items in the market
+          order</span>
+      </span>
+    </label>
+  </div>
+  <div class="selector">
+    <input type="checkbox" class="hider" checked="true" id="price_col"
+           name="price_col" />
+    <label for="price_col">
+      <span class="tooltipped">Price
+        <span class="tooltip">The price of the market order</span>
+      </span>
+    </label>
+  </div>
+  <div class="selector">
+    <input type="checkbox" class="hider" checked="true" id="cost_col"
+           name="cost_col" />
+    <label for="cost_col">
+      <span class="tooltipped">Cost
+        <span class="tooltip">Production cost as per our price
+          list</span>
+      </span>
+    </label>
+  </div>
+  <div class="selector">
+    <input type="checkbox" class="hider" checked="true"
+           id="profit_margin" name="profit_margin" />
+    <label for="profit_margin">
+      <span class="tooltipped">Profit margin
+        <span class="tooltip">The profit margin, i.e. the percentage
+          of the final ISK involved that was not involved in acquiring
+          the item</span>
+      </span>
+    </label>
+  </div>
+  <div class="selector">
+    <input type="checkbox" class="hider" checked="true"
+           id="profit_per_item" name="profit_per_item" />
+    <label for="profit_per_item">
+      <span class="tooltipped">Profit per item
+        <span class="tooltip">Profit per item, i.e. the difference
+          between production cost and market price</span>
+      </span>
+    </label>
+  </div>
+  <div class="selector">
+    <input type="checkbox" class="hider" checked="true"
+           id="sales_per_day" name="sales_per_day" />
+    <label for="sales_per_day">
+      <span class="tooltipped">Sales per day
+        <span class="tooltip">Average sales per day based on the sales
+          in the last 7 or 28 days</span>
+      </span>
+    </label>
+  </div>
+  <div class="selector">
+    <input type="checkbox" class="hider" checked="true"
+           id="profit_per_day" name="profit_per_day" />
+    <label for="profit_per_day">
+      <span class="tooltipped">Profit per day
+        <span class="tooltip">The profit per day based on the average
+          sales per day</span>
+      </span>
+    </label>
+  </div>
+  <div class="selector">
+    <input type="checkbox" class="hider" checked="true"
+           id="est_days_remaining" name="est_days_remaining" />
+    <label for="est_days_remaining">
+      <span class="tooltipped">Est. days remaining
+        <span class="tooltip">Estimated days remaining until the order
+          is sold out based on the average sales per day and the
+          remaining quantity</span>
+      </span>
+    </label>
+  </div>
+
+  <div class="selector">
+    <input type="checkbox" class="hider" checked="true" id="competiton_price"
+           name="competition_price" />
+    <label for="competition_price">
+      <span class="tooltipped">Competition Price
+        <span class="tooltip">The competition price the best price of
+          a competing order, if any is known. An order is considered
+          competing if it was issued within 3 jumps for a sell order,
+          or if it covers the order station for a buy order.
+          <br /><br />This can easily be outdated, so cross-check
+          before basing decisions on it.</span>
+      </span>
+    </label>
+  </div>
+  <div class="selector">
+    <input type="checkbox" class="hider" checked="true" id="suggested_price"
+           name="suggested_price" />
+    <label for="suggested_price">
+      <span class="tooltipped">Suggested Price
+        <span class="tooltip">The suggested price, if any, is based on
+        undercutting the competition while staying within 10% of the
+        production cost. <br /><br />The competition price can easily
+        be outdated, so cross-check before basing decisions on
+        it.</span>
+      </span>
+    </label>
+  </div>
+
+  <div class="selector">
+    <input type="checkbox" class="hider" checked="true" id="trend_col"
+           name="trend_col" />
+    <label for="trend_col">
+      <span class="tooltipped">Trend
+        <span class="tooltip">The trend of sales, or the percentage of
+          the daily sales of the last 28 days that happened in the
+          last 7 days; if this is above 50%, sales are increasing; if
+          it's below 50%, sales are slowing down</span>
+      </span>
+    </label>
+  </div>
+<div style="clear: left; margin-bottom: 1em;"></div>
+</div>
+
+{% for station, bothorders in order_list %}
+<h3>{{station}}</h3>
+{% if bothorders.sell %}
+<h4>Sell Orders</h4>
+{% with bothorders.sell as order_list %}
+{% include "industry/ordertable.html" %}
+{% endwith %}
+{% endif %}
+
+{% if bothorders.buy %}
+<h4>Buy Orders</h4>
+{% with bothorders.buy as order_list %}
+{% include "industry/ordertable.html" %}
+{% endwith %}
+{% endif %}
+{% endfor %}
+
+{% endblock %}

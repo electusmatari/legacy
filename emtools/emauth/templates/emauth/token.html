@@ -1,0 +1,21 @@
+{% extends "emauth/base.html" %}
+
+{% block content %}
+<h1>Authentication Token</h1>
+
+<p>Some applications on electusmatari.com require
+  an <em>authentication token</em> to identify you as a user of
+  electusmatari.com. If you have not been asked to provide an
+  authentication token, you can happily ignore this page for now.</p>
+
+<p>Please do not give your authentication token to random people, as
+  it can be used to identify as yourself.</p>
+
+<p>Your authentication token is:</p>
+
+<div style="padding: 1em 0em 2em 2em">{{user.authtoken.token}}</div>
+
+<form method="post" action="">
+<input type="submit" value="Invalidate and generate a new token" />
+</form>
+{% endblock %}

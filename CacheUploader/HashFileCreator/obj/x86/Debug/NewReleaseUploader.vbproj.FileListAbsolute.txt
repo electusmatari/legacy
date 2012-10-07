@@ -1,0 +1,26 @@
+d:\Dirk\Documents\Visual Studio 2010\Projects\CacheUploader\HashFileCreator\bin\Debug\CacheUploaderCore.dll
+d:\Dirk\Documents\Visual Studio 2010\Projects\CacheUploader\HashFileCreator\bin\Debug\CacheUploaderCore.pdb
+d:\Dirk\Documents\Visual Studio 2010\Projects\CacheUploader\HashFileCreator\bin\Debug\CacheUploaderCore.xml
+d:\Dirk\Documents\Visual Studio 2010\Projects\CacheUploader\HashFileCreator\obj\x86\Debug\ResolveAssemblyReference.cache
+d:\Dirk\Documents\Visual Studio 2010\Projects\CacheUploader\HashFileCreator\obj\x86\Debug\GenerateResource.read.1.tlog
+d:\Dirk\Documents\Visual Studio 2010\Projects\CacheUploader\HashFileCreator\obj\x86\Debug\GenerateResource.write.1.tlog
+d:\Dirk\Documents\Visual Studio 2010\Projects\CacheUploader\HashFileCreator\bin\Debug\NewReleaseUploader.exe
+d:\Dirk\Documents\Visual Studio 2010\Projects\CacheUploader\HashFileCreator\bin\Debug\NewReleaseUploader.pdb
+d:\Dirk\Documents\Visual Studio 2010\Projects\CacheUploader\HashFileCreator\bin\Debug\NewReleaseUploader.xml
+d:\Dirk\Documents\Visual Studio 2010\Projects\CacheUploader\HashFileCreator\obj\x86\Debug\NewReleaseUploader.Resources.resources
+d:\Dirk\Documents\Visual Studio 2010\Projects\CacheUploader\HashFileCreator\obj\x86\Debug\NewReleaseUploader.exe
+d:\Dirk\Documents\Visual Studio 2010\Projects\CacheUploader\HashFileCreator\obj\x86\Debug\NewReleaseUploader.xml
+d:\Dirk\Documents\Visual Studio 2010\Projects\CacheUploader\HashFileCreator\obj\x86\Debug\NewReleaseUploader.pdb
+D:\Programming\Projekte\CacheUploader\devel\HashFileCreator\bin\Debug\NewReleaseUploader.exe
+D:\Programming\Projekte\CacheUploader\devel\HashFileCreator\bin\Debug\NewReleaseUploader.pdb
+D:\Programming\Projekte\CacheUploader\devel\HashFileCreator\bin\Debug\NewReleaseUploader.xml
+D:\Programming\Projekte\CacheUploader\devel\HashFileCreator\bin\Debug\CacheUploaderCore.dll
+D:\Programming\Projekte\CacheUploader\devel\HashFileCreator\bin\Debug\CacheUploaderCore.pdb
+D:\Programming\Projekte\CacheUploader\devel\HashFileCreator\bin\Debug\CacheUploaderCore.xml
+D:\Programming\Projekte\CacheUploader\devel\HashFileCreator\obj\x86\Debug\ResolveAssemblyReference.cache
+D:\Programming\Projekte\CacheUploader\devel\HashFileCreator\obj\x86\Debug\NewReleaseUploader.Resources.resources
+D:\Programming\Projekte\CacheUploader\devel\HashFileCreator\obj\x86\Debug\GenerateResource.read.1.tlog
+D:\Programming\Projekte\CacheUploader\devel\HashFileCreator\obj\x86\Debug\GenerateResource.write.1.tlog
+D:\Programming\Projekte\CacheUploader\devel\HashFileCreator\obj\x86\Debug\NewReleaseUploader.exe
+D:\Programming\Projekte\CacheUploader\devel\HashFileCreator\obj\x86\Debug\NewReleaseUploader.xml
+D:\Programming\Projekte\CacheUploader\devel\HashFileCreator\obj\x86\Debug\NewReleaseUploader.pdb

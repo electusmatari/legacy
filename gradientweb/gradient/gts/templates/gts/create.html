@@ -1,0 +1,26 @@
+{% extends "gts/base.html" %}
+
+{% block gtscontent %}
+{% if instance %}
+<h1>Edit Ticket #{{instance.id}}</h1>
+{% else %}
+<h1>Create New Ticket</h1>
+{% endif %}
+
+<table>
+<form action="" method="post">{% csrf_token %}
+{{form.as_table}}
+<tr><td></td><td><input type="submit" value="{% if instance %}Save{% else %}Create{% endif %}" /></td></tr>
+</form>
+<tr><td></td><td>
+{% if instance %}
+<form method="get" action="/gts/{{instance.id}}/">
+<input type="submit" value="Cancel Edit" />
+</form>
+{% else %}
+<form method="get" action="/gts/">
+<input type="submit" value="Cancel" />
+</form>
+{% endif %}
+</td></tr></table>
+{% endblock %}

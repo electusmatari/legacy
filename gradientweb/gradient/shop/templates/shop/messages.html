@@ -1,0 +1,41 @@
+{% extends "shop/base-rhs.html" %}
+
+{% block appheader %}
+{% endblock %}
+
+{% block appcontent %}
+<h1>Messages</h1>
+
+{% if message_list %}
+
+{% include "paginator.html" %}
+
+<table class="messages">
+{% for message in message_list %}
+<tr>
+  <td class="poster">
+    <img src="http://image.eveonline.com/Character/{{message.authorid}}_64.jpg"
+         /><br />
+    {{message.authorname}}<br />
+    <span style="font-size: small">{{message.created|date:"Y-m-d H:i"}}</span>
+  </td>
+  <td>
+    {{message.text|linebreaksbr}}
+  </td>
+</tr>
+{% endfor %}
+</table>
+
+{% else %}
+
+<p>You have no messages.</p>
+
+{% endif %}
+
+<h2>Reply</h2>
+
+<form method="post" action="">
+  <textarea name="text" rows="5" cols="40"></textarea><br />
+  <input type="submit" value="Post" />
+</form>
+{% endblock %}

@@ -1,0 +1,24 @@
+{% extends "shop/base.html" %}
+{% load formatting %}
+
+{% block appcontent %}
+<h1>Editing order #{{order.id}}</h1>
+
+<table>
+  <tr><th>Customer:</th><td>{{order.name}}</td></tr>
+  <tr><th>Office:</th><td>{{order.office.name}}</td></tr>
+  <tr><th>Product:</th><td>{{order.typename}}</td></tr>
+</table>
+
+<h2>Split Order</h2>
+<p>Split the order in two to deliver a partial contract. Not all
+  customers want this, by the way.</p>
+
+<p>Order quantity: {{order.quantity}}</p>
+
+<form method="post" action="">
+  <input type="hidden" name="action" value="split" />
+  <input type="text" name="quantity" value="" />
+  <input type="submit" value="Split" />
+</form>
+{% endblock %}

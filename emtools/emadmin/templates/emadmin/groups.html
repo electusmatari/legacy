@@ -1,0 +1,46 @@
+{% extends "emadmin/base.html" %}
+
+{% block scriptheader %}
+<script type="text/javascript" src="/media/js/jquery.js"></script>
+<script type="text/javascript" src="/media/js/jquery.tablesorter.js"></script>
+<script type="text/javascript">
+$(function() {
+    $('.grouplist').tablesorter({
+        widgets: ['zebra'],
+        headers: {4: { sorter: 'digit', },
+                  }
+    });
+    $('.collapsable').click(function () {
+      $(this).next().toggle();
+    }).each(function () {
+      $(this).attr("style", "cursor: pointer").next().hide();
+    });
+});
+</script>
+{% endblock %}
+
+{% block content %}
+<h2>Groups</h2>
+
+{% for group, count, user_list in group_list %}
+<h3 class="collapsable">{{group}} ({{count}})</h3>
+
+<table class="data grouplist">
+<thead>
+<tr><th>Name</th><th>Corp</th><th>Alliance</th><th>Forum</th><th>In&nbsp;days</th></tr>
+</thead>
+<tbody>
+{% for user in user_list %}
+<tr>
+  <td>{{user.name}}</td>
+  <td>{% if user.user.profile.corp %}{{user.user.profile.corp}}{% endif %}</td>
+  <td>{% if user.user.profile.alliance %}{{user.user.profile.alliance}}{% endif %}</td>
+  <td class="{{user.cssclass}}">{{user.lastactive|date:"Y-m-d H:i"}}</td>
+  <td class="{{user.cssclass}}">{{user.days}}</td>
+</tr>
+{% endfor %}
+</tbody>
+</table>
+{% endfor %}
+
+{% endblock %}

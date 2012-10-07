@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+
+{% block title %}Corp Admin{% endblock %}
+
+{% block tabs %}
+<ul class="tabs">
+<li {% ifequal tab 'log' %}class="active"{% endifequal %}><a href="{% url emtools.corpadmin.views.view_authlog %}">Log</a></li>
+<li {% ifequal tab 'members' %}class="active"{% endifequal %}><a href="{% url emtools.corpadmin.views.view_members %}">Members</a></li>
+<li {% ifequal tab 'activity' %}class="active"{% endifequal %}><a href="{% url emtools.corpadmin.views.view_activity %}">Activity</a></li>
+<li {% ifequal tab 'apiconfig' %}class="active"{% endifequal %}><a href="{% url emtools.corpadmin.views.view_apiconfig %}">API</a></li>
+</ul>
+{% endblock %}
+
+{% block body %}
+{% block content %}
+{% endblock %}
+{% endblock %}
