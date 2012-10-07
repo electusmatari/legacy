@@ -1,0 +1,3 @@
+#!/bin/sh
+
+rsync -r --delete /home/forcer/Projects/emtools/inteld/ emcom:Projects/inteld/

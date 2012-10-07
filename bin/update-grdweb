@@ -1,0 +1,5 @@
+#!/bin/sh
+
+rsync -r --delete /home/forcer/Projects/emtools/gradientweb/gradient emcom:Projects/gradient/
+rsync -r --delete /home/forcer/Projects/emtools/gradientweb/media/ emcom:www/gradient.electusmatari.com/
+ssh emcom sudo /etc/init.d/apache2 restart
