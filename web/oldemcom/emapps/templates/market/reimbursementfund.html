@@ -1,0 +1,18 @@
+{{inherit "base.html"}}
+{{py:pagename = 'reimbursementfund'}}
+
+<h2>Reimbursement Fund Item Sales</h2>
+
+<p>These are the items that are currently available in the
+  reimbursement fund. If you wish to purchase some items, please see
+  <a href="http://www.electusmatari.com/forums/showthread.php?tid=6417">the
+  relevant forum thread</a> for how.</p>
+
+{{for category, types in data}}
+<h3>{{category}}</h3>
+<ul>
+{{for typename, quantity in types}}
+<li>{{typename}} ({{quantity}}x)</li>
+{{endfor}}
+</ul>
+{{endfor}}

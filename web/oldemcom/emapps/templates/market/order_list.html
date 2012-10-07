@@ -1,0 +1,82 @@
+{{inherit "base.html"}}
+{{py:
+if 'Your' in title:
+    pagename = 'ownorder'
+else:
+    pagename = 'request'
+}}
+
+{{for state in states[:-1]}}
+<h2>State: {{state.title()}}</h2>
+
+{{py:lastsource = None}}
+
+{{for o in orders}}
+{{if o.state == state}}
+
+{{if o.source != lastsource}}
+<h3>{{o.source}}</h3>
+{{py:lastsource = o.source}}
+{{endif}}
+
+<div class="order">
+<h3><a href="/market/order/{{o.id}}/">Order #{{o.id}} by
+    {{o.customer}} ({{o.created|eve_time}})</a>
+{{if type == 'own'}}
+{{if o.state == 'unclaimed'}}
+<form method="post" action="">
+<input type="hidden" name="action" value="cancel" />
+<input type="hidden" name="orderid" value="{{o.id}}" />
+<input type="submit" value="Cancel" />
+</form>
+{{endif}}
+{{else}}
+{{if o.state == 'unclaimed'}}
+<form method="post" action="">
+<input type="hidden" name="action" value="claim" />
+<input type="hidden" name="orderid" value="{{o.id}}" />
+<input type="submit" value="Claim" />
+</form>
+{{endif}}
+{{if o.state == 'claimed'}}
+<form method="post" action="">
+<input type="hidden" name="action" value="markdelivered" />
+<input type="hidden" name="orderid" value="{{o.id}}" />
+<input type="submit" value="Delivered" />
+</form>
+{{endif}}
+{{if o.state == 'delivered'}}
+<form method="post" action="">
+<input type="hidden" name="action" value="markdone" />
+<input type="hidden" name="orderid" value="{{o.id}}" />
+<input type="submit" value="Done" />
+</form>
+{{endif}}
+{{endif}}
+</h3>
+
+<table>
+<tr><td>Status:</td><td>{{o.state}}</td></tr>
+<tr><td>Producer:</td><td>{{o.producer}}</td></tr>
+{{if o.price}}
+<tr><td>Price:</td><td>{{o.price|humane}}</td></tr>
+{{endif}}
+</table>
+
+<p><b>Order text:</b></p>
+
+<p>{{o.ordertext|addbr}}</p>
+
+{{if o.lastcomment}}
+<p><b>Last Comment:</b></p>
+<p>
+<blockquote><cite><span> ({{o.lastcomment.created|eve_time}})</span>{{o.lastcomment.author}} Wrote:</cite>
+{{o.lastcomment.comment|addbr}}
+</blockquote>
+</p>
+{{endif}}
+</div>
+
+{{endif}}
+{{endfor}}
+{{endfor}}

@@ -1,0 +1,13 @@
+{{inherit "../base.html"}}
+
+{{def title}}
+Electus Matari: Operation Announcements
+{{enddef}}
+
+{{def tabs}}
+<ul class="tabs">
+  <li {{if pagename == 'info'}}class="active"{{endif}}><a href="/opwarn/">Overview</a></li>
+</ul>
+{{enddef}}
+
+{{self.body|html}}

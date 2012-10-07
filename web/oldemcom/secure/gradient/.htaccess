@@ -1,0 +1,4 @@
+AuthType Basic
+AuthName "Access for /electusmatari.com/secure/gradient" 
+AuthUserFile /home/forcer/Projects/old-emcom/ftp/htpasswd
+require user teo

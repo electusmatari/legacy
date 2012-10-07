@@ -1,0 +1,58 @@
+<?xml version="1.0"e encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+                      "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<link type="text/css" rel="stylesheet" href="http://www.electusmatari.com/forums/cache/themes/theme2/global.css" />
+<script src="/js/jquery.js" type="text/javascript"></script>
+<script src="/js/jquery.sound.js" type="text/javascript"></script>
+<script type="text/javascript">
+last_op_id = null;
+
+function update_op() {
+    $.getJSON("http://www.electusmatari.com/ops/oplist/",
+        function(data, textStatus) {
+            if (textStatus != "success") {
+                $("#announce").text("Error retrieving data: " + textStatus);
+            } else if (data.title == null) {
+                $("#announce").text("No operations at the moment.");
+            } else {
+                if (data.id != last_op_id) {
+                    $.sound.play("http://www.electusmatari.com/op.wav",
+                                 {timeout: 30000});
+                    last_op_id = data.id;
+                }
+                minutes = (data.seconds/60);
+                minutes = minutes.toFixed(0);
+                $("#announce").html(data.title + "<br /><small><i>" + minutes + "&nbsp;minutes&nbsp;ago</i></small>");
+            }
+            return false;
+        });
+}
+
+$().ready(function() {
+    setInterval("update_op()", 30000);
+    update_op();
+});
+</script>
+
+<title>EM Op Announce</title>
+</head>
+
+<body style="font-family: sans-serif; margin: 0; top: 0; left: 0;">
+<table width="100%" cellspacing="1" cellpadding="4" border="0"
+       align="center" class="tborder">
+<tr>
+  <td class="thead">
+    <div class="float_right" style="margin-top: 3px;"><span class="smalltext"><a href="#" onclick="window.close();">Close</a></span></div>
+    <div><strong>EM Ops</strong></div>
+  </td>
+</tr>
+<tr>
+  <td class="trow2">
+    <div id="announce">No announcements loaded.</div>
+  </td>
+</tr>
+</table>
+</body> </html>

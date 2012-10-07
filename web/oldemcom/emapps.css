@@ -1,0 +1,125 @@
+ul.tabs {
+      list-style: none;
+      padding: 0;
+      margin: 1em 0 1px 0;
+}
+ul.tabs li {
+      font-weight: bold;
+      display: inline;
+      background: #efefef;
+      border: 1px solid #d4d4d4;
+      padding: 0.2em 0.5em;
+      margin: 0 1em 0 0;
+}
+
+ul.tabs li.active {
+      background: #ffffff;
+      border-bottom: 1px solid #ffffff;
+}
+
+ul.ballot {
+      list-style: none;
+      margin: 0.5em 0;
+      padding: 0;
+}
+
+ul.undecorated {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+#content {
+      border: 1px solid #d4d4d4;
+      padding: 1em;
+      margin: 0;
+}
+
+table.matrix {
+    border: 1px solid black;
+    border-collapse: collapse;
+}
+
+table.matrix td, table.matrix th {
+    border: 1px solid black;
+    width: 1em;
+    text-align: right;
+    padding: 0 0.5em;
+}
+
+table.matrix th.side {
+    text-align: left;
+}
+
+table.matrix tr.even td, table.matrix tr.even th {
+    border: 1px solid black;
+    background-color: #E0E0E0;
+}
+
+table.standings {
+  border-collapse: collapse;
+}
+table.standings tr td, table.standing tr th {
+  text-align: left;
+  padding: 0.1em 0.5em;
+}
+
+table.standings .odd {
+  background: #efefef;
+}
+
+table.standings .even .enemy {
+  background: #ff5050;
+}
+table.standings .odd .enemy {
+  background: #ef4040;
+}
+
+table.standings .even .competitor {
+  background: #ff9060;
+}
+table.standings .odd .competitor {
+  background: #ef8050;
+}
+
+table.standings .even .blue {
+  background: #6090ff;
+}
+table.standings .odd .blue {
+  background: #5080ef;
+}
+
+table.market {
+    border: 1px solid black;
+    border-collapse: collapse;
+}
+
+table.market td, table.market th {
+    border: 1px solid black;
+    padding: 0 0.5em;
+}
+
+table.market tr.odd td {
+    border: 1px solid black;
+    background-color: #E0E0E0;
+}
+
+td.number {
+    text-align: right;
+}
+
+div.order {
+    border: 1px solid black;
+    padding: 0.5em;
+    margin: 0.5em 0;
+}
+
+div.order h3 {
+    padding: 0.5em;
+    margin: 0;
+    border-bottom: 1px solid #4A4A4A;
+}
+
+dl.spaced dd {
+    margin-bottom: 1em;
+}

@@ -1,0 +1,28 @@
+{{py:pagename = 'index'}}
+{{inherit "base.html"}}
+
+{{if len(series) > 0}}
+<h2>Series</h2>
+<ul>
+{{for name in series}}
+<li><a href="{{name}}/">{{name}}</a></li>
+{{endfor}}
+</ul>
+{{endif}}
+
+{{if len(images) > 0}}
+<h2>Images in this Series</h2>
+{{for name in images}}
+<div style="border: 1px solid #DFDFDF; float: left; padding: 20px;
+            text-align: center">
+<div style="height: 128px; width: 128px">
+{{if name in thumbs}}
+<a href="{{name}}"><img src="{{thumbs[name]}}" border="0" /></a>
+{{endif}}
+</div>
+<a href="{{name}}">{{name}}</a>
+</div>
+{{endfor}}
+<div style="clear: both"></div>
+
+{{endif}}

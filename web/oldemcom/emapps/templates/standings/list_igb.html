@@ -1,0 +1,61 @@
+<?xml version="1.0"e encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+                      "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>Electus Matari: Standings</title>
+</head>
+
+<body>
+<h1>Electus Matari: Standings</h1>
+<h2>Target List</h2>
+
+<p>This is a list of Electus Matari's valid targets. If you find your
+organization on this list, it means EM's pilots are authorized to fire
+on your ships without warning. It might or might not mean they will
+actively hunt you down.</p>
+
+<p>Organizations are placed on this list for 1) crimes (such as
+piracy, theft, or slave-trading) in Republic space, 2) hostilities
+towards EM or allies anywhere, or 3) assistance of the Amarr militia.
+If you want clarification for why any particular organization is
+considered hostile, or believe there has been mistake, please contact
+our diplomats (use channel "Public - EM" for finding out latest
+contact information).</p>
+
+<ul>
+{{for st in negative}}
+<li>{{st.entity}} {{st.ticker}} - {{"%+i" % st.standing}}{{if st.comments != ''}}, {{st.comments}}{{endif}}</li>
+{{endfor}}
+</ul>
+
+<h2>Blue List</h2>
+<p>Organizations on this list are currently +5 or above in standing to Electus Matari. This means our pilots will not fire on them and in case of friendly fire will do their best to disengage before returning fire. It is not a guarantee of help, co-operation, or information sharing of any kind.</p>
+
+<p><em>Note that while we are NRDS everywhere, not all of our +5s are. Do not assume people will not fire at you merely because they are on this list, but instead negotiate separate blue status.</em></p>
+
+<p><em>This list is not necessarily complete, as our internal bookkeeping might deviate from the actual standings set in the interface. So just because you are not on this list does not mean you do not show blue to our pilots. We're working on getting this list updated.</em></p>
+
+<p>We grant blue standings under the following conditions:</p>
+
+<ul>
+<li>Mutual blue only.</li>
+<li>No piracy, griefing, thieving, extortion, or other criminal acts in Heimatar, Metropolis, Molden Heath, Great Wildlands, or other territory controlled by the Minmatar Republic.</li>
+<li>No support of the Amarr militia or other slaver organizations (e.g. CVA).</li>
+</ul>
+
+<p>Other than the last point, what you do outside of the Minmatar regions and the Amarr warzone is none of our business, as long as you do not shoot us. Neither are we particularly concerned about &quot;shooting back&quot; or feuds between people on our blue list and/or third parties.</p>
+
+<p>Corporations in the Minmatar militia are not considered automatically blue. NRDS corporations in the militia will be granted blue if they so request, without further negotiations. NBSI corporations in the militia will be decided on case by case.</p>
+
+<p>For negotiations for +5 please contact our diplomats (use channel "Public - EM" to find out latest contact information).</p>
+
+<ul>
+{{for st in positive}}
+<li>{{st.entity}} {{st.ticker}} - blue{{if st.comments != ''}}, {{st.comments}}{{endif}}</li>
+{{endfor}}
+</ul>
+
+
+</body> </html>

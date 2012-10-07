@@ -1,0 +1,10 @@
+<standings>
+{{for st in standings}}
+  <standing>
+    <entity>{{st.entity}}</entity>
+    <ticker>{{st.ticker}}</ticker>
+    <value>{{if st.standing > 0}}blue{{else}}{{st.standing}}{{endif}}</value>
+    <comments>{{st.comments}}</comments>
+  </standing>
+{{endfor}}
+</standings>

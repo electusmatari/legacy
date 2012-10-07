@@ -1,0 +1,42 @@
+{{py:admin_page = 'combat'}}
+{{inherit "base.html"}}
+
+<h2>Combat</h2>
+
+<form action="" method="get">
+Start year: <input type="text" size="4" name="startyear" value="{{startyear}}" />
+month: <input type="text" size="2" name="startmonth" value="{{startmonth}}" /><br />
+End year: <input type="text" size="4" name="endyear" value="{{endyear}}" />
+month: <input type="text" size="2" name="endmonth" value="{{endmonth}}" /><br /> <br />
+<input type="submit" />
+</form>
+
+
+{{for title, active in active_list}}
+<h3>Active Pilots per Corp ({{title}})</h3>
+
+<table border="1">
+<tr><th>Corp</th><th>Pilots</th><th>Multi</th><th>Single</th><th>Involved</th></tr>
+{{py:(multisum, singlesum, involvedsum) = (0, 0, 0)}}
+{{for corp, multi, single, involved in active}}
+{{py:
+multisum += multi
+singlesum += single
+involvedsum += involved
+}}
+<tr>
+  <td>{{corp}}</td>
+  <td>{{multi+single}}</td>
+  <td>{{multi}}</td>
+  <td>{{single}}</td>
+  <td>{{involved}}</td>
+</tr>
+{{endfor}}
+<tr><td><strong>Alliance</strong></td>
+<td><strong>{{multisum+singlesum}}</strong></td>
+<td><strong>{{multisum}}</strong></td>
+<td><strong>{{singlesum}}</strong></td>
+<td><strong>{{involvedsum}}</strong></td>
+</tr>
+</table>
+{{endfor}}

@@ -1,0 +1,11 @@
+{{inherit "base.html"}}
+{{py:pagename = 'reputation'}}
+
+<h1>Reputation</h1>
+
+<dl>
+{{for uid, username, adduid, addusername, reputation, timestamp, comments, pid in reputation}}
+<dt><span style="font-weight: bold; color: {{if reputation < 0}}#DF0000{{elif reputation > 0}}#00AF00{{else}}#000000{{endif}}">To <a href="http://www.electusmatari.com/forums/reputation.php?uid={{uid}}">{{username}}</a> by <a href="http://www.electusmatari.com/forums/reputation.php?uid={{adduid}}">{{addusername}}</a> ({{"%+i" % reputation}} on {{timestamp|eve_time}}{{if pid}} for <a href="http://www.electusmatari.com/forums/showthread.php?pid={{pid}}#pid{{pid}}">post {{pid}}</a>{{endif}}):</span></dt>
+<dd style="padding-bottom: 1em">{{comments}}</dd>
+{{endfor}}
+</dl>

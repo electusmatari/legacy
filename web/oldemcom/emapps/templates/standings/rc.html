@@ -1,0 +1,67 @@
+{{py:pagename = 'rc'}}
+{{inherit "base.html"}}
+
+{{py:
+if user.has_permission('em'):
+  emuser = True
+else:
+  emuser = False
+}}
+
+<h2>Recent Changes</h2>
+
+<p>
+{{if page.first()}}
+&lt;&lt;
+{{else}}
+<a href="?page={{page.pagenum - 1}}">&lt;&lt;</a>
+{{endif}}
+{{page.pagenum}} / {{page.totalpages}}
+{{if page.last()}}
+&gt;&gt;
+{{else}}
+<a href="?page={{page.pagenum + 1}}">&gt;&gt;</a>
+{{endif}}
+</p>
+
+<table class="standings">
+<tr class="even"><th>Date</th><th>Entity</th><th>Old</th><th>New</th></tr>
+{{for loop, st in looper(page.items)}}
+<tr {{if loop.odd}}class="odd"{{endif}}
+    {{if loop.even}}class="even"{{endif}}
+>
+  <td>{{eve_time(st.date, includetime=False)}}</td>
+  <td>
+    {{if emuser}}<a href="http://www.electusmatari.com/forums/showthread.php?tid={{st.tid}}">{{endif}}
+      {{st.entity}} {{st.ticker}}
+    {{if emuser}}</a>{{endif}}
+  </td>
+  <td
+    {{if st.old_standing == -5}}class="competitor"{{endif}}
+    {{if st.old_standing == -10}}class="enemy"{{endif}}
+    {{if st.old_standing > 0}}class="blue"{{endif}}
+  >
+    {{if st.old_standing > 0}}
+    blue
+    {{elif st.old_standing < 0}}
+    red
+    {{else}}
+    neutral
+    {{endif}}
+  </td>
+  <td
+    {{if st.new_standing == -5}}class="competitor"{{endif}}
+    {{if st.new_standing == -10}}class="enemy"{{endif}}
+    {{if st.new_standing > 0}}class="blue"{{endif}}
+  >
+    {{if st.new_standing > 0}}
+    blue
+    {{elif st.new_standing < 0}}
+    red
+    {{else}}
+    neutral
+    {{endif}}
+  </td>
+</tr>
+{{endfor}}
+</table>

@@ -1,0 +1,22 @@
+{{inherit "../base.html"}}
+
+{{def title}}
+Electus Matari: Gradient Corp Page
+{{enddef}}
+
+{{def tabs}}
+<ul class="tabs">
+  <li {{if pagename == 'index'}}class="active"{{endif}}><a href="/gradient/">Overview</a></li>
+  <li {{if pagename == 'pricelist'}}class="active"{{endif}}><a href="/gradient/prices/">Price List</a></li>
+  <li {{if pagename == 'pricecomparison'}}class="active"{{endif}}><a href="/gradient/production/">Price Comparison</a></li>
+  <li {{if pagename == 'pi'}}class="active"{{endif}}><a href="/gradient/pi/">Planetary Industry</a></li>
+  <li {{if pagename == 'orders'}}class="active"{{endif}}><a href="/gradient/orders/">Market Orders</a></li>
+  <li {{if pagename == 'voters'}}class="active"{{endif}}><a href="/gradient/voters/">Voters</a></li>
+{{if user.has_permission('corpadmin')}}
+  <li {{if pagename == 'members'}}class="active"{{endif}}><a href="/grd/personnel/">Members</a></li>
+  <li><a href="/auth/corp/">Forum Activity</a></li>
+{{endif}}
+</ul>
+{{enddef}}
+
+{{self.body|html}}

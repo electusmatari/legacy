@@ -1,0 +1,113 @@
+{{inherit "base.html"}}
+{{py:pagename = 'members'}}
+{{py:
+def days(n):
+    result = []
+    if n > 365:
+        result.append("%iy" % (n / 365))
+        n = n % 365
+    if n > 30:
+        result.append("%im" % (n / 30))
+        n = n % 30
+    if len(result) == 0 or n > 0:
+        result.append("%id" % n)
+    return " ".join(result)
+
+def seconds(s):
+    result = []
+    if s >= 60*60:
+        result.append("%ih" % (s/(60*60)))
+        s = s % 60
+    if s >= 60:
+        result.append("%im" % (s/60))
+        s = s % 60
+    if len(result) == 0 or s > 0:
+        result.append("%is" % s)
+    return " ".join(result)
+
+def pilot(charid, charname):
+    return html('<span style="color: blue; text-decoration: underline; cursor: pointer" onClick="CCPEVE.showInfo(1379, %s)">%s</span>' % (charid, charname))
+}}
+
+<h2>Gradient Personnel Overview</h2>
+
+<p>Data from {{datatime|eve_time}}.</p>
+
+<h3>Inactive Members ({{len(inactive)}})</h3>
+
+<ul>
+{{for charname, charid, logoff, is_prospect in inactive}}
+<li>{{days((now - logoff).days)}} {{pilot(charid, charname)}}{{if is_prospect}} (prospect){{endif}}</li>
+{{endfor}}
+</ul>
+
+<h3>Active Prospects in Need of Promotion ({{len(promotion)}})</h3>
+
+<ul>
+{{for charname, charid, start in promotion}}
+<li>{{days((now - start).days)}} {{pilot(charid, charname)}}</li>
+{{endfor}}
+</ul>
+
+<h3>Active Prospects ({{len(prospects)}})</h3>
+
+<ul>
+{{for charname, charid, start, logoff in prospects}}
+<li>{{pilot(charid, charname)}} (prospect for {{days((now - start).days)}}, last active {{days((now - logoff).days)}} ago)</li>
+{{endfor}}
+</ul>
+
+{{if len(missingtitles) > 0}}
+<h3>Members with missing titles ({{len(missingtitles)}})</h3>
+<ul>
+{{for charname, charid, titles in missingtitles}}
+<li>{{pilot(charid, charname)}}: {{", ".join(titles)}}</li>
+{{endfor}}
+</ul>
+{{endif}}
+
+{{if len(directroles) > 0}}
+<h3>Members with direct roles ({{len(directroles)}})</h3>
+<ul>
+{{for charname, charid, roles in directroles}}
+<li>{{pilot(charid, charname)}}: {{", ".join(roles)}}</li>
+{{endfor}}
+</ul>
+{{endif}}
+
+<h3>Members not on EM Forums ({{len(notonforums)}})</h3>
+
+<ul>
+{{for charname, charid, note in notonforums}}
+<li>{{pilot(charid, charname)}} {{if note}}({{note}}){{endif}}</li>
+{{endfor}}
+</ul>
+
+<h3>Member List ({{len(members)}})</h3>
+
+<table border="1">
+<tr>
+  <th>Name</th>
+  <th style="width: 40%">Title</th>
+  <th>Joined</th>
+  <th>Inactive</th>
+  <th>Last Activity</th>
+</tr>
+{{for charname, details in members}}
+{{py:
+charid = details['characterID']
+freeformtitle = details['freeformtitle']
+titles = details['titles']
+start = details['startDateTime']
+logon = details['logonDateTime']
+logoff = details['logoffDateTime']
+}}
+<tr>
+  <td>{{pilot(charid, charname)}}</td>
+  <td>{{", ".join([freeformtitle] + titles)}}</td>
+  <td>{{days((now - start).days)}}</td>
+  <td>{{days((now - logoff).days)}}</td>
+  <td>{{seconds((logoff - logon).seconds)}}</td>
+</tr>
+{{endfor}}
+</table>

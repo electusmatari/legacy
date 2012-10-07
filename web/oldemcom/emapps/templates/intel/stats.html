@@ -1,0 +1,52 @@
+{{py:pagename = 'stats'}}
+{{inherit "base.html"}}
+
+{{def scriptheader}}
+<style type="text/css">
+table {
+    border-collapse: collapse;
+    border: 1px solid #AFAFAF;
+}
+table th {
+    text-align: center;
+    border: 1px solid #AFAFAF;
+}
+table td {
+    border: 1px solid #AFAFAF;
+    padding: 0.2em 0.4em;
+}
+
+thead tr {
+    background: #CFCFCF;
+}
+
+tbody tr.odd {
+    background: #EFEFEF;
+}
+td.numeric {
+    text-align: right;
+}
+
+</style>
+{{enddef}}
+
+<h2>Locator Statistics</h2>
+
+<h3>Top Trace Submitter</h3>
+
+<table>
+<thead>
+<tr><th>Rank</th><th>Submitter</th><th>Traces</th></tr>
+</thead>
+<tbody>
+{{py: rank = 1}}
+{{for traces, submitter in stats}}
+<tr>
+  <td class="numeric">{{rank}}</td>
+  <td>{{submitter}}</td>
+  <td class="numeric">{{traces}}</td>
+</tr>
+{{py: rank += 1}}
+{{endfor}}
+</tbody>
+</table>
