@@ -7,7 +7,7 @@ import datetime
 import os
 import subprocess
 
-BACKUPDIR = '/home/forcer/Projects/old-emcom/backup/'
+BACKUPDIR = '/home/forcer/backup/mysql'
 
 def main():
     print "Content-Type: text/plain"

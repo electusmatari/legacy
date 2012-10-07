@@ -5,7 +5,7 @@ import datetime
 from django.http import HttpResponse
 
 import sys
-sys.path.append("/home/forcer/Projects/gradient")
+sys.path.append("/home/forcer/Projects/evecode/web/gradient.electusmatari.com/data/python/")
 from gradient.uploader.models import MarketHistory, MarketHistoryLastUpload
 from gradient.uploader.models import MarketOrder, MarketOrderLastUpload
 from gradient.uploader.models import FacWarSystem

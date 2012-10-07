@@ -67,7 +67,7 @@ def generate_auth_token():
                    for i in range(64))
 
 
-FILESDIR = "/home/forcer/www/gradient.electusmatari.com/uploader/files/"
+FILESDIR = "/home/forcer/Projects/evecode/web/gradient.electusmatari.com/www/uploader/files/"
 
 def view_files(request, filename):
     if filename == 'gdu.exe':

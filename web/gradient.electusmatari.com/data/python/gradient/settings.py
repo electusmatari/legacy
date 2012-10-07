@@ -3,7 +3,7 @@
 from settings_local import *
 
 import sys
-sys.path.append("/home/forcer/Projects/emtools/")
+sys.path.append("/home/forcer/Projects/evecode/web/electusmatari.com/data/python/")
 
 # import logging
 # logging.basicConfig(filename="/home/forcer/Projects/gradient/logs/grd.log",

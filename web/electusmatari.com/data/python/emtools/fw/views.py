@@ -7,7 +7,7 @@ from emtools.ccpeve.models import apiroot
 import emtools.ccpeve.igb as igb
 
 import sys
-sys.path.append("/home/forcer/Projects/gradient")
+sys.path.append("/home/forcer/Projects/evecode/web/gradient.electusmatari.com/data/python/")
 
 from gradient.uploader.models import FacWarSystem
 from emtools.intel.models import Pilot, Corporation, Change
