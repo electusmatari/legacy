@@ -952,6 +952,7 @@ def last_price(ordertype, stationid, typeid):
     except Transaction.DoesNotExist:
         return 0.0
 
+# - High Sec (Hangar, 4)
 # - Restricted (CorpSAG2, 116)
 # - Production (CorpSAG3, 117)
 # - Incoming (CorpSAG4, 118)
@@ -959,7 +960,7 @@ def last_price(ordertype, stationid, typeid):
 # - Equipment (CorpSAG6, 120)
 # - Outgoing (CorpSAG7, 121)
 # - Deliveries (CorpMarket, 62)
-STOCK_FLAGS = set([62, 116, 117, 118])
+STOCK_FLAGS = set([4, 62, 116, 117, 118])
 HANGAR_OUTGOING = 121
 # In case we ever need the itemIDs:
 # 1490307531 - Sell for corp
