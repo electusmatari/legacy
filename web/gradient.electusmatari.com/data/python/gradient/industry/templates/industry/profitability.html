@@ -1,0 +1,28 @@
+{% extends "industry/base.html" %}
+{% load formatting %}
+
+{% block appcontent %}
+<h2>Gradient Profitability Scale</h2>
+
+<p>This is the profit per item. Be careful, though, as this does not
+take into account units sold or production time. Market prices can be
+inaccurate, too. Use it as a rough guideline at most.</p>
+
+<table class="data">
+  <thead>
+    <tr><th>Name</th><th>Profit</th><th>Market&nbsp;Price</th><th>Production&nbsp;Cost</th><th>Safety&nbsp;Margin</th></tr>
+  </thead>
+  <tbody>
+    {% for product in product_list %}
+    <tr class="{% cycle odd,even %}">
+      <td>{{product.typename}}</td>
+      <td class="numeric">{{product.profit|floatcomma}}</td>
+      <td class="numeric">{{product.marketprice|floatcomma}}</td>
+      <td class="numeric">{{product.productioncost|floatcomma}}</td>
+      <td class="numeric">{{product.safetymargin|floatcomma}}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+{% endblock %}

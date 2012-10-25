@@ -356,6 +356,25 @@ def stocks_unwatch(request, stockid):
     return HttpResponseRedirect('/industry/stocks/watched/')
 
 @require_gradient
+def profitability(request):
+    c = connection.cursor()
+    c.execute("SELECT pl.typename, pl.productioncost, pl.safetymargin, "
+              "       mp.price, "
+              "       mp.price - (pl.productioncost * pl.safetymargin) "
+              "         as profit "
+              "FROM industry_pricelist pl "
+              "     INNER JOIN industry_marketprice mp "
+              "       ON pl.typeid = mp.typeid "
+              "ORDER BY profit DESC")
+    products = [dict(typename=typename, productioncost=productioncost,
+                     safetymargin=safetymargin, marketprice=marketprice,
+                     profit=profit)
+                for (typename, productioncost, safetymargin,
+                    marketprice, profit) in c.fetchall()]
+    return direct_to_template(request, 'industry/profitability.html',
+                              extra_context={'product_list': products})
+
+@require_gradient
 def bpos_view(request):
     bpos = BlueprintOriginal.objects.all()
     return direct_to_template(request, 'industry/bpos.html',
