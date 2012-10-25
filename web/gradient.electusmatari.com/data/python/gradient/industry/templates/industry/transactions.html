@@ -17,6 +17,12 @@ table.data tbody tr.sell td.price, table.data tbody tr td.win {
 {% block appcontent %}
 <h1>Market Transactions</h1>
 
+{% if display_pilot %}
+<p><i>Showing all corporate transactions. <a href="/industry/transactions/">Show only your own.</a></i></p>
+{% else %}
+<p><i>Showing only your own transactions. <a href="/industry/transactions/?all=yes">Show all corporate transactions.</a></i></p>
+{% endif %}
+
 {% include "paginatorng.html" %}
 
 <table class="data">
