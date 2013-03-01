@@ -263,7 +263,7 @@ class Bag(object):
 class IndexCalculator(object):
     def __init__(self):
         self.index = {}
-        
+
         for row in Index.objects.all():
             if row.typename in USE_JITA_INDEX:
                 self.index[row.typename] = row.jita
@@ -320,7 +320,7 @@ class IndexCalculator(object):
             return None
         bag = Bag()
         for reqtype, reqqty in inputs:
-            bag[reqtype.typename] += (reqqty * 
+            bag[reqtype.typename] += (reqqty *
                                       reqtype.attribute('moonMiningAmount'))
         # Also add half a control tower worth of fuel ...
         tower = InvType.from_typename('Minmatar Control Tower')
@@ -392,7 +392,7 @@ def get_component_list(typename):
         c.portionsize = int(output_qty * result_runs)
         bag = Bag()
         for reqtype, reqqty in inputs:
-            bag[reqtype.typename] += (reqqty * 
+            bag[reqtype.typename] += (reqqty *
                                       reqtype.attribute('moonMiningAmount'))
         mats1 = index.get_bag_materials(bag)
         c.add_section('Reaction', sorted(mats1))
@@ -512,7 +512,7 @@ def publicmarket_save(regionid, typeid, tree):
         # years. Add the year to the time stamp to avoid a silly Feb
         # 29 bug.
         evemetrics_time = datetime.datetime.strptime(
-            "%s-%s" % (now.year, reported_time.text),
+            "%s-%s" % (now.year, reported_time.text.strip()),
             "%Y-%m-%d %H:%M:%S"
             )
     try:
@@ -541,7 +541,7 @@ def publicmarket_save(regionid, typeid, tree):
                 volremain=mo.volremaining,
                 price=mo.price
                 )
-        
+
 def publicmarket_save2(regionid, typeid, tree):
     now = datetime.datetime.utcnow()
     assert str(typeid) == tree.find("quicklook/item").text
@@ -767,7 +767,7 @@ def update_pricelist(grd):
         if not (product.typename == 'Obelisk' or
                 product.group().startswith("Rig ")):
             inventable.extend(bptype.invent_to())
-        
+
     for bpc in inventable:
         if bpc.typeid in bposet:
             continue
@@ -856,7 +856,7 @@ def update_marketorder(grd):
                     datetime.datetime.utcfromtimestamp(gmo._meta.currentTime))
     for order in gmo.orders:
         ordertype = 'buy' if order.bid else 'sell'
-        expires = (datetime.datetime.utcfromtimestamp(order.issued) + 
+        expires = (datetime.datetime.utcfromtimestamp(order.issued) +
                    datetime.timedelta(days=order.duration))
         volremaining = order.volRemaining
         if order.orderState != 0:
@@ -882,7 +882,7 @@ def update_marketorder(grd):
             productioncost = 0.0
         sales7d = get_transactions(ordertype, order.stationID,
                                    order.typeID, 7) / 7.0
-        sales28d = get_transactions(ordertype, order.stationID, 
+        sales28d = get_transactions(ordertype, order.stationID,
                                     order.typeID, 28) / 28.0
         if sales7d > 0:
             salesperday = sales7d
@@ -990,7 +990,7 @@ def update_stock(grd):
                 if asset2.flag in STOCK_FLAGS:
                     stocks.setdefault(stationid, Bag())
                     stocks[stationid][asset2.typeID] += asset2.quantity
-                
+
                 if (asset2.flag == HANGAR_OUTGOING and
                     asset2.typeID in CAN_TYPEIDS
                     and hasattr(asset2, 'contents')): # Outgoing
@@ -1028,7 +1028,7 @@ def make_stationid(locationid):
         return locationid - 6000000
     else:
         return None
-    
+
 def get_competitionprice(ordertype, stationid, typeid, volremaining,
                          orderprice, orderrange):
     systemid = get_stationsystem(stationid)
