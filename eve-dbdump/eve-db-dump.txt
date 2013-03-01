@@ -1,19 +1,40 @@
 As root:
 
 # mysql
-> create database inferno12;
-> grant all privileges on inferno12.* to 'forcer'@'localhost';
+> create database newdbdump;
+> grant all privileges on newdbdump.* to 'forcer'@'localhost';
+
+# su - postgres
+$ createdb newdbdump -O forcer
 
 As forcer:
 
-mysql inferno12 < mysql55-inferno12-structure.sql
-mysql inferno12 < mysql55-inferno12-data.sql
+mysql newdbdump < mysql55-inferno12-structure.sql
+mysql newdbdump < mysql55-inferno12-data.sql
 
-mysqldump --add-drop-table --complete-insert --extended-insert \
-  > mysql-compat.sql
+mysqldump newdbdump --add-drop-table  > dump1.sql
 
-$ perl ~/mysql2pgsql.pl mysql55-inferno12-extended.sql postgres.sql
-$ sed -e 's/"xmax"/"xMax"/g' -e 's/"xmin"/"xMin"/g' \
-  < postgres.sql > postgres2.sql
-$ psql inferno12 < postgres2.sql
-$ pg_dump inferno12 > /tmp/inf12.sql
+perl ~/Projects/evecode/eve-dbdump/dev/bin/mysql2pgsql.pl \
+  dump1.sql dump2.sql
+sed -e 's/"xmax"/"xMax"/g' -e 's/"xmin"/"xMin"/g' \
+  < dump2.sql > dump3.sql
+
+psql newdbdump < dump3.sql
+
+pg_dump newdbdump > dump4.sql
+
+pg_dump eve -U emtools -h localhost > backup.sql
+
+bzip2 -1 dump4.sql
+Projects/evecode/bin/importdbdump dump4.sql.bz2
+
+
+Cleanup:
+
+Als root:
+
+# mysql
+> drop database newdbdump;
+
+# su - postgres
+$ dropdb newdbdump
