@@ -11,10 +11,11 @@ from emtools.ccpeve import eveapi
 GUARDED_GROUPS = ['Ally',
                   'Electus Matari',
                   'Gradient',
-                  'Gradient Employee',
-                  'Gradient Executive',
-                  'Gradient Recruiter',
-                  'Gradient Personnel Manager',
+                  # FIXME! Bugging as of 2013-02-02
+                  # 'Gradient Employee',
+                  # 'Gradient Executive',
+                  # 'Gradient Recruiter',
+                  # 'Gradient Personnel Manager',
                   'Lutinari Syndicate',
                   ]
 
@@ -175,7 +176,8 @@ def update_single_user2(api, mybbuser, grddetails, allies):
     # GRD members
     if profile.corp == 'Gradient':
         mybbuser.add_group('Gradient')
-        grdauth(mybbuser, grddetails)
+        # FIXME! Bugging as of 2013-02-02
+        # grdauth(mybbuser, grddetails)
 
     # LUTI members
     if profile.corp == 'Lutinari Syndicate':
@@ -201,10 +203,20 @@ def get_gradient_details():
     grd = APIKey.objects.get(name='Gradient').corp()
     result = {}
     try:
-        membersecurity = grd.MemberSecurity()
         membertracking = grd.MemberTracking()
     except Exception as e:
         raise AuthenticationError("Error during API call: %s" % str(e))
+    for member in membertracking.members:
+        result.setdefault(member.name, (set(), ''))
+        (titles, freeform) = result[member.name]
+        result[member.name] = (titles, member.title)
+    try:
+        membersecurity = grd.MemberSecurity()
+    except Exception as e:
+        logging.info("corp.MemberSecurity is still bugging")
+        return result
+        # FIXME! Bugging as of 2013-02-02
+        # raise AuthenticationError("Error during API call: %s" % str(e))
     for member in membersecurity.members:
         result.setdefault(member.name, (set(), ''))
         for role in member.roles:
@@ -212,10 +224,6 @@ def get_gradient_details():
                 result[member.name][0].add('Director')
         for title in member.titles:
             result[member.name][0].add(title.titleName)
-    for member in membertracking.members:
-        result.setdefault(member.name, (set(), ''))
-        (titles, freeform) = result[member.name]
-        result[member.name] = (titles, member.title)
     return result
 
 def get_allies():

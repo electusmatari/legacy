@@ -13,7 +13,7 @@ def current():
     for row in tree.findall("type"):
         result[row.attrib["name"]] = IndexRow(row)
     return result
-         
+
 class IndexRow(float):
     def __new__(cls, row):
         obj = super(IndexRow, cls).__new__(cls, row.attrib["republic"])
@@ -808,4 +808,3 @@ TYPE_DATA_OLD = [
 #         obj.moldenheath = float(obj.moldenheath)
 #         obj.jita = float(obj.jita)
 #         return obj
-
