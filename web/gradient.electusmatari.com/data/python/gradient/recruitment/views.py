@@ -133,9 +133,9 @@ def get_standings():
     except:
         return standings
     for contact in gcl.allianceContactList:
-        standings[contact.contactID] = "+%i" % contact.standing
+        standings[contact.contactID] = "%+i" % contact.standing
         for corpid in alliance_corps.get(contact.contactID, []):
-            standings[corpid] = "+%i" % contact.standing
+            standings[corpid] = "%+i" % contact.standing
     return standings
 
 class Question(object):
