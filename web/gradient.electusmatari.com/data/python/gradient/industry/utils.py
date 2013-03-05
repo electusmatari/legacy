@@ -544,7 +544,7 @@ def publicmarket_save(regionid, typeid, tree):
 
 def publicmarket_save2(regionid, typeid, tree):
     now = datetime.datetime.utcnow()
-    assert str(typeid) == tree.find("quicklook/item").text
+    assert str(typeid) == tree.find("quicklook/item").text.strip()
     PublicMarketOrder.objects.filter(regionid=regionid, typeid=typeid).delete()
     def save_order(ordertype, order):
         stationid = int(order.find("station").text)
