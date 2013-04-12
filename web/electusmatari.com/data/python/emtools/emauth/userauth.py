@@ -28,6 +28,7 @@ SECURE_GROUPS = [('Council', 'Electus Matari'),
                  ('Tournament', 'Electus Matari'),
                  ('Lutinari Directors', 'Lutinari Syndicate'),
                  ('Lutinari Recruiters', 'Lutinari Syndicate'),
+                 ('Lutinari Members', 'Lutinari Syndicate'),
                  ]
 
 log = logging.getLogger('auth')
