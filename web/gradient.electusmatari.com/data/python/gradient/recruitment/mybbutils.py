@@ -7,8 +7,10 @@ import MySQLdb
 from django.conf import settings
 
 def connect(dbname):
-    return MySQLdb.connect(db=dbname, user='emcom',
-                           passwd=settings.MYSQL_PASSWD)
+    db = MySQLdb.connect(db=dbname, user='emcom',
+                         passwd=settings.MYSQL_PASSWD)
+    db.set_character_set('utf8')
+    return db
 
 class MyBB(object):
     def __init__(self):
@@ -38,7 +40,7 @@ WHERE fid = %s
             posthash = ""
         if tid is None:
             tid = self.create_thread(fid, subject, prefix, uid, username,
-                                     dateline, 0, dateline, 
+                                     dateline, 0, dateline,
                                      username, uid, visible)
             new_thread = True
         else:
