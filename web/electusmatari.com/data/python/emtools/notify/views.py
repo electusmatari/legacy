@@ -32,7 +32,7 @@ FID_GRD = 144
 FID_LUTI = 145
 FID_ALLY = 149
 def json_opnotify(request):
-    if ((not request.user.is_authenticated() or 
+    if ((not request.user.is_authenticated() or
          request.user.profile.characterid is None)):
         return HttpResponse(json.dumps([]), mimetype="text/json")
     fid_list = []
@@ -66,7 +66,10 @@ def json_opnotify(request):
             continue
         year, month, day = (int(x) for x in m.group(1).split("."))
         hour, minute = (int(x) for x in m.group(2).split(":"))
-        dt = datetime.datetime(year + 1898, month, day, hour, minute)
+        try:
+            dt = datetime.datetime(year + 1898, month, day, hour, minute)
+        except ValueError:
+            pass
         timestamp = time.mktime(dt.timetuple())
         location = m.group(3)
         text = m.group(4)
