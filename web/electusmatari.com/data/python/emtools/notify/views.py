@@ -69,7 +69,7 @@ def json_opnotify(request):
         try:
             dt = datetime.datetime(year + 1898, month, day, hour, minute)
         except ValueError:
-            pass
+            continue
         timestamp = time.mktime(dt.timetuple())
         location = m.group(3)
         text = m.group(4)
