@@ -459,8 +459,14 @@ def update():
     transaction.commit()
     log.info("Update transactions and journal")
     for accountkey in [1000, 1001, 1002, 1003, 1004, 1005, 1006]:
-        update_transaction(grd, accountkey)
-        update_journal(grd, accountkey)
+        try:
+            update_transaction(grd, accountkey)
+        except:
+            logging.exception("Error during update_transaction")
+        try:
+            update_journal(grd, accountkey)
+        except:
+            logging.exception("Error during update_journal")
     transaction.commit()
     log.info("Update transaction info")
     add_transaction_info(grd)
@@ -754,6 +760,9 @@ def update_pricelist(grd):
         bposet.add(bpo.typeid)
         bptype = InvType(bpo.typeid, bpo.typename)
         product = bptype.product()
+        if product is None:
+            raise RuntimeError("Can't find product for BPO %s (%s)"
+                               % (bpo.typeid, bpo.typename))
         productioncost = index.cost(product.typename)
         if productioncost is None or not productioncost > 0:
             continue
