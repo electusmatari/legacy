@@ -203,10 +203,7 @@ def get_gradient_details():
     """
     grd = APIKey.objects.get(name='Gradient').corp()
     result = {}
-    try:
-        membertracking = grd.MemberTracking()
-    except Exception as e:
-        raise AuthenticationError("Error during API call: %s" % str(e))
+    membertracking = grd.MemberTracking()
     for member in membertracking.members:
         result.setdefault(member.name, (set(), ''))
         (titles, freeform) = result[member.name]
