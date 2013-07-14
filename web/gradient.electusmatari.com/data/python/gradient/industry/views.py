@@ -252,9 +252,12 @@ def marketorders_delete(request, orderid):
 
 @require_gradient
 def config_view(request):
-    wmo_list = WantedMarketOrder.objects.filter(
-        characterid=request.user.profile.characterid,
-        forcorp=False)
+    if request.GET.get('all', False):
+        wmo_list = WantedMarketOrder.objects.all()
+    else:
+        wmo_list = WantedMarketOrder.objects.filter(
+            characterid=request.user.profile.characterid,
+            forcorp=False)
     return direct_to_template(request, 'industry/config.html',
                               extra_context={'wanted_list': wmo_list})
 
