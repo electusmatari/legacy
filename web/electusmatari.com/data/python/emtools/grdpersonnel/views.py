@@ -1,8 +1,9 @@
 import datetime
 
+from django.conf import settings
 from django.views.generic.simple import direct_to_template
 from emtools import utils
-from emtools.ccpeve.models import apiroot, APIKey
+from emtools.ccpeve.models import APIKey
 from emtools.emauth.decorators import require_mybbgroup
 import emtools.ccpeve.igb as igb
 
@@ -150,7 +151,8 @@ import urllib
 
 def get_roster():
     try:
-        u = urllib.urlopen("http://gradient:dualprop@gradient.orava.org/wiki/Roster")
+        u = urllib.urlopen("http://gradient:{password}@gradient.orava.org/wiki/Roster"
+                           .format(password=settings.GRDWIKIPASSWORD))
         s = u.read()
         return [name.lower()
                 for name in re.findall(r"<li> *(.*?)[ 0-9.]*\n", s)]
