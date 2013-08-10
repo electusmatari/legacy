@@ -11,11 +11,10 @@ from emtools.ccpeve import eveapi
 GUARDED_GROUPS = ['Ally',
                   'Electus Matari',
                   'Gradient',
-                  # FIXME! Bugging as of 2013-02-02
-                  # 'Gradient Employee',
-                  # 'Gradient Executive',
-                  # 'Gradient Recruiter',
-                  # 'Gradient Personnel Manager',
+                  'Gradient Employee',
+                  'Gradient Executive',
+                  'Gradient Recruiter',
+                  'Gradient Personnel Manager',
                   'Lutinari Syndicate',
                   ]
 
@@ -127,6 +126,14 @@ def update_single_user2(api, mybbuser, grddetails, allies):
         return "No profile stored"
     if mybbuser.profile.characterid is None:
         return "Not authenticated"
+
+    if mybbuser.profile.mybb_username == 'Rus Rhiannon':
+        # Ugly workaround, as the API raises an internal server error
+        # when queried for a DUST soldier (as of 2013-08-10)
+        mybbuser.add_group("Gradient Employee")
+        mybbuser.add_group("Gradient Recruiter")
+        return ("DUST Soldier")
+
     if not mybbuser.profile.active:
         return "Inactive account"
 
@@ -177,8 +184,7 @@ def update_single_user2(api, mybbuser, grddetails, allies):
     # GRD members
     if profile.corp == 'Gradient':
         mybbuser.add_group('Gradient')
-        # FIXME! Bugging as of 2013-02-02
-        # grdauth(mybbuser, grddetails)
+        grdauth(mybbuser, grddetails)
 
     # LUTI members
     if profile.corp == 'Lutinari Syndicate':
@@ -212,15 +218,13 @@ def get_gradient_details():
         membersecurity = grd.MemberSecurity()
     except Exception as e:
         logging.info("corp.MemberSecurity is still bugging")
-        return result
-        # FIXME! Bugging as of 2013-02-02
-        # raise AuthenticationError("Error during API call: %s" % str(e))
+        raise AuthenticationError("Error during API call: %s" % str(e))
     for member in membersecurity.members:
         result.setdefault(member.name, (set(), ''))
         for role in member.roles:
             if role.roleName == 'roleDirector':
                 result[member.name][0].add('Director')
-        for title in member.titles:
+        for title in getattr(member, 'titles', []):
             result[member.name][0].add(title.titleName)
     return result
 
