@@ -19,7 +19,9 @@ def view_members(request):
         pilots.setdefault(member.name, defaultdict(lambda: ""))
         pilots[member.name]['id'] = member.characterID
         pilots[member.name]['titles'] = [title.titleName
-                                         for title in member.titles]
+                                         for title in getattr(member,
+                                                              'titles',
+                                                              [])]
         pilots[member.name]['roles'] = [role.roleName
                                         for role in member.roles]
     for member in mt.members:
