@@ -120,6 +120,8 @@ def update_single_user(api, mybbuser, grddetails, allies):
 
 def update_single_user2(api, mybbuser, grddetails, allies):
     for group in GUARDED_GROUPS:
+        if not grddetails and group.startswith("Gradient"):
+            continue
         mybbuser.remove_group(group)
 
     if mybbuser.profile is None:
@@ -184,7 +186,8 @@ def update_single_user2(api, mybbuser, grddetails, allies):
     # GRD members
     if profile.corp == 'Gradient':
         mybbuser.add_group('Gradient')
-        grdauth(mybbuser, grddetails)
+        if grddetails:
+            grdauth(mybbuser, grddetails)
 
     # LUTI members
     if profile.corp == 'Lutinari Syndicate':
@@ -217,8 +220,8 @@ def get_gradient_details():
     try:
         membersecurity = grd.MemberSecurity()
     except Exception as e:
-        logging.info("corp.MemberSecurity is still bugging")
-        raise AuthenticationError("Error during API call: %s" % str(e))
+        logging.info("corp.MemberSecurity exception: %s" % str(e))
+        return False
     for member in membersecurity.members:
         result.setdefault(member.name, (set(), ''))
         for role in member.roles:
