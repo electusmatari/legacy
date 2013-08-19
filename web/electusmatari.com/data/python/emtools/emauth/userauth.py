@@ -133,7 +133,7 @@ def update_single_user2(api, mybbuser, grddetails, allies):
         # Ugly workaround, as the API raises an internal server error
         # when queried for a DUST soldier (as of 2013-08-10)
         mybbuser.add_group("Gradient Employee")
-        mybbuser.add_group("Gradient Recruiter")
+        mybbuser.add_group("Gradient Personnel Manager")
         return ("DUST Soldier")
 
     if not mybbuser.profile.active:
