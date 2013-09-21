@@ -19,6 +19,15 @@ perl ~/Projects/evecode/eve-dbdump/dev/bin/mysql2pgsql.pl \
 sed -e 's/"xmax"/"xMax"/g' -e 's/"xmin"/"xMin"/g' \
   < dump2.sql > dump3.sql
 
+FIXME!
+
+- dump3.sql now has some weird "unique" KEY ... stuff for
+  invuniquenames, just delete that line.
+- Also, orbyteaindex => orbitindex
+- translationtables: Delete line (and preceding comma)
+  '''primary key ("sourcetable(255"),translatedKey(255))'''
+
+
 psql newdbdump < dump3.sql
 
 pg_dump newdbdump > dump4.sql
