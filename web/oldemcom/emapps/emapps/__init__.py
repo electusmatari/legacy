@@ -21,27 +21,9 @@ def emapps(environ, start_response):
 
     environ['emapps.user'] = User(*mybb_auth.mybb_auth())
     app = wsgiref.util.shift_path_info(environ)
-    if app == 'apps':
-        data = kgi.dispatch(environ, start_response,
-                            [('', lambda environ: kgi.template_response('apps.html', user=environ["emapps.user"]))])
-    elif app == 'standings':
+    if app == 'standings':
         import standings
         data = standings.standingsapp(environ, start_response)
-    elif app == 'intel':
-        import intel
-        data = intel.intelapp(environ, start_response)
-    elif app == 'market':
-        import market
-        data = market.marketapp(environ, start_response)
-    elif app == 'oldadmin':
-        import admin
-        data = admin.adminapp(environ, start_response)
-    elif app == 'gradient':
-        import gradient
-        data = gradient.grdapp(environ, start_response)
-    elif app == 'gallery':
-        import gallery
-        data = gallery.galleryapp(environ, start_response)
     elif app == 'forumtools':
         import forums
         data = forums.forumsapp(environ, start_response)
