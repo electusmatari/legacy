@@ -1,4 +1,0 @@
-AuthType Basic
-AuthName "Access for /electusmatari.com/secure/sales" 
-AuthUserFile /home/forcer/Projects/old-emcom/ftp/htpasswd
-require user gradient
